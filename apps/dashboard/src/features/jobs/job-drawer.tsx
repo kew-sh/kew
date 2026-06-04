@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
-import { ArrowUp, Pencil, RotateCw, Trash2, X } from "lucide-react";
 import type { Job } from "@kew/core";
+import { ArrowUp, Pencil, RotateCw, Trash2, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { JsonView } from "@/components/json-view";
 import { StateBadge } from "@/components/state-badge";
 import { Button } from "@/components/ui/button";
-import { JsonView } from "@/components/json-view";
 import { duration, relativeTime } from "@/lib/utils";
 
 export function JobDrawer({
@@ -33,7 +33,7 @@ export function JobDrawer({
     setConfirmRemove(false);
     setError(null);
     setDraft(JSON.stringify(job.data, null, 2));
-  }, [job?.id]);
+  }, [job]);
 
   useEffect(() => {
     if (!job) return;
@@ -58,7 +58,11 @@ export function JobDrawer({
 
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[1px]" onClick={onClose} aria-hidden />
+      <div
+        className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[1px]"
+        onClick={onClose}
+        aria-hidden
+      />
       <aside
         role="dialog"
         aria-label={`Job ${job.id}`}
@@ -85,7 +89,10 @@ export function JobDrawer({
             <Meta label="Attempts" value={`${job.attemptsMade} / ${job.maxAttempts}`} />
             <Meta label="Priority" value={String(job.priority)} />
             <Meta label="Created" value={`${relativeTime(job.timestamp)} ago`} />
-            <Meta label="Duration" value={job.durationMs != null ? duration(job.durationMs) : "—"} />
+            <Meta
+              label="Duration"
+              value={job.durationMs != null ? duration(job.durationMs) : "—"}
+            />
           </dl>
 
           {job.failedReason && (
@@ -140,6 +147,7 @@ export function JobDrawer({
             <Section title="Logs">
               <div className="space-y-1 rounded-md border border-line bg-canvas p-3 font-mono text-[11px] text-ink-2">
                 {job.logs.map((line, i) => (
+                  // biome-ignore lint/suspicious/noArrayIndexKey: append-only log lines, never reordered
                   <div key={i} className="whitespace-pre-wrap">
                     {line}
                   </div>
@@ -179,13 +187,21 @@ export function JobDrawer({
             ) : (
               <>
                 {job.state === "failed" && (
-                  <Button variant="subtle" disabled={pending} onClick={() => onAction("retry", job.id)}>
+                  <Button
+                    variant="subtle"
+                    disabled={pending}
+                    onClick={() => onAction("retry", job.id)}
+                  >
                     <RotateCw className="size-3.5" />
                     Retry
                   </Button>
                 )}
                 {job.state === "delayed" && (
-                  <Button variant="subtle" disabled={pending} onClick={() => onAction("promote", job.id)}>
+                  <Button
+                    variant="subtle"
+                    disabled={pending}
+                    onClick={() => onAction("promote", job.id)}
+                  >
                     <ArrowUp className="size-3.5" />
                     Promote
                   </Button>

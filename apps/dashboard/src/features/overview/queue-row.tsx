@@ -1,8 +1,8 @@
+import { type JobState, type QueueSummary, queueHealth } from "@kew/core";
 import { Link } from "@tanstack/react-router";
 import { ChevronRight, Pause } from "lucide-react";
-import { queueHealth, type JobState, type QueueSummary } from "@kew/core";
-import { StateDot } from "@/components/state-badge";
 import { Sparkline } from "@/components/sparkline";
+import { StateDot } from "@/components/state-badge";
 import { cn, compact } from "@/lib/utils";
 
 const STRIP: JobState[] = ["active", "waiting", "delayed", "failed", "completed"];

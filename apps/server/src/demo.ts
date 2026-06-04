@@ -8,7 +8,9 @@ import { createRedis } from "./redis";
  */
 
 const QUEUES = ["emails", "webhooks", "notifications", "ai-inference"];
-const producers = Object.fromEntries(QUEUES.map((n) => [n, new Queue(n, { connection: createRedis() })]));
+const producers = Object.fromEntries(
+  QUEUES.map((n) => [n, new Queue(n, { connection: createRedis() })]),
+);
 
 for (const name of QUEUES) {
   new Worker(

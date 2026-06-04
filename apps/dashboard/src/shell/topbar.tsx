@@ -1,7 +1,7 @@
 import { Menu, Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/theme";
 import { StateDot } from "@/components/state-badge";
+import { ThemeToggle } from "@/components/theme";
+import { Button } from "@/components/ui/button";
 
 export function Topbar({ onMenu }: { onMenu: () => void }) {
   return (

@@ -19,7 +19,8 @@ export function MetricChart({
   const n = data.length;
   const x = (i: number) => (n <= 1 ? 0 : (i / (n - 1)) * W);
   const y = (v: number) => H - (v / max) * (H - 4) - 2;
-  const line = (arr: number[]) => arr.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+  const line = (arr: number[]) =>
+    arr.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
   const area = `0,${H} ${line(data)} ${W},${H}`;
 
   return (
@@ -39,7 +40,7 @@ export function MetricChart({
         strokeLinejoin="round"
         vectorEffect="non-scaling-stroke"
       />
-      {failures && failures.some((f) => f > 0) && (
+      {failures?.some((f) => f > 0) && (
         <polyline
           points={line(failures)}
           fill="none"

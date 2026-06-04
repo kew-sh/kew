@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { ArrowUp, RotateCw, Trash2, X } from "lucide-react";
 import type { BulkAction } from "@kew/core";
+import { ArrowUp, RotateCw, Trash2, X } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
 export function BulkBar({
@@ -50,11 +50,21 @@ export function BulkBar({
               <RotateCw className="size-3.5" />
               Retry
             </Button>
-            <Button size="sm" variant="subtle" disabled={pending} onClick={() => onAction("promote")}>
+            <Button
+              size="sm"
+              variant="subtle"
+              disabled={pending}
+              onClick={() => onAction("promote")}
+            >
               <ArrowUp className="size-3.5" />
               Promote
             </Button>
-            <Button size="sm" variant="danger" disabled={pending} onClick={() => setConfirmRemove(true)}>
+            <Button
+              size="sm"
+              variant="danger"
+              disabled={pending}
+              onClick={() => setConfirmRemove(true)}
+            >
               <Trash2 className="size-3.5" />
               Remove
             </Button>

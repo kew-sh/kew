@@ -1,12 +1,7 @@
+import { createRootRoute, createRoute, createRouter, Outlet } from "@tanstack/react-router";
 import { lazy } from "react";
-import {
-  createRootRoute,
-  createRoute,
-  createRouter,
-  Outlet,
-} from "@tanstack/react-router";
-import { AppShell } from "@/shell/app-shell";
 import { OverviewPage } from "@/features/overview/overview-page";
+import { AppShell } from "@/shell/app-shell";
 
 // Overview is the landing route, kept eager. The rest are code-split so the
 // initial bundle stays lean (TanStack Table, cronstrue, cron-parser, etc. load

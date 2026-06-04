@@ -1,14 +1,14 @@
-import { useRef } from "react";
+import type { Job } from "@kew/core";
 import {
   createColumnHelper,
   flexRender,
   getCoreRowModel,
-  useReactTable,
   type OnChangeFn,
   type RowSelectionState,
+  useReactTable,
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import type { Job } from "@kew/core";
+import { useRef } from "react";
 import { StateBadge } from "@/components/state-badge";
 import { cn, duration, relativeTime } from "@/lib/utils";
 

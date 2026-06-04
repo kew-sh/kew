@@ -1,8 +1,8 @@
-import { useMemo, useState } from "react";
+import { api, type Scheduler, useQueues, useSchedulers } from "@kew/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import cronstrue from "cronstrue";
 import { CalendarClock, ChevronRight, Plus, Trash2, X } from "lucide-react";
-import { api, useQueues, useSchedulers, type Scheduler } from "@kew/core";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { SchedulerDrawer } from "./scheduler-drawer";
@@ -199,7 +199,11 @@ function CreateForm({ queues, onDone }: { queues: string[]; onDone: () => void }
       </div>
 
       <div className="mt-3 flex gap-2">
-        <Button variant="accent" disabled={!valid || create.isPending} onClick={() => create.mutate()}>
+        <Button
+          variant="accent"
+          disabled={!valid || create.isPending}
+          onClick={() => create.mutate()}
+        >
           Create schedule
         </Button>
         <Button variant="ghost" onClick={onDone}>
@@ -220,6 +224,7 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
+    // biome-ignore lint/a11y/noLabelWithoutControl: the form control is passed in as children
     <label className={cn("flex flex-col gap-1", full && "sm:col-span-2")}>
       <span className="text-xs text-muted">{label}</span>
       {children}

@@ -47,7 +47,7 @@ export function Sparkline({
         strokeLinecap="round"
         vectorEffect="non-scaling-stroke"
       />
-      {failures && failures.some((f) => f > 0) && (
+      {failures?.some((f) => f > 0) && (
         <polyline
           points={toPoints(failures)}
           fill="none"

@@ -1,5 +1,5 @@
+import { type FlowNode, useFlows } from "@kew/core";
 import { GitFork, Workflow } from "lucide-react";
-import { useFlows, type FlowNode } from "@kew/core";
 import { StateBadge, StateDot } from "@/components/state-badge";
 
 export function FlowsPage() {
@@ -68,8 +68,9 @@ function EmptyFlows() {
       <Workflow className="size-7 text-muted" />
       <h2 className="mt-3 text-sm font-medium text-ink">No flows yet</h2>
       <p className="mt-1 max-w-sm text-sm text-muted">
-        Flows appear when you enqueue parent jobs with children via BullMQ's FlowProducer. The parent
-        waits in <span className="font-mono">waiting-children</span> until its children finish.
+        Flows appear when you enqueue parent jobs with children via BullMQ's FlowProducer. The
+        parent waits in <span className="font-mono">waiting-children</span> until its children
+        finish.
       </p>
     </div>
   );

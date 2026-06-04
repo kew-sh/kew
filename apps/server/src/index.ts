@@ -1,11 +1,11 @@
-import { Hono } from "hono";
-import { cors } from "hono/cors";
-import { serveStatic } from "hono/bun";
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import type { JobState } from "@kew/core/types";
-import { createRedis, REDIS_URL } from "./redis";
+import { Hono } from "hono";
+import { serveStatic } from "hono/bun";
+import { cors } from "hono/cors";
 import { discoverQueues, getJobsPage, getQueueSummary, STATES } from "./queue-service";
+import { createRedis, REDIS_URL } from "./redis";
 import { startSampler } from "./sampler";
 
 const redis = createRedis();
@@ -21,9 +21,19 @@ app.get("/api/connection", async (c) => {
   try {
     const info = await redis.info("server");
     const version = /redis_version:([^\r\n]+)/.exec(info)?.[1] ?? "unknown";
-    return c.json({ url: REDIS_URL, status: "connected", readOnly: READ_ONLY, redisVersion: version });
+    return c.json({
+      url: REDIS_URL,
+      status: "connected",
+      readOnly: READ_ONLY,
+      redisVersion: version,
+    });
   } catch {
-    return c.json({ url: REDIS_URL, status: "error", readOnly: READ_ONLY, redisVersion: "unknown" });
+    return c.json({
+      url: REDIS_URL,
+      status: "error",
+      readOnly: READ_ONLY,
+      redisVersion: "unknown",
+    });
   }
 });
 

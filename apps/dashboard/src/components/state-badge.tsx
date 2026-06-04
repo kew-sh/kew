@@ -1,5 +1,5 @@
-import { cn } from "@/lib/utils";
 import type { JobState } from "@kew/core";
+import { cn } from "@/lib/utils";
 import { STATE_META } from "./state-meta";
 
 export function StateBadge({ state, className }: { state: JobState; className?: string }) {
@@ -32,7 +32,12 @@ export function StateDot({
   const m = STATE_META[state];
   return (
     <span
-      className={cn("inline-block size-2 shrink-0 rounded-full", m.dot, pulse && "pulse-dot", className)}
+      className={cn(
+        "inline-block size-2 shrink-0 rounded-full",
+        m.dot,
+        pulse && "pulse-dot",
+        className,
+      )}
       aria-hidden
     />
   );

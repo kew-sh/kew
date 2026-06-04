@@ -1,5 +1,5 @@
-import { useMemo } from "react";
 import { useQueues } from "@kew/core";
+import { useMemo } from "react";
 import { MetricChart } from "@/components/metric-chart";
 import { cn, compact } from "@/lib/utils";
 
@@ -28,7 +28,11 @@ export function MetricsPage() {
       <div className="mt-4 flex flex-wrap gap-x-8 gap-y-2 rounded-lg border border-line bg-surface px-4 py-3">
         <Stat label="Throughput" value={`${compact(agg.rate)}/m`} />
         <Stat label="Completed · 30m" value={compact(agg.completed)} />
-        <Stat label="Failed · 30m" value={compact(agg.failed)} tone={agg.failed > 0 ? "failed" : undefined} />
+        <Stat
+          label="Failed · 30m"
+          value={compact(agg.failed)}
+          tone={agg.failed > 0 ? "failed" : undefined}
+        />
         <Stat label="Fail rate" value={`${(agg.failRate * 100).toFixed(1)}%`} />
       </div>
 
@@ -53,7 +57,9 @@ function Stat({ label, value, tone }: { label: string; value: string; tone?: "fa
   return (
     <div>
       <div className="text-xs text-muted">{label}</div>
-      <div className={cn("text-lg font-semibold tnum", tone === "failed" && "text-failed")}>{value}</div>
+      <div className={cn("text-lg font-semibold tnum", tone === "failed" && "text-failed")}>
+        {value}
+      </div>
     </div>
   );
 }

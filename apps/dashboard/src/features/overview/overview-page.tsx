@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { backlog, type QueueSummary, useQueues } from "@kew/core";
 import { Inbox } from "lucide-react";
-import { backlog, useQueues, type QueueSummary } from "@kew/core";
+import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { QueueRow } from "./queue-row";
 
@@ -32,6 +32,7 @@ export function OverviewPage() {
         <div className="flex items-center gap-0.5 rounded-lg border border-line bg-surface p-0.5 text-sm">
           {(["health", "backlog", "name"] as Sort[]).map((s) => (
             <button
+              type="button"
               key={s}
               onClick={() => setSort(s)}
               className={cn(
@@ -55,7 +56,7 @@ export function OverviewPage() {
 
         <div className="space-y-1.5">
           {isLoading && !queues
-            ? Array.from({ length: 5 }).map((_, i) => <RowSkeleton key={i} />)
+            ? ["a", "b", "c", "d", "e"].map((k) => <RowSkeleton key={k} />)
             : sorted.map((q) => <QueueRow key={q.name} q={q} />)}
         </div>
 
@@ -86,8 +87,8 @@ function EmptyQueues() {
       <Inbox className="size-7 text-muted" />
       <h2 className="mt-3 text-sm font-medium text-ink">No queues found on this Redis</h2>
       <p className="mt-1 max-w-sm text-sm text-muted">
-        BullMQ queues appear here once a producer adds a job or a worker starts. Check that the panel
-        points at the same Redis as your app.
+        BullMQ queues appear here once a producer adds a job or a worker starts. Check that the
+        panel points at the same Redis as your app.
       </p>
     </div>
   );

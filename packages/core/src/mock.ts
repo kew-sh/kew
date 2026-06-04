@@ -1,10 +1,4 @@
-import {
-  JOB_STATES,
-  type Job,
-  type JobCounts,
-  type JobState,
-  type QueueSummary,
-} from "./types";
+import { JOB_STATES, type Job, type JobCounts, type JobState, type QueueSummary } from "./types";
 
 /**
  * A small deterministic-ish world of BullMQ queues that evolves over time, so
@@ -61,8 +55,7 @@ function makeJob(queue: string, state: JobState, ageMs: number): Job {
   const maxAttempts = pick([1, 3, 3, 5]);
   const attemptsMade =
     state === "failed" ? maxAttempts : state === "active" ? int(0, 1) : int(0, maxAttempts - 1);
-  const durationMs =
-    state === "completed" || state === "active" ? int(45, 9000) : undefined;
+  const durationMs = state === "completed" || state === "active" ? int(45, 9000) : undefined;
 
   const data: Record<string, unknown> = {
     userId: `usr_${int(1000, 9999)}`,
@@ -110,7 +103,9 @@ function makeJob(queue: string, state: JobState, ageMs: number): Job {
   }
   job.logs = [
     `[${new Date(timestamp).toISOString()}] picked up by worker-${int(1, 4)}`,
-    state === "failed" ? `[error] attempt ${attemptsMade}/${maxAttempts} failed` : `processing ${name}`,
+    state === "failed"
+      ? `[error] attempt ${attemptsMade}/${maxAttempts} failed`
+      : `processing ${name}`,
   ];
   return job;
 }
@@ -123,10 +118,36 @@ function makeQueue(
   const jobs: Job[] = [];
 
   const spec: Record<typeof profile, Partial<Record<JobState, number>>> = {
-    healthy: { active: int(2, 6), waiting: int(0, 12), completed: int(8000, 40000), failed: int(0, 4), delayed: int(0, 3) },
-    failing: { active: int(1, 4), waiting: int(20, 80), completed: int(3000, 9000), failed: int(140, 520), delayed: int(2, 9), prioritized: int(0, 3) },
-    "backed-up": { active: int(8, 16), waiting: int(800, 4200), completed: int(20000, 60000), failed: int(10, 40), delayed: int(20, 120), prioritized: int(2, 8) },
-    paused: { active: 0, waiting: int(40, 200), completed: int(1000, 4000), failed: int(2, 20), delayed: int(0, 5) },
+    healthy: {
+      active: int(2, 6),
+      waiting: int(0, 12),
+      completed: int(8000, 40000),
+      failed: int(0, 4),
+      delayed: int(0, 3),
+    },
+    failing: {
+      active: int(1, 4),
+      waiting: int(20, 80),
+      completed: int(3000, 9000),
+      failed: int(140, 520),
+      delayed: int(2, 9),
+      prioritized: int(0, 3),
+    },
+    "backed-up": {
+      active: int(8, 16),
+      waiting: int(800, 4200),
+      completed: int(20000, 60000),
+      failed: int(10, 40),
+      delayed: int(20, 120),
+      prioritized: int(2, 8),
+    },
+    paused: {
+      active: 0,
+      waiting: int(40, 200),
+      completed: int(1000, 4000),
+      failed: int(2, 20),
+      delayed: int(0, 5),
+    },
     idle: { active: 0, waiting: 0, completed: int(200, 2000), failed: int(0, 2) },
   };
 
@@ -140,7 +161,8 @@ function makeQueue(
   }
 
   const throughput = Array.from({ length: 30 }, () => {
-    const base = profile === "backed-up" ? 80 : profile === "idle" ? 2 : profile === "paused" ? 0 : 30;
+    const base =
+      profile === "backed-up" ? 80 : profile === "idle" ? 2 : profile === "paused" ? 0 : 30;
     return Math.max(0, base + int(-base, base));
   });
   const failures = Array.from({ length: 30 }, () =>
@@ -187,8 +209,21 @@ type Sched = {
 
 const schedulers: Record<string, Sched[]> = {
   emails: [
-    { id: "daily-digest", name: "digest", pattern: "0 9 * * *", tz: "UTC", next: Date.now() + 3_600_000, data: { kind: "digest" } },
-    { id: "weekly-report", name: "report", pattern: "0 8 * * 1", tz: "UTC", next: Date.now() + 86_400_000 },
+    {
+      id: "daily-digest",
+      name: "digest",
+      pattern: "0 9 * * *",
+      tz: "UTC",
+      next: Date.now() + 3_600_000,
+      data: { kind: "digest" },
+    },
+    {
+      id: "weekly-report",
+      name: "report",
+      pattern: "0 8 * * 1",
+      tz: "UTC",
+      next: Date.now() + 86_400_000,
+    },
   ],
   "media-processing": [
     { id: "temp-cleanup", name: "cleanup-temp", every: 3_600_000, next: Date.now() + 600_000 },
@@ -211,7 +246,8 @@ export function upsertScheduler(input: {
   tz?: string;
   data?: unknown;
 }): void {
-  const list = (schedulers[input.queue] ??= []);
+  schedulers[input.queue] ??= [];
+  const list = schedulers[input.queue];
   const next = Date.now() + (input.every ?? 60_000);
   const rec: Sched = {
     id: input.id,
@@ -303,17 +339,35 @@ const flows: FNode[] = [
     queue: "media-processing",
     state: "waiting-children",
     children: [
-      { id: "910002", name: "render-chart", queue: "media-processing", state: "completed", children: [] },
+      {
+        id: "910002",
+        name: "render-chart",
+        queue: "media-processing",
+        state: "completed",
+        children: [],
+      },
       {
         id: "910003",
         name: "build-summary",
         queue: "media-processing",
         state: "active",
         children: [
-          { id: "910006", name: "fetch-rows", queue: "media-processing", state: "completed", children: [] },
+          {
+            id: "910006",
+            name: "fetch-rows",
+            queue: "media-processing",
+            state: "completed",
+            children: [],
+          },
         ],
       },
-      { id: "910004", name: "make-cover", queue: "media-processing", state: "waiting", children: [] },
+      {
+        id: "910004",
+        name: "make-cover",
+        queue: "media-processing",
+        state: "waiting",
+        children: [],
+      },
     ],
   },
   {
@@ -348,7 +402,8 @@ export function getQueues(): QueueSummary[] {
       throughput: [...q.throughput],
       failures: [...q.failures],
       ratePerMin: q.throughput[q.throughput.length - 1] ?? 0,
-      failRate: completedWindow + failedWindow === 0 ? 0 : failedWindow / (completedWindow + failedWindow),
+      failRate:
+        completedWindow + failedWindow === 0 ? 0 : failedWindow / (completedWindow + failedWindow),
     };
   });
 }

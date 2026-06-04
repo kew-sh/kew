@@ -1,17 +1,6 @@
+import { type QueueSummary, queueHealth, useConnection, useQueues } from "@kew/core";
 import { Link, useRouterState } from "@tanstack/react-router";
-import {
-  BarChart3,
-  CalendarClock,
-  GitFork,
-  Layers,
-  ListChecks,
-} from "lucide-react";
-import {
-  queueHealth,
-  useConnection,
-  useQueues,
-  type QueueSummary,
-} from "@kew/core";
+import { BarChart3, CalendarClock, GitFork, Layers, ListChecks } from "lucide-react";
 import { StateDot } from "@/components/state-badge";
 import { cn, compact } from "@/lib/utils";
 
@@ -38,7 +27,9 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
             <Layers className="size-4" strokeWidth={2.5} />
           </span>
           <span className="font-semibold tracking-tight">Kew</span>
-          <span className="rounded bg-overlay px-1 py-0.5 font-mono text-[10px] text-muted">beta</span>
+          <span className="rounded bg-overlay px-1 py-0.5 font-mono text-[10px] text-muted">
+            beta
+          </span>
         </div>
 
         <nav className="space-y-0.5 px-2 pt-1">
@@ -77,7 +68,9 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
                 : "text-ink-2 hover:bg-overlay/60 hover:text-ink",
             )}
           >
-            <GitFork className={cn("size-4", pathname === "/flows" ? "text-accent" : "text-muted")} />
+            <GitFork
+              className={cn("size-4", pathname === "/flows" ? "text-accent" : "text-muted")}
+            />
             Flows
           </Link>
           <Link
@@ -89,7 +82,9 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
                 : "text-ink-2 hover:bg-overlay/60 hover:text-ink",
             )}
           >
-            <BarChart3 className={cn("size-4", pathname === "/metrics" ? "text-accent" : "text-muted")} />
+            <BarChart3
+              className={cn("size-4", pathname === "/metrics" ? "text-accent" : "text-muted")}
+            />
             Metrics
           </Link>
         </nav>
@@ -119,7 +114,9 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
             <span className="min-w-0 flex-1 truncate font-mono text-muted">
               {conn?.url ?? "connecting…"}
             </span>
-            {conn && <span className="font-mono text-[10px] text-muted/70">v{conn.redisVersion}</span>}
+            {conn && (
+              <span className="font-mono text-[10px] text-muted/70">v{conn.redisVersion}</span>
+            )}
           </div>
         </div>
       </aside>

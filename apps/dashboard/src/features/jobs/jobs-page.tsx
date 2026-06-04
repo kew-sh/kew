@@ -1,25 +1,25 @@
-import { useMemo, useState } from "react";
-import { Link, useParams } from "@tanstack/react-router";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { RowSelectionState } from "@tanstack/react-table";
-import { ArrowLeft, CheckCircle2, SlidersHorizontal } from "lucide-react";
 import {
   api,
+  type BulkAction,
   JOB_STATES,
+  type Job,
+  type JobState,
   queueHealth,
   useConnection,
   useJobs,
   useQueue,
-  type BulkAction,
-  type Job,
-  type JobState,
 } from "@kew/core";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Link, useParams } from "@tanstack/react-router";
+import type { RowSelectionState } from "@tanstack/react-table";
+import { ArrowLeft, CheckCircle2, SlidersHorizontal } from "lucide-react";
+import { useMemo, useState } from "react";
 import { StateDot } from "@/components/state-badge";
 import { STATE_META } from "@/components/state-meta";
 import { cn, compact } from "@/lib/utils";
-import { JobTable } from "./job-table";
 import { BulkBar } from "./bulk-bar";
 import { JobDrawer } from "./job-drawer";
+import { JobTable } from "./job-table";
 
 const TIME_WINDOWS = [
   { id: "all", label: "Any time", ms: Number.POSITIVE_INFINITY },
@@ -105,9 +105,7 @@ export function JobsPage() {
           Queues
         </Link>
         <h1 className="mt-2 flex items-center gap-2.5 text-lg font-semibold tracking-tight">
-          {queue && (
-            <StateDot state={queueHealth(queue)} pulse={queueHealth(queue) === "active"} />
-          )}
+          {queue && <StateDot state={queueHealth(queue)} pulse={queueHealth(queue) === "active"} />}
           <span className="font-mono">{queueName}</span>
           {readOnly && (
             <span className="rounded bg-overlay px-1.5 py-0.5 text-[11px] font-normal text-delayed">
@@ -117,11 +115,15 @@ export function JobsPage() {
         </h1>
       </div>
 
-      <div role="tablist" className="mt-3 flex gap-1 overflow-x-auto border-b border-line px-4 md:px-8">
+      <div
+        role="tablist"
+        className="mt-3 flex gap-1 overflow-x-auto border-b border-line px-4 md:px-8"
+      >
         {JOB_STATES.map((s) => {
           const active = s === state;
           return (
             <button
+              type="button"
               key={s}
               role="tab"
               aria-selected={active}
@@ -152,6 +154,7 @@ export function JobsPage() {
           <SlidersHorizontal className="ml-1 size-3 text-muted" />
           {TIME_WINDOWS.map((t) => (
             <button
+              type="button"
               key={t.id}
               onClick={() => setWin(t.id)}
               className={cn(

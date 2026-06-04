@@ -1,5 +1,5 @@
-import { createContext, useContext, useEffect, useState } from "react";
 import { Moon, Sun } from "lucide-react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { Button } from "./ui/button";
 
 type Theme = "dark" | "light";
@@ -20,7 +20,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, [theme]);
 
   return (
-    <ThemeCtx.Provider value={{ theme, toggle: () => setTheme((t) => (t === "dark" ? "light" : "dark")) }}>
+    <ThemeCtx.Provider
+      value={{ theme, toggle: () => setTheme((t) => (t === "dark" ? "light" : "dark")) }}
+    >
       {children}
     </ThemeCtx.Provider>
   );

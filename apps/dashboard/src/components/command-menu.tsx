@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
-import { Command } from "cmdk";
+import { queueHealth, useQueues } from "@kew/core";
 import { useNavigate } from "@tanstack/react-router";
+import { Command } from "cmdk";
 import { LayoutGrid, MoonStar, Search } from "lucide-react";
-import { useQueues, queueHealth } from "@kew/core";
-import { useTheme } from "./theme";
+import { useEffect, useState } from "react";
 import { StateDot } from "./state-badge";
+import { useTheme } from "./theme";
 
 /** ⌘K palette. Listens for the shortcut globally and a custom open event. */
 export function CommandMenu() {

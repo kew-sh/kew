@@ -60,7 +60,10 @@ export function startSampler(redis: Redis, getNames: () => Promise<string[]>) {
           });
           continue;
         }
-        prev.throughput = [...prev.throughput.slice(1), Math.max(0, completed - prev.lastCompleted)];
+        prev.throughput = [
+          ...prev.throughput.slice(1),
+          Math.max(0, completed - prev.lastCompleted),
+        ];
         prev.failures = [...prev.failures.slice(1), Math.max(0, failed - prev.lastFailed)];
         prev.lastCompleted = completed;
         prev.lastFailed = failed;

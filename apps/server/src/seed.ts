@@ -10,8 +10,15 @@ import { createRedis } from "./redis";
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const ALL = ["emails", "ai-inference", "media-processing", "webhooks", "exports", "notifications"];
 
-async function drain(name: string, processor: (job: { data: any }) => Promise<unknown>, ms: number) {
-  const worker = new Worker(name, processor as never, { connection: createRedis(), concurrency: 16 });
+async function drain(
+  name: string,
+  processor: (job: { data: { _fail?: boolean } }) => Promise<unknown>,
+  ms: number,
+) {
+  const worker = new Worker(name, processor as never, {
+    connection: createRedis(),
+    concurrency: 16,
+  });
   await wait(ms);
   await worker.close();
 }
@@ -21,7 +28,9 @@ async function main() {
   const q = (name: string) => new Queue(name, { connection });
 
   for (const name of ALL) {
-    await q(name).obliterate({ force: true }).catch(() => {});
+    await q(name)
+      .obliterate({ force: true })
+      .catch(() => {});
   }
 
   // emails — healthy: lots completed, a few failed, one delayed, a cron scheduler
@@ -29,7 +38,11 @@ async function main() {
   for (let i = 0; i < 300; i++) await emails.add("welcome-email", { to: `user${i}@example.com` });
   for (let i = 0; i < 6; i++) await emails.add("digest", { _fail: true });
   await emails.add("reminder", { userId: 42 }, { delay: 10 * 60_000 });
-  await emails.upsertJobScheduler("daily-digest", { pattern: "0 9 * * *" }, { name: "digest", data: { scheduled: true } });
+  await emails.upsertJobScheduler(
+    "daily-digest",
+    { pattern: "0 9 * * *" },
+    { name: "digest", data: { scheduled: true } },
+  );
 
   // ai-inference — failing: token-heavy jobs, ~2/3 hit a provider error
   const ai = q("ai-inference");
@@ -69,24 +82,40 @@ async function main() {
 
   // process a few queues to create completed/failed states
   await Promise.all([
-    drain("emails", async (j) => {
-      if (j.data?._fail) throw new Error("RateLimitError: 429 Too Many Requests");
-      await wait(3);
-      return { ok: true };
-    }, 4500),
-    drain("ai-inference", async (j) => {
-      if (j.data?._fail) throw new Error("TimeoutError: provider timed out after 30000ms");
-      await wait(8);
-      return { embedding: "[…]" };
-    }, 4500),
-    drain("webhooks", async () => {
-      await wait(2);
-      return { delivered: true };
-    }, 3000),
-    drain("notifications", async () => {
-      await wait(2);
-      return { sent: true };
-    }, 2000),
+    drain(
+      "emails",
+      async (j) => {
+        if (j.data?._fail) throw new Error("RateLimitError: 429 Too Many Requests");
+        await wait(3);
+        return { ok: true };
+      },
+      4500,
+    ),
+    drain(
+      "ai-inference",
+      async (j) => {
+        if (j.data?._fail) throw new Error("TimeoutError: provider timed out after 30000ms");
+        await wait(8);
+        return { embedding: "[…]" };
+      },
+      4500,
+    ),
+    drain(
+      "webhooks",
+      async () => {
+        await wait(2);
+        return { delivered: true };
+      },
+      3000,
+    ),
+    drain(
+      "notifications",
+      async () => {
+        await wait(2);
+        return { sent: true };
+      },
+      2000,
+    ),
   ]);
 
   console.log("✓ seed complete — queues populated with a realistic snapshot");

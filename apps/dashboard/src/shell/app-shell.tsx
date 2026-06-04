@@ -1,7 +1,7 @@
 import { Suspense, useState } from "react";
+import { CommandMenu } from "@/components/command-menu";
 import { Sidebar } from "./sidebar";
 import { Topbar } from "./topbar";
-import { CommandMenu } from "@/components/command-menu";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [mobileNav, setMobileNav] = useState(false);

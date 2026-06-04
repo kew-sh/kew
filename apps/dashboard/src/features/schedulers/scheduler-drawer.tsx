@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { api, type Scheduler } from "@kew/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CronExpressionParser } from "cron-parser";
 import cronstrue from "cronstrue";
 import { CalendarClock, Trash2, X } from "lucide-react";
-import { api, type Scheduler } from "@kew/core";
-import { Button } from "@/components/ui/button";
+import { useEffect, useMemo, useState } from "react";
 import { JsonView } from "@/components/json-view";
+import { Button } from "@/components/ui/button";
 
 function human(s: Scheduler): string {
   if (s.pattern) {
@@ -59,7 +59,7 @@ export function SchedulerDrawer({
 
   useEffect(() => {
     if (scheduler) setConfirm(false);
-  }, [scheduler?.id]);
+  }, [scheduler?.id, scheduler]);
 
   useEffect(() => {
     if (!scheduler) return;
@@ -84,7 +84,11 @@ export function SchedulerDrawer({
 
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[1px]" onClick={onClose} aria-hidden />
+      <div
+        className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[1px]"
+        onClick={onClose}
+        aria-hidden
+      />
       <aside
         role="dialog"
         aria-label={`Scheduler ${scheduler.id}`}
@@ -108,7 +112,9 @@ export function SchedulerDrawer({
 
         <div className="min-h-0 flex-1 space-y-5 overflow-y-auto p-4">
           <section>
-            <h3 className="mb-1.5 text-xs font-medium uppercase tracking-wider text-muted">Schedule</h3>
+            <h3 className="mb-1.5 text-xs font-medium uppercase tracking-wider text-muted">
+              Schedule
+            </h3>
             <p className="text-sm">{human(scheduler)}</p>
             <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted">
               {scheduler.pattern && <span className="font-mono">{scheduler.pattern}</span>}
@@ -128,7 +134,9 @@ export function SchedulerDrawer({
               </div>
               {scheduler.data != null && (
                 <div className="mt-2.5">
-                  <div className="mb-1 text-[11px] uppercase tracking-wider text-muted">with data</div>
+                  <div className="mb-1 text-[11px] uppercase tracking-wider text-muted">
+                    with data
+                  </div>
                   <JsonView value={scheduler.data} />
                 </div>
               )}
@@ -140,12 +148,14 @@ export function SchedulerDrawer({
               Next runs
             </h3>
             {runs.length === 0 ? (
-              <p className="text-sm text-muted">Couldn't compute upcoming runs from this pattern.</p>
+              <p className="text-sm text-muted">
+                Couldn't compute upcoming runs from this pattern.
+              </p>
             ) : (
               <ol className="overflow-hidden rounded-md border border-line">
                 {runs.map((d, i) => (
                   <li
-                    key={i}
+                    key={d.getTime()}
                     className="flex items-center justify-between border-b border-line/50 px-3 py-2 text-sm last:border-0"
                   >
                     <span className="tnum">{fmt.format(d)}</span>

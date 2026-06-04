@@ -1,12 +1,6 @@
+import type { Job, JobCounts, JobPage, JobState, QueueSummary } from "@kew/core/types";
 import { Queue } from "bullmq";
 import type { Redis } from "ioredis";
-import type {
-  Job,
-  JobCounts,
-  JobPage,
-  JobState,
-  QueueSummary,
-} from "@kew/core/types";
 import { BULLMQ_PREFIX } from "./redis";
 import { getWindow } from "./sampler";
 
