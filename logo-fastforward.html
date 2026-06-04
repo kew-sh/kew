@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kew — fast-forward refinements</title>
+    <style>
+      :root {
+        --bg: #16141c;
+        --raised: #1c1a24;
+        --overlay: #232029;
+        --line: #2a2733;
+        --violet: #8b5cff;
+        --violet-2: #9e78ff;
+        --bar: #4f4a5e;
+        --bar-faint: #38343f;
+        --text: #eceaf0;
+        --muted: #8b8593;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; background: var(--bg); color: var(--text);
+        font-family: ui-sans-serif, "Geist", Inter, system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased; padding: 56px 40px 96px;
+      }
+      .mono { font-family: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace; }
+      header { max-width: 1180px; margin: 0 auto 40px; }
+      h1 { font-size: 25px; font-weight: 600; margin: 0 0 8px; letter-spacing: -0.01em; }
+      header p { color: var(--muted); font-size: 14px; margin: 0; line-height: 1.5; max-width: 72ch; }
+      .grid { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+      .card { background: var(--raised); border: 1px solid var(--line); border-radius: 14px; padding: 22px 22px 18px; display: flex; flex-direction: column; }
+      .card.pick { border-color: color-mix(in oklab, var(--violet) 55%, var(--line)); }
+      .tag { font-size: 10.5px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--violet); font-weight: 600; margin-bottom: 5px; }
+      .name { font-size: 15px; font-weight: 600; margin: 0 0 2px; }
+      .desc { color: var(--muted); font-size: 12px; line-height: 1.5; margin: 0 0 16px; min-height: 50px; }
+      .stage { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; height: 170px; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
+      .sizes { display: flex; align-items: center; gap: 20px; }
+      .size-item { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+      .size-item span { font-size: 10px; color: var(--muted); }
+      .size-box { background: var(--bg); border: 1px solid var(--line); border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+      .tab { display: inline-flex; align-items: center; gap: 6px; background: var(--overlay); border: 1px solid var(--line); border-radius: 7px 7px 0 0; padding: 6px 10px 7px; font-size: 11px; color: var(--muted); }
+      footer { max-width: 1180px; margin: 36px auto 0; color: var(--muted); font-size: 12.5px; line-height: 1.6; }
+      code { background: var(--overlay); padding: 1px 6px; border-radius: 5px; color: var(--text); font-size: 12px; }
+    </style>
+  </head>
+  <body>
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <!-- baseline: current -->
+      <symbol id="ff-base" viewBox="0 0 96 96">
+        <g fill="none" stroke-linejoin="round" stroke-linecap="round" stroke-width="11">
+          <polyline points="30,26 52,48 30,70" stroke="#4f4a5e" />
+          <polyline points="52,26 70,48 52,70" stroke="#8b5cff" />
+        </g>
+      </symbol>
+
+      <!-- 1. sharp miter -->
+      <symbol id="ff-sharp" viewBox="0 0 96 96">
+        <g fill="none" stroke-linejoin="miter" stroke-linecap="butt" stroke-width="11" stroke-miterlimit="6">
+          <polyline points="30,24 54,48 30,72" stroke="#4f4a5e" />
+          <polyline points="50,24 74,48 50,72" stroke="#8b5cff" />
+        </g>
+      </symbol>
+
+      <!-- 2. bold -->
+      <symbol id="ff-bold" viewBox="0 0 96 96">
+        <g fill="none" stroke-linejoin="round" stroke-linecap="round" stroke-width="15">
+          <polyline points="30,28 50,48 30,68" stroke="#4f4a5e" />
+          <polyline points="50,28 70,48 50,68" stroke="#8b5cff" />
+        </g>
+      </symbol>
+
+      <!-- 3. solid fast-forward (two-tone) -->
+      <symbol id="ff-solid" viewBox="0 0 96 96">
+        <polygon points="24,24 48,48 24,72" fill="#4f4a5e" />
+        <polygon points="48,24 72,48 48,72" fill="#8b5cff" />
+      </symbol>
+
+      <!-- 4. solid, rounded corners -->
+      <symbol id="ff-solid-round" viewBox="0 0 96 96">
+        <polygon points="25,26 47,48 25,70" fill="#4f4a5e" stroke="#4f4a5e" stroke-width="8" stroke-linejoin="round" />
+        <polygon points="49,26 71,48 49,70" fill="#8b5cff" stroke="#8b5cff" stroke-width="8" stroke-linejoin="round" />
+      </symbol>
+
+      <!-- 5. solid mono violet -->
+      <symbol id="ff-mono" viewBox="0 0 96 96">
+        <polygon points="24,24 48,48 24,72" fill="#8b5cff" />
+        <polygon points="48,24 72,48 48,72" fill="#8b5cff" />
+      </symbol>
+
+      <!-- 6. motion trio -->
+      <symbol id="ff-trio" viewBox="0 0 96 96">
+        <g fill="none" stroke-linejoin="round" stroke-linecap="round" stroke-width="9">
+          <polyline points="24,30 40,48 24,66" stroke="#38343f" />
+          <polyline points="42,30 58,48 42,66" stroke="#4f4a5e" />
+          <polyline points="60,30 76,48 60,66" stroke="#8b5cff" />
+        </g>
+      </symbol>
+
+      <!-- 7. nested: outline back + solid front -->
+      <symbol id="ff-nested" viewBox="0 0 96 96">
+        <polyline points="28,26 49,48 28,70" fill="none" stroke="#4f4a5e" stroke-width="10" stroke-linejoin="round" stroke-linecap="round" />
+        <polygon points="50,26 72,48 50,70" fill="#8b5cff" />
+      </symbol>
+
+      <!-- 8. terminal prompt: chevron + cursor -->
+      <symbol id="ff-prompt" viewBox="0 0 96 96">
+        <polyline points="26,28 50,48 26,68" fill="none" stroke="#8b5cff" stroke-width="11" stroke-linejoin="round" stroke-linecap="round" />
+        <rect x="60" y="34" width="13" height="28" rx="2.5" fill="#8b5cff" />
+      </symbol>
+
+      <!-- 9. solid, leading-back violet (reversed emphasis) -->
+      <symbol id="ff-rev" viewBox="0 0 96 96">
+        <polygon points="24,24 48,48 24,72" fill="#8b5cff" />
+        <polygon points="48,24 72,48 48,72" fill="#4f4a5e" />
+      </symbol>
+
+      <!-- app-icon tiles -->
+      <symbol id="tile-dark" viewBox="0 0 96 96">
+        <rect width="96" height="96" rx="22" fill="#1c1a24" />
+        <rect x="0.5" y="0.5" width="95" height="95" rx="21.5" fill="none" stroke="#2a2733" />
+        <polygon points="30,30 50,48 30,66" fill="#4f4a5e" />
+        <polygon points="50,30 70,48 50,66" fill="#8b5cff" />
+      </symbol>
+      <symbol id="tile-violet" viewBox="0 0 96 96">
+        <rect width="96" height="96" rx="22" fill="#8b5cff" />
+        <polygon points="32,30 52,48 32,66" fill="#c9b6ff" />
+        <polygon points="50,30 70,48 50,66" fill="#16141c" />
+      </symbol>
+    </svg>
+
+    <header>
+      <h1>Kew — refino do “fast-forward”</h1>
+      <p>
+        9 variações do conceito que você curtiu + 2 mocks de app-icon. Compare em grande e em
+        32&nbsp;/&nbsp;16&nbsp;px. A primeira é a base atual (referência); o resto são refinos.
+        Me diga o número (e qualquer tweak de peso/cor).
+      </p>
+    </header>
+
+    <main class="grid">
+      <section class="card">
+        <div class="tag">0 · base atual</div>
+        <h2 class="name">Referência</h2>
+        <p class="desc">O que está na tela hoje: round joins, traço 11, dois chevrons.</p>
+        <div class="stage"><svg width="104" height="104"><use href="#ff-base" /></svg></div>
+        <div class="sizes">
+          <div class="size-item"><div class="size-box" style="width:32px;height:32px"><svg width="32" height="32"><use href="#ff-base" /></svg></div><span>32</span></div>
+          <div class="size-item"><div class="size-box" style="width:16px;height:16px"><svg width="16" height="16"><use href="#ff-base" /></svg></div><span>16</span></div>
+          <div class="size-item" style="align-items:flex-start"><div class="tab"><svg width="13" height="13"><use href="#ff-base" /></svg> kew.sh</div><span>tab</span></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="tag">1 · engenheirado</div>
+        <h2 class="name">Sharp / miter</h2>
+        <p class="desc">Cantos vivos (miter) e pontas retas (butt). Mais "terminal", menos macio. Pontas mais longas dão velocidade.</p>
+        <div class="stage"><svg width="104" height="104"><use href="#ff-sharp" /></svg></div>
+        <div class="sizes">
+          <div class="size-item"><div class="size-box" style="width:32px;height:32px"><svg width="32" height="32"><use href="#ff-sharp" /></svg></div><span>32</span></div>
+          <div class="size-item"><div class="size-box" style="width:16px;height:16px"><svg width="16" height="16"><use href="#ff-sharp" /></svg></div><span>16</span></div>
+          <div class="size-item" style="align-items:flex-start"><div class="tab"><svg width="13" height="13"><use href="#ff-sharp" /></svg> kew.sh</div><span>tab</span></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="tag">2 · encorpado</div>
+        <h2 class="name">Bold</h2>
+        <p class="desc">Traço 15. Mais presença, segura melhor o tamanho pequeno sem virar sólido.</p>
+        <div class="stage"><svg width="104" height="104"><use href="#ff-bold" /></svg></div>
+        <div class="sizes">
+          <div class="size-item"><div class="size-box" style="width:32px;height:32px"><svg width="32" height="32"><use href="#ff-bold" /></svg></div><span>32</span></div>
+          <div class="size-item"><div class="size-box" style="width:16px;height:16px"><svg width="16" height="16"><use href="#ff-bold" /></svg></div><span>16</span></div>
+          <div class="size-item" style="align-items:flex-start"><div class="tab"><svg width="13" height="13"><use href="#ff-bold" /></svg> kew.sh</div><span>tab</span></div>
+        </div>
+      </section>
+
+      <section class="card pick">
+        <div class="tag">3 · recomendado</div>
+        <h2 class="name">Sólido ⏩</h2>
+        <p class="desc">Dois triângulos cheios = fast-forward clássico. Máxima legibilidade no favicon, leitura instantânea. Frente violeta = processando.</p>
+        <div class="stage"><svg width="104" height="104"><use href="#ff-solid" /></svg></div>
+        <div class="sizes">
+          <div class="size-item"><div class="size-box" style="width:32px;height:32px"><svg width="32" height="32"><use href="#ff-solid" /></svg></div><span>32</span></div>
+          <div class="size-item"><div class="size-box" style="width:16px;height:16px"><svg width="16" height="16"><use href="#ff-solid" /></svg></div><span>16</span></div>
+          <div class="size-item" style="align-items:flex-start"><div class="tab"><svg width="13" height="13"><use href="#ff-solid" /></svg> kew.sh</div><span>tab</span></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="tag">4 · sólido suave</div>
+        <h2 class="name">Sólido, cantos 2px</h2>
+        <p class="desc">Mesma massa do 3, com cantos levemente arredondados. Premium sem ser fofinho.</p>
+        <div class="stage"><svg width="104" height="104"><use href="#ff-solid-round" /></svg></div>
+        <div class="sizes">
+          <div class="size-item"><div class="size-box" style="width:32px;height:32px"><svg width="32" height="32"><use href="#ff-solid-round" /></svg></div><span>32</span></div>
+          <div class="size-item"><div class="size-box" style="width:16px;height:16px"><svg width="16" height="16"><use href="#ff-solid-round" /></svg></div><span>16</span></div>
+          <div class="size-item" style="align-items:flex-start"><div class="tab"><svg width="13" height="13"><use href="#ff-solid-round" /></svg> kew.sh</div><span>tab</span></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="tag">5 · single-accent</div>
+        <h2 class="name">Sólido mono</h2>
+        <p class="desc">Os dois triângulos violeta. Mais marca, menos "estado". Limpíssimo como app icon.</p>
+        <div class="stage"><svg width="104" height="104"><use href="#ff-mono" /></svg></div>
+        <div class="sizes">
+          <div class="size-item"><div class="size-box" style="width:32px;height:32px"><svg width="32" height="32"><use href="#ff-mono" /></svg></div><span>32</span></div>
+          <div class="size-item"><div class="size-box" style="width:16px;height:16px"><svg width="16" height="16"><use href="#ff-mono" /></svg></div><span>16</span></div>
+          <div class="size-item" style="align-items:flex-start"><div class="tab"><svg width="13" height="13"><use href="#ff-mono" /></svg> kew.sh</div><span>tab</span></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="tag">6 · movimento</div>
+        <h2 class="name">Trio / motion</h2>
+        <p class="desc">Três chevrons clareando até o violeta = velocidade + profundidade de fila. Mais detalhe (cuidado no 16px).</p>
+        <div class="stage"><svg width="104" height="104"><use href="#ff-trio" /></svg></div>
+        <div class="sizes">
+          <div class="size-item"><div class="size-box" style="width:32px;height:32px"><svg width="32" height="32"><use href="#ff-trio" /></svg></div><span>32</span></div>
+          <div class="size-item"><div class="size-box" style="width:16px;height:16px"><svg width="16" height="16"><use href="#ff-trio" /></svg></div><span>16</span></div>
+          <div class="size-item" style="align-items:flex-start"><div class="tab"><svg width="13" height="13"><use href="#ff-trio" /></svg> kew.sh</div><span>tab</span></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="tag">7 · profundidade</div>
+        <h2 class="name">Nested</h2>
+        <p class="desc">Chevron vazado atrás + triângulo cheio violeta na frente. Mistura traço e massa, dá camada.</p>
+        <div class="stage"><svg width="104" height="104"><use href="#ff-nested" /></svg></div>
+        <div class="sizes">
+          <div class="size-item"><div class="size-box" style="width:32px;height:32px"><svg width="32" height="32"><use href="#ff-nested" /></svg></div><span>32</span></div>
+          <div class="size-item"><div class="size-box" style="width:16px;height:16px"><svg width="16" height="16"><use href="#ff-nested" /></svg></div><span>16</span></div>
+          <div class="size-item" style="align-items:flex-start"><div class="tab"><svg width="13" height="13"><use href="#ff-nested" /></svg> kew.sh</div><span>tab</span></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="tag">8 · terminal-native</div>
+        <h2 class="name">Prompt &gt;▌</h2>
+        <p class="desc">Chevron + bloco de cursor = prompt de terminal. Amarra na identidade keyboard-first / ⌘K do Kew.</p>
+        <div class="stage"><svg width="104" height="104"><use href="#ff-prompt" /></svg></div>
+        <div class="sizes">
+          <div class="size-item"><div class="size-box" style="width:32px;height:32px"><svg width="32" height="32"><use href="#ff-prompt" /></svg></div><span>32</span></div>
+          <div class="size-item"><div class="size-box" style="width:16px;height:16px"><svg width="16" height="16"><use href="#ff-prompt" /></svg></div><span>16</span></div>
+          <div class="size-item" style="align-items:flex-start"><div class="tab"><svg width="13" height="13"><use href="#ff-prompt" /></svg> kew.sh</div><span>tab</span></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="tag">9 · ênfase invertida</div>
+        <h2 class="name">Sólido reverso</h2>
+        <p class="desc">Triângulo de trás violeta (o "próximo da fila"), frente cinza. Foco no que está chegando, não no que sai.</p>
+        <div class="stage"><svg width="104" height="104"><use href="#ff-rev" /></svg></div>
+        <div class="sizes">
+          <div class="size-item"><div class="size-box" style="width:32px;height:32px"><svg width="32" height="32"><use href="#ff-rev" /></svg></div><span>32</span></div>
+          <div class="size-item"><div class="size-box" style="width:16px;height:16px"><svg width="16" height="16"><use href="#ff-rev" /></svg></div><span>16</span></div>
+          <div class="size-item" style="align-items:flex-start"><div class="tab"><svg width="13" height="13"><use href="#ff-rev" /></svg> kew.sh</div><span>tab</span></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="tag">app icon · escuro</div>
+        <h2 class="name">Tile dark</h2>
+        <p class="desc">Mark sólido num tile arredondado escuro. Dock / PWA / GitHub avatar.</p>
+        <div class="stage"><svg width="104" height="104"><use href="#tile-dark" /></svg></div>
+        <div class="sizes">
+          <div class="size-item"><svg width="44" height="44"><use href="#tile-dark" /></svg><span>44</span></div>
+          <div class="size-item"><svg width="28" height="28"><use href="#tile-dark" /></svg><span>28</span></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="tag">app icon · violeta</div>
+        <h2 class="name">Tile violet</h2>
+        <p class="desc">Tile violeta cheio, mark vazado escuro + sombra clara. Mais vibrante, destaca no springboard.</p>
+        <div class="stage"><svg width="104" height="104"><use href="#tile-violet" /></svg></div>
+        <div class="sizes">
+          <div class="size-item"><svg width="44" height="44"><use href="#tile-violet" /></svg><span>44</span></div>
+          <div class="size-item"><svg width="28" height="28"><use href="#tile-violet" /></svg><span>28</span></div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      Todos derivam do chevron »: traço <code>#4f4a5e</code> → violeta <code>#8b5cff</code> sobre <code>#16141c</code>.
+      Diga o número favorito + tweaks (peso, gap, cor da barra, qual triângulo acende). Eu finalizo e gero
+      <code>public/favicon.svg</code> + plot no <code>index.html</code>.
+    </footer>
+  </body>
+</html>

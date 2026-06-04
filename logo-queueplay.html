@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kew — Queue→Play + fusões</title>
+    <style>
+      :root {
+        --bg: #16141c; --raised: #1c1a24; --overlay: #232029; --line: #2a2733;
+        --violet: #8b5cff; --violet-2: #9e78ff; --bar: #4f4a5e; --bar-faint: #38343f;
+        --text: #eceaf0; --muted: #8b8593;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--bg); color: var(--text); font-family: ui-sans-serif, "Geist", Inter, system-ui, sans-serif; -webkit-font-smoothing: antialiased; padding: 56px 40px 96px; }
+      .mono { font-family: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace; }
+      header { max-width: 1180px; margin: 0 auto 40px; }
+      h1 { font-size: 25px; font-weight: 600; margin: 0 0 8px; letter-spacing: -0.01em; }
+      header p { color: var(--muted); font-size: 14px; margin: 0; line-height: 1.5; max-width: 72ch; }
+      .section-label { max-width: 1180px; margin: 36px auto 14px; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+      .grid { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+      .card { background: var(--raised); border: 1px solid var(--line); border-radius: 14px; padding: 22px 22px 18px; display: flex; flex-direction: column; }
+      .card.pick { border-color: color-mix(in oklab, var(--violet) 55%, var(--line)); }
+      .tag { font-size: 10.5px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--violet); font-weight: 600; margin-bottom: 5px; }
+      .name { font-size: 15px; font-weight: 600; margin: 0 0 2px; }
+      .desc { color: var(--muted); font-size: 12px; line-height: 1.5; margin: 0 0 16px; min-height: 50px; }
+      .stage { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; height: 170px; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
+      .sizes { display: flex; align-items: center; gap: 20px; }
+      .size-item { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+      .size-item span { font-size: 10px; color: var(--muted); }
+      .size-box { background: var(--bg); border: 1px solid var(--line); border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+      .tab { display: inline-flex; align-items: center; gap: 6px; background: var(--overlay); border: 1px solid var(--line); border-radius: 7px 7px 0 0; padding: 6px 10px 7px; font-size: 11px; color: var(--muted); }
+      footer { max-width: 1180px; margin: 36px auto 0; color: var(--muted); font-size: 12.5px; line-height: 1.6; }
+      code { background: var(--overlay); padding: 1px 6px; border-radius: 5px; color: var(--text); font-size: 12px; }
+    </style>
+  </head>
+  <body>
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <!-- ===== Queue → Play refinements ===== -->
+      <!-- base (current) -->
+      <symbol id="qp-base" viewBox="0 0 96 96">
+        <rect x="26" y="20" width="12" height="8" rx="2" fill="#4f4a5e" />
+        <rect x="26" y="33" width="26" height="8" rx="2" fill="#4f4a5e" />
+        <rect x="26" y="46" width="40" height="8" rx="2" fill="#8b5cff" />
+        <rect x="26" y="59" width="26" height="8" rx="2" fill="#4f4a5e" />
+        <rect x="26" y="72" width="12" height="8" rx="2" fill="#4f4a5e" />
+      </symbol>
+
+      <!-- 3-bar, chunky (favicon-safe) -->
+      <symbol id="qp-3" viewBox="0 0 96 96">
+        <rect x="26" y="26" width="18" height="11" rx="2.5" fill="#4f4a5e" />
+        <rect x="26" y="42" width="40" height="11" rx="2.5" fill="#8b5cff" />
+        <rect x="26" y="58" width="18" height="11" rx="2.5" fill="#4f4a5e" />
+      </symbol>
+
+      <!-- sharp corners -->
+      <symbol id="qp-sharp" viewBox="0 0 96 96">
+        <rect x="26" y="20" width="12" height="8" fill="#4f4a5e" />
+        <rect x="26" y="33" width="26" height="8" fill="#4f4a5e" />
+        <rect x="26" y="46" width="40" height="8" fill="#8b5cff" />
+        <rect x="26" y="59" width="26" height="8" fill="#4f4a5e" />
+        <rect x="26" y="72" width="12" height="8" fill="#4f4a5e" />
+      </symbol>
+
+      <!-- arrow staircase (descending widths, top active) -->
+      <symbol id="qp-arrow" viewBox="0 0 96 96">
+        <rect x="26" y="22" width="44" height="8" rx="2" fill="#8b5cff" />
+        <rect x="26" y="35" width="34" height="8" rx="2" fill="#4f4a5e" />
+        <rect x="26" y="48" width="24" height="8" rx="2" fill="#4f4a5e" />
+        <rect x="26" y="61" width="14" height="8" rx="2" fill="#4f4a5e" />
+      </symbol>
+
+      <!-- tight gaps, denser -->
+      <symbol id="qp-tight" viewBox="0 0 96 96">
+        <rect x="26" y="26" width="14" height="7" rx="2" fill="#4f4a5e" />
+        <rect x="26" y="36" width="28" height="7" rx="2" fill="#4f4a5e" />
+        <rect x="26" y="46" width="42" height="7" rx="2" fill="#8b5cff" />
+        <rect x="26" y="56" width="28" height="7" rx="2" fill="#4f4a5e" />
+        <rect x="26" y="66" width="14" height="7" rx="2" fill="#4f4a5e" />
+      </symbol>
+
+      <!-- ===== Fusions: queue bars + forward ===== -->
+      <!-- active bar becomes an arrow (queue + forward in one) -->
+      <symbol id="fz-arrowbar" viewBox="0 0 96 96">
+        <rect x="26" y="20" width="12" height="8" rx="2" fill="#4f4a5e" />
+        <rect x="26" y="33" width="24" height="8" rx="2" fill="#4f4a5e" />
+        <path d="M26 44 h28 v-4 l14 10 -14 10 v-4 h-28 z" fill="#8b5cff" />
+        <rect x="26" y="59" width="24" height="8" rx="2" fill="#4f4a5e" />
+        <rect x="26" y="72" width="12" height="8" rx="2" fill="#4f4a5e" />
+      </symbol>
+
+      <!-- mini queue feeds a chevron -->
+      <symbol id="fz-feed" viewBox="0 0 96 96">
+        <g fill="#4f4a5e">
+          <rect x="18" y="30" width="18" height="7" rx="2" />
+          <rect x="18" y="44" width="18" height="7" rx="2" />
+          <rect x="18" y="58" width="18" height="7" rx="2" />
+        </g>
+        <polyline points="44,30 64,48 44,66" fill="none" stroke="#8b5cff" stroke-width="10" stroke-linejoin="round" stroke-linecap="round" />
+      </symbol>
+
+      <!-- play triangle sliced by queue gaps (solid ▶ with slots) -->
+      <symbol id="fz-slotplay" viewBox="0 0 96 96">
+        <defs>
+          <clipPath id="tri"><polygon points="28,22 28,74 70,48" /></clipPath>
+        </defs>
+        <g clip-path="url(#tri)">
+          <rect x="24" y="20" width="52" height="11" fill="#4f4a5e" />
+          <rect x="24" y="34" width="52" height="11" fill="#4f4a5e" />
+          <rect x="24" y="48" width="52" height="11" fill="#8b5cff" />
+          <rect x="24" y="62" width="52" height="11" fill="#4f4a5e" />
+        </g>
+      </symbol>
+    </svg>
+
+    <header>
+      <h1>Kew — Queue→Play (refino) + fusões</h1>
+      <p>
+        Você curtiu o Queue→Play e o Fast-forward. Em cima: refinos do Queue→Play. Embaixo:
+        <b>fusões</b> dos dois — a barra ativa vira seta, a fila escoa num chevron, ou o ▶ sólido
+        é fatiado pelas linhas da fila. Compare em 32/16px e me diga o número.
+      </p>
+    </header>
+
+    <div class="section-label">Queue → Play · refinos</div>
+    <main class="grid">
+      <section class="card">
+        <div class="tag">0 · base</div>
+        <h2 class="name">Referência</h2>
+        <p class="desc">O que você viu: 5 barras, larguras formando ▶, ativa central acesa, radius 2.</p>
+        <div class="stage"><svg width="104" height="104"><use href="#qp-base" /></svg></div>
+        <div class="sizes">
+          <div class="size-item"><div class="size-box" style="width:32px;height:32px"><svg width="32" height="32"><use href="#qp-base" /></svg></div><span>32</span></div>
+          <div class="size-item"><div class="size-box" style="width:16px;height:16px"><svg width="16" height="16"><use href="#qp-base" /></svg></div><span>16</span></div>
+          <div class="size-item" style="align-items:flex-start"><div class="tab"><svg width="13" height="13"><use href="#qp-base" /></svg> kew.sh</div><span>tab</span></div>
+        </div>
+      </section>
+
+      <section class="card pick">
+        <div class="tag">1 · favicon-safe</div>
+        <h2 class="name">3 barras, encorpado</h2>
+        <p class="desc">Só 3 barras mais grossas. Mantém o ▶ mas <b>não borra no 16px</b> — o problema da versão de 5 barras.</p>
+        <div class="stage"><svg width="104" height="104"><use href="#qp-3" /></svg></div>
+        <div class="sizes">
+          <div class="size-item"><div class="size-box" style="width:32px;height:32px"><svg width="32" height="32"><use href="#qp-3" /></svg></div><span>32</span></div>
+          <div class="size-item"><div class="size-box" style="width:16px;height:16px"><svg width="16" height="16"><use href="#qp-3" /></svg></div><span>16</span></div>
+          <div class="size-item" style="align-items:flex-start"><div class="tab"><svg width="13" height="13"><use href="#qp-3" /></svg> kew.sh</div><span>tab</span></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="tag">2 · engenheirado</div>
+        <h2 class="name">Cantos vivos</h2>
+        <p class="desc">Radius 0. Mais terminal/CLI, menos suave. Combina com o tom "afiado" da marca.</p>
+        <div class="stage"><svg width="104" height="104"><use href="#qp-sharp" /></svg></div>
+        <div class="sizes">
+          <div class="size-item"><div class="size-box" style="width:32px;height:32px"><svg width="32" height="32"><use href="#qp-sharp" /></svg></div><span>32</span></div>
+          <div class="size-item"><div class="size-box" style="width:16px;height:16px"><svg width="16" height="16"><use href="#qp-sharp" /></svg></div><span>16</span></div>
+          <div class="size-item" style="align-items:flex-start"><div class="tab"><svg width="13" height="13"><use href="#qp-sharp" /></svg> kew.sh</div><span>tab</span></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="tag">3 · variante</div>
+        <h2 class="name">Staircase / arrow</h2>
+        <p class="desc">Larguras decrescentes do topo (ativo, violeta) pra base. Lê como seta/queue escoando pra baixo-direita.</p>
+        <div class="stage"><svg width="104" height="104"><use href="#qp-arrow" /></svg></div>
+        <div class="sizes">
+          <div class="size-item"><div class="size-box" style="width:32px;height:32px"><svg width="32" height="32"><use href="#qp-arrow" /></svg></div><span>32</span></div>
+          <div class="size-item"><div class="size-box" style="width:16px;height:16px"><svg width="16" height="16"><use href="#qp-arrow" /></svg></div><span>16</span></div>
+          <div class="size-item" style="align-items:flex-start"><div class="tab"><svg width="13" height="13"><use href="#qp-arrow" /></svg> kew.sh</div><span>tab</span></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="tag">4 · denso</div>
+        <h2 class="name">Gaps apertados</h2>
+        <p class="desc">Mesmo ▶, barras mais finas e juntas. Mais "data table", mais técnico. (No 16px é o que mais sofre.)</p>
+        <div class="stage"><svg width="104" height="104"><use href="#qp-tight" /></svg></div>
+        <div class="sizes">
+          <div class="size-item"><div class="size-box" style="width:32px;height:32px"><svg width="32" height="32"><use href="#qp-tight" /></svg></div><span>32</span></div>
+          <div class="size-item"><div class="size-box" style="width:16px;height:16px"><svg width="16" height="16"><use href="#qp-tight" /></svg></div><span>16</span></div>
+          <div class="size-item" style="align-items:flex-start"><div class="tab"><svg width="13" height="13"><use href="#qp-tight" /></svg> kew.sh</div><span>tab</span></div>
+        </div>
+      </section>
+    </main>
+
+    <div class="section-label">Fusões · Queue + Fast-forward</div>
+    <main class="grid">
+      <section class="card pick">
+        <div class="tag">F1 · a história inteira</div>
+        <h2 class="name">Barra-seta</h2>
+        <p class="desc">A fila de barras, mas a <b>ativa vira uma seta →</b> disparando pra frente. Queue + forward num símbolo só. O mais "Kew".</p>
+        <div class="stage"><svg width="104" height="104"><use href="#fz-arrowbar" /></svg></div>
+        <div class="sizes">
+          <div class="size-item"><div class="size-box" style="width:32px;height:32px"><svg width="32" height="32"><use href="#fz-arrowbar" /></svg></div><span>32</span></div>
+          <div class="size-item"><div class="size-box" style="width:16px;height:16px"><svg width="16" height="16"><use href="#fz-arrowbar" /></svg></div><span>16</span></div>
+          <div class="size-item" style="align-items:flex-start"><div class="tab"><svg width="13" height="13"><use href="#fz-arrowbar" /></svg> kew.sh</div><span>tab</span></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="tag">F2 · narrativo</div>
+        <h2 class="name">Fila → chevron</h2>
+        <p class="desc">Mini-fila de 3 barras escoando para um chevron violeta = "jobs entram, são processados". Conta o fluxo.</p>
+        <div class="stage"><svg width="104" height="104"><use href="#fz-feed" /></svg></div>
+        <div class="sizes">
+          <div class="size-item"><div class="size-box" style="width:32px;height:32px"><svg width="32" height="32"><use href="#fz-feed" /></svg></div><span>32</span></div>
+          <div class="size-item"><div class="size-box" style="width:16px;height:16px"><svg width="16" height="16"><use href="#fz-feed" /></svg></div><span>16</span></div>
+          <div class="size-item" style="align-items:flex-start"><div class="tab"><svg width="13" height="13"><use href="#fz-feed" /></svg> kew.sh</div><span>tab</span></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="tag">F3 · sólido + linhas</div>
+        <h2 class="name">Play fatiado</h2>
+        <p class="desc">Um ▶ sólido cortado pelas linhas da fila, faixa central violeta. Massa do fast-forward + leitura de fila.</p>
+        <div class="stage"><svg width="104" height="104"><use href="#fz-slotplay" /></svg></div>
+        <div class="sizes">
+          <div class="size-item"><div class="size-box" style="width:32px;height:32px"><svg width="32" height="32"><use href="#fz-slotplay" /></svg></div><span>32</span></div>
+          <div class="size-item"><div class="size-box" style="width:16px;height:16px"><svg width="16" height="16"><use href="#fz-slotplay" /></svg></div><span>16</span></div>
+          <div class="size-item" style="align-items:flex-start"><div class="tab"><svg width="13" height="13"><use href="#fz-slotplay" /></svg> kew.sh</div><span>tab</span></div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      Mesmos tokens: barra <code>#4f4a5e</code> · violeta <code>#8b5cff</code> · fundo <code>#16141c</code>.
+      Você tem 3 páginas abertas agora (conceitos · fast-forward · este). Me diga os finalistas
+      (ex.: "qp-3 + ff-solid + F1") e eu finalizo o escolhido + gero o favicon.
+    </footer>
+  </body>
+</html>

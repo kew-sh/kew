@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kew — Sharp Trio (finalistas)</title>
+    <style>
+      :root {
+        --bg: #16141c; --raised: #1c1a24; --overlay: #232029; --line: #2a2733;
+        --violet: #8b5cff; --violet-2: #9e78ff; --bar: #4f4a5e; --bar-faint: #38343f;
+        --text: #eceaf0; --muted: #8b8593;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--bg); color: var(--text); font-family: ui-sans-serif, "Geist", Inter, system-ui, sans-serif; -webkit-font-smoothing: antialiased; padding: 56px 40px 96px; }
+      .mono { font-family: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace; }
+      header { max-width: 1180px; margin: 0 auto 38px; }
+      h1 { font-size: 25px; font-weight: 600; margin: 0 0 8px; letter-spacing: -0.01em; }
+      header p { color: var(--muted); font-size: 14px; margin: 0; line-height: 1.5; max-width: 72ch; }
+      .grid { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+      .card { background: var(--raised); border: 1px solid var(--line); border-radius: 14px; padding: 22px 22px 18px; display: flex; flex-direction: column; }
+      .card.pick { border-color: color-mix(in oklab, var(--violet) 60%, var(--line)); }
+      .tag { font-size: 10.5px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--violet); font-weight: 600; margin-bottom: 5px; }
+      .name { font-size: 15px; font-weight: 600; margin: 0 0 2px; }
+      .desc { color: var(--muted); font-size: 12px; line-height: 1.5; margin: 0 0 16px; min-height: 48px; }
+      .stage { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; height: 170px; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
+      .sizes { display: flex; align-items: center; gap: 20px; }
+      .size-item { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+      .size-item span { font-size: 10px; color: var(--muted); }
+      .size-box { background: var(--bg); border: 1px solid var(--line); border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+      .tab { display: inline-flex; align-items: center; gap: 6px; background: var(--overlay); border: 1px solid var(--line); border-radius: 7px 7px 0 0; padding: 6px 10px 7px; font-size: 11px; color: var(--muted); }
+      .lockup-row { max-width: 1180px; margin: 22px auto 0; display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+      .lockup-card { background: var(--raised); border: 1px solid var(--line); border-radius: 14px; padding: 26px; }
+      .lockup { display: flex; align-items: center; gap: 16px; justify-content: center; height: 90px; }
+      .word { font-size: 32px; font-weight: 600; letter-spacing: -0.02em; color: var(--text); display: inline-flex; align-items: baseline; }
+      .cursor { display: inline-block; width: 13px; height: 27px; background: var(--violet); border-radius: 2px; margin-left: 4px; transform: translateY(3px); animation: blink 1.1s steps(1) infinite; }
+      @keyframes blink { 50% { opacity: 0; } }
+      footer { max-width: 1180px; margin: 34px auto 0; color: var(--muted); font-size: 12.5px; line-height: 1.6; }
+      code { background: var(--overlay); padding: 1px 6px; border-radius: 5px; color: var(--text); font-size: 12px; }
+    </style>
+  </head>
+  <body>
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <!-- recommended: sharp trio, motion fade -->
+      <symbol id="st-trio" viewBox="0 0 96 96">
+        <g fill="none" stroke-linejoin="miter" stroke-linecap="butt" stroke-width="10" stroke-miterlimit="8">
+          <polyline points="22,26 40,48 22,70" stroke="#38343f" />
+          <polyline points="40,26 58,48 40,70" stroke="#4f4a5e" />
+          <polyline points="58,26 76,48 58,70" stroke="#8b5cff" />
+        </g>
+      </symbol>
+
+      <!-- bolder -->
+      <symbol id="st-bold" viewBox="0 0 96 96">
+        <g fill="none" stroke-linejoin="miter" stroke-linecap="butt" stroke-width="13" stroke-miterlimit="8">
+          <polyline points="23,27 41,48 23,69" stroke="#38343f" />
+          <polyline points="41,27 59,48 41,69" stroke="#4f4a5e" />
+          <polyline points="59,27 77,48 59,69" stroke="#8b5cff" />
+        </g>
+      </symbol>
+
+      <!-- mono violet, opacity fade -->
+      <symbol id="st-mono" viewBox="0 0 96 96">
+        <g fill="none" stroke="#8b5cff" stroke-linejoin="miter" stroke-linecap="butt" stroke-width="10" stroke-miterlimit="8">
+          <polyline points="22,26 40,48 22,70" opacity="0.35" />
+          <polyline points="40,26 58,48 40,70" opacity="0.65" />
+          <polyline points="58,26 76,48 58,70" opacity="1" />
+        </g>
+      </symbol>
+
+      <!-- duo (closest to your ff-sharp) -->
+      <symbol id="st-duo" viewBox="0 0 96 96">
+        <g fill="none" stroke-linejoin="miter" stroke-linecap="butt" stroke-width="11" stroke-miterlimit="8">
+          <polyline points="32,24 56,48 32,72" stroke="#4f4a5e" />
+          <polyline points="52,24 76,48 52,72" stroke="#8b5cff" />
+        </g>
+      </symbol>
+
+      <!-- quad, more motion -->
+      <symbol id="st-quad" viewBox="0 0 96 96">
+        <g fill="none" stroke-linejoin="miter" stroke-linecap="butt" stroke-width="8" stroke-miterlimit="8">
+          <polyline points="18,28 34,48 18,68" stroke="#322e39" />
+          <polyline points="34,28 50,48 34,68" stroke="#423e4e" />
+          <polyline points="50,28 66,48 50,68" stroke="#5f5a70" />
+          <polyline points="66,28 82,48 66,68" stroke="#8b5cff" />
+        </g>
+      </symbol>
+
+      <!-- tight gaps -->
+      <symbol id="st-tight" viewBox="0 0 96 96">
+        <g fill="none" stroke-linejoin="miter" stroke-linecap="butt" stroke-width="10" stroke-miterlimit="8">
+          <polyline points="28,28 44,48 28,68" stroke="#38343f" />
+          <polyline points="42,28 58,48 42,68" stroke="#4f4a5e" />
+          <polyline points="56,28 72,48 56,68" stroke="#8b5cff" />
+        </g>
+      </symbol>
+    </svg>
+
+    <header>
+      <h1>Kew — “Sharp Trio”: o cruzamento dos seus 2 favoritos</h1>
+      <p>
+        Sharp/miter (cantos vivos) + Trio/motion (3 chevrons com fade) fundidos. Aqui você ajusta
+        o que sobrou: <b>peso</b>, <b>gap</b>, <b>nº de chevrons</b> e <b>como o fade acende</b>.
+        O destacado é meu palpite. Lockups com o wordmark embaixo.
+      </p>
+    </header>
+
+    <main class="grid">
+      <section class="card pick">
+        <div class="tag">A · recomendado</div>
+        <h2 class="name">Sharp Trio</h2>
+        <p class="desc">3 chevrons miter, fade apagado→violeta. Direção + velocidade + ponta afiada. O merge exato dos seus dois favoritos.</p>
+        <div class="stage"><svg width="104" height="104"><use href="#st-trio" /></svg></div>
+        <div class="sizes">
+          <div class="size-item"><div class="size-box" style="width:32px;height:32px"><svg width="32" height="32"><use href="#st-trio" /></svg></div><span>32</span></div>
+          <div class="size-item"><div class="size-box" style="width:16px;height:16px"><svg width="16" height="16"><use href="#st-trio" /></svg></div><span>16</span></div>
+          <div class="size-item" style="align-items:flex-start"><div class="tab"><svg width="13" height="13"><use href="#st-trio" /></svg> kew.sh</div><span>tab</span></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="tag">B · mais presença</div>
+        <h2 class="name">Sharp Trio · bold</h2>
+        <p class="desc">Mesmo desenho, traço 13. Segura melhor no favicon e fica mais "logo", menos "ícone fino".</p>
+        <div class="stage"><svg width="104" height="104"><use href="#st-bold" /></svg></div>
+        <div class="sizes">
+          <div class="size-item"><div class="size-box" style="width:32px;height:32px"><svg width="32" height="32"><use href="#st-bold" /></svg></div><span>32</span></div>
+          <div class="size-item"><div class="size-box" style="width:16px;height:16px"><svg width="16" height="16"><use href="#st-bold" /></svg></div><span>16</span></div>
+          <div class="size-item" style="align-items:flex-start"><div class="tab"><svg width="13" height="13"><use href="#st-bold" /></svg> kew.sh</div><span>tab</span></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="tag">C · single-accent</div>
+        <h2 class="name">Sharp Trio · mono</h2>
+        <p class="desc">Tudo violeta, o fade vem da opacidade (35→65→100%). Mais marca, menos "estado". Discreto e elegante.</p>
+        <div class="stage"><svg width="104" height="104"><use href="#st-mono" /></svg></div>
+        <div class="sizes">
+          <div class="size-item"><div class="size-box" style="width:32px;height:32px"><svg width="32" height="32"><use href="#st-mono" /></svg></div><span>32</span></div>
+          <div class="size-item"><div class="size-box" style="width:16px;height:16px"><svg width="16" height="16"><use href="#st-mono" /></svg></div><span>16</span></div>
+          <div class="size-item" style="align-items:flex-start"><div class="tab"><svg width="13" height="13"><use href="#st-mono" /></svg> kew.sh</div><span>tab</span></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="tag">D · mais limpo</div>
+        <h2 class="name">Sharp Duo</h2>
+        <p class="desc">Só 2 chevrons miter (o seu Sharp original, refinado). Menos detalhe = mais forte no 16px. Sem o "motion" do trio.</p>
+        <div class="stage"><svg width="104" height="104"><use href="#st-duo" /></svg></div>
+        <div class="sizes">
+          <div class="size-item"><div class="size-box" style="width:32px;height:32px"><svg width="32" height="32"><use href="#st-duo" /></svg></div><span>32</span></div>
+          <div class="size-item"><div class="size-box" style="width:16px;height:16px"><svg width="16" height="16"><use href="#st-duo" /></svg></div><span>16</span></div>
+          <div class="size-item" style="align-items:flex-start"><div class="tab"><svg width="13" height="13"><use href="#st-duo" /></svg> kew.sh</div><span>tab</span></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="tag">E · mais movimento</div>
+        <h2 class="name">Sharp Quad</h2>
+        <p class="desc">4 chevrons, fade mais longo = mais sensação de velocidade/throughput. Traço fino (cuidado no 16px).</p>
+        <div class="stage"><svg width="104" height="104"><use href="#st-quad" /></svg></div>
+        <div class="sizes">
+          <div class="size-item"><div class="size-box" style="width:32px;height:32px"><svg width="32" height="32"><use href="#st-quad" /></svg></div><span>32</span></div>
+          <div class="size-item"><div class="size-box" style="width:16px;height:16px"><svg width="16" height="16"><use href="#st-quad" /></svg></div><span>16</span></div>
+          <div class="size-item" style="align-items:flex-start"><div class="tab"><svg width="13" height="13"><use href="#st-quad" /></svg> kew.sh</div><span>tab</span></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="tag">F · compacto</div>
+        <h2 class="name">Sharp Trio · tight</h2>
+        <p class="desc">Trio com chevrons mais sobrepostos. Mais coeso, lê como um símbolo só em vez de 3 peças.</p>
+        <div class="stage"><svg width="104" height="104"><use href="#st-tight" /></svg></div>
+        <div class="sizes">
+          <div class="size-item"><div class="size-box" style="width:32px;height:32px"><svg width="32" height="32"><use href="#st-tight" /></svg></div><span>32</span></div>
+          <div class="size-item"><div class="size-box" style="width:16px;height:16px"><svg width="16" height="16"><use href="#st-tight" /></svg></div><span>16</span></div>
+          <div class="size-item" style="align-items:flex-start"><div class="tab"><svg width="13" height="13"><use href="#st-tight" /></svg> kew.sh</div><span>tab</span></div>
+        </div>
+      </section>
+    </main>
+
+    <div class="lockup-row">
+      <div class="lockup-card">
+        <div class="tag">Lockup · trio</div>
+        <div class="lockup"><svg width="50" height="50"><use href="#st-trio" /></svg><span class="word mono">kew<span class="cursor"></span></span></div>
+      </div>
+      <div class="lockup-card">
+        <div class="tag">Lockup · duo</div>
+        <div class="lockup"><svg width="50" height="50"><use href="#st-duo" /></svg><span class="word mono">kew<span class="cursor"></span></span></div>
+      </div>
+    </div>
+
+    <footer>
+      Tudo miter (canto vivo). Fade: <code>#38343f</code> → <code>#4f4a5e</code> → <code>#8b5cff</code> sobre <code>#16141c</code>.
+      Me diga a letra (A–F) + ajuste fino se quiser (peso, gap, fade). Aí eu travo, gero
+      <code>public/favicon.svg</code> (+ um <code>favicon</code> mono pro 16px) e ploto no <code>index.html</code> + faço o componente do lockup pro topbar.
+    </footer>
+  </body>
+</html>

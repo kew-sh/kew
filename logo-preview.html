@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kew — logo concepts</title>
+    <style>
+      :root {
+        --bg: #16141c;
+        --raised: #1c1a24;
+        --overlay: #232029;
+        --line: #2a2733;
+        --violet: #8b5cff;
+        --violet-2: #9e78ff;
+        --bar: #423e4e;
+        --bar-2: #4f4a5e;
+        --text: #eceaf0;
+        --muted: #8b8593;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: ui-sans-serif, "Geist", Inter, system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        padding: 56px 40px 96px;
+      }
+      .mono { font-family: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace; }
+      header { max-width: 1100px; margin: 0 auto 44px; }
+      h1 { font-size: 25px; font-weight: 600; margin: 0 0 8px; letter-spacing: -0.01em; }
+      header p { color: var(--muted); font-size: 14px; margin: 0; line-height: 1.5; max-width: 70ch; }
+      .grid {
+        max-width: 1100px; margin: 0 auto;
+        display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;
+      }
+      .card {
+        background: var(--raised);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 28px 28px 22px;
+        display: flex; flex-direction: column;
+      }
+      .tag {
+        font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+        color: var(--violet); font-weight: 600; margin-bottom: 4px;
+      }
+      .name { font-size: 16px; font-weight: 600; margin: 0 0 2px; }
+      .desc { color: var(--muted); font-size: 12.5px; line-height: 1.5; margin: 0 0 22px; min-height: 38px; }
+      .stage {
+        background: var(--bg);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        height: 220px;
+        display: flex; align-items: center; justify-content: center;
+        margin-bottom: 18px;
+      }
+      .sizes {
+        display: flex; align-items: center; gap: 26px;
+        padding-top: 4px;
+      }
+      .size-item { display: flex; flex-direction: column; align-items: center; gap: 7px; }
+      .size-item span { font-size: 10px; color: var(--muted); }
+      .size-box {
+        background: var(--bg); border: 1px solid var(--line); border-radius: 6px;
+        display: flex; align-items: center; justify-content: center;
+      }
+      .tab {
+        display: inline-flex; align-items: center; gap: 7px;
+        background: var(--overlay); border: 1px solid var(--line);
+        border-radius: 7px 7px 0 0; padding: 7px 12px 8px;
+        font-size: 12px; color: var(--muted);
+      }
+      .lockup-card { grid-column: 1 / -1; }
+      .lockup { display: flex; align-items: center; gap: 16px; }
+      .lockup .word {
+        font-size: 30px; font-weight: 600; letter-spacing: -0.02em; color: var(--text);
+        display: inline-flex; align-items: baseline;
+      }
+      .cursor {
+        display: inline-block; width: 13px; height: 26px; background: var(--violet);
+        border-radius: 2px; margin-left: 3px; transform: translateY(3px);
+      }
+      .note { color: var(--muted); font-size: 12px; margin-top: 10px; }
+      footer { max-width: 1100px; margin: 40px auto 0; color: var(--muted); font-size: 12.5px; line-height: 1.6; }
+      code { background: var(--overlay); padding: 1px 6px; border-radius: 5px; color: var(--text); font-size: 12px; }
+    </style>
+  </head>
+  <body>
+    <!-- ===== SVG sprite (the actual marks) ===== -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <!-- 1. Monogram K — stem = 3 queued blocks -->
+      <symbol id="mark-k" viewBox="0 0 96 96">
+        <g fill="#8b5cff">
+          <rect x="26" y="22" width="13" height="16" rx="2.5" />
+          <rect x="26" y="41" width="13" height="15" rx="2.5" />
+          <rect x="26" y="59" width="13" height="15" rx="2.5" />
+        </g>
+        <g stroke="#8b5cff" stroke-width="13" stroke-linecap="butt">
+          <line x1="33" y1="48" x2="66" y2="21" />
+          <line x1="33" y1="48" x2="66" y2="75" />
+        </g>
+      </symbol>
+
+      <!-- 1b. Monogram K — two-tone (queue violet, fork muted) -->
+      <symbol id="mark-k2" viewBox="0 0 96 96">
+        <g stroke="#4f4a5e" stroke-width="13" stroke-linecap="butt">
+          <line x1="33" y1="48" x2="66" y2="21" />
+          <line x1="33" y1="48" x2="66" y2="75" />
+        </g>
+        <g fill="#8b5cff">
+          <rect x="26" y="22" width="13" height="16" rx="2.5" />
+          <rect x="26" y="41" width="13" height="15" rx="2.5" />
+          <rect x="26" y="59" width="13" height="15" rx="2.5" />
+        </g>
+      </symbol>
+
+      <!-- 2. Queue → play (refined bars, active job lit) -->
+      <symbol id="mark-play" viewBox="0 0 96 96">
+        <rect x="26" y="20" width="12" height="8" rx="2" fill="#423e4e" />
+        <rect x="26" y="33" width="26" height="8" rx="2" fill="#423e4e" />
+        <rect x="26" y="46" width="40" height="8" rx="2" fill="#8b5cff" />
+        <rect x="26" y="59" width="26" height="8" rx="2" fill="#423e4e" />
+        <rect x="26" y="72" width="12" height="8" rx="2" fill="#423e4e" />
+      </symbol>
+
+      <!-- 3. Forward chevrons (fast-forward / next) -->
+      <symbol id="mark-fwd" viewBox="0 0 96 96">
+        <g fill="none" stroke-linejoin="round" stroke-linecap="round" stroke-width="11">
+          <polyline points="30,26 52,48 30,70" stroke="#4f4a5e" />
+          <polyline points="52,26 70,48 52,70" stroke="#8b5cff" />
+        </g>
+      </symbol>
+    </svg>
+
+    <header>
+      <h1>Kew — logo concepts</h1>
+      <p>
+        Desenhados em SVG nos tokens reais do Kew (violeta <span class="mono">#8b5cff</span>,
+        fundo <span class="mono">#16141c</span>). Compare em tamanho grande e em 32 / 16&nbsp;px
+        (favicon) — é no pequeno que o logo se prova. Nada de barras-equalizer aleatórias.
+      </p>
+    </header>
+
+    <main class="grid">
+      <!-- Concept 1 -->
+      <section class="card">
+        <div class="tag">Conceito 1 · recomendado</div>
+        <h2 class="name">Monograma K</h2>
+        <p class="desc">Lê como a inicial <b>K</b> e como uma <b>fila</b>: o tronco são 3 blocos empilhados (jobs enfileirados). Único, ownable, single-accent — régua Linear/Vercel.</p>
+        <div class="stage"><svg width="128" height="128"><use href="#mark-k" /></svg></div>
+        <div class="sizes">
+          <div class="size-item"><div class="size-box" style="width:32px;height:32px"><svg width="32" height="32"><use href="#mark-k" /></svg></div><span>32px</span></div>
+          <div class="size-item"><div class="size-box" style="width:16px;height:16px"><svg width="16" height="16"><use href="#mark-k" /></svg></div><span>16px</span></div>
+          <div class="size-item" style="align-items:flex-start">
+            <div class="tab"><svg width="14" height="14"><use href="#mark-k" /></svg> kew.sh</div>
+            <span>browser tab</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Concept 1b -->
+      <section class="card">
+        <div class="tag">Conceito 1b · variante</div>
+        <h2 class="name">Monograma K · two-tone</h2>
+        <p class="desc">Mesma forma, mas a <b>fila</b> (tronco) fica violeta e a bifurcação cinza — separa "o que está na fila" de "para onde escoa". Mais legível no 16px.</p>
+        <div class="stage"><svg width="128" height="128"><use href="#mark-k2" /></svg></div>
+        <div class="sizes">
+          <div class="size-item"><div class="size-box" style="width:32px;height:32px"><svg width="32" height="32"><use href="#mark-k2" /></svg></div><span>32px</span></div>
+          <div class="size-item"><div class="size-box" style="width:16px;height:16px"><svg width="16" height="16"><use href="#mark-k2" /></svg></div><span>16px</span></div>
+          <div class="size-item" style="align-items:flex-start">
+            <div class="tab"><svg width="14" height="14"><use href="#mark-k2" /></svg> kew.sh</div>
+            <span>browser tab</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Concept 2 -->
+      <section class="card">
+        <div class="tag">Conceito 2 · barras, mas com lógica</div>
+        <h2 class="name">Queue → Play</h2>
+        <p class="desc">A versão <i>intencional</i> do que você gerou: larguras formam um <b>play ▶</b> (processando), a barra ativa central acesa. Não é equalizer aleatório — tem direção.</p>
+        <div class="stage"><svg width="128" height="128"><use href="#mark-play" /></svg></div>
+        <div class="sizes">
+          <div class="size-item"><div class="size-box" style="width:32px;height:32px"><svg width="32" height="32"><use href="#mark-play" /></svg></div><span>32px</span></div>
+          <div class="size-item"><div class="size-box" style="width:16px;height:16px"><svg width="16" height="16"><use href="#mark-play" /></svg></div><span>16px</span></div>
+          <div class="size-item" style="align-items:flex-start">
+            <div class="tab"><svg width="14" height="14"><use href="#mark-play" /></svg> kew.sh</div>
+            <span>browser tab</span>
+          </div>
+        </div>
+        <p class="note">⚠︎ No 16px as barras finas borram — por isso o K vence pro favicon.</p>
+      </section>
+
+      <!-- Concept 3 -->
+      <section class="card">
+        <div class="tag">Conceito 3 · terminal-native</div>
+        <h2 class="name">Fast-forward »</h2>
+        <p class="desc">Dois chevrons = avançar / próximo job. O da frente violeta (em processamento). Cara de player/terminal, bem afiado e legível em qualquer tamanho.</p>
+        <div class="stage"><svg width="128" height="128"><use href="#mark-fwd" /></svg></div>
+        <div class="sizes">
+          <div class="size-item"><div class="size-box" style="width:32px;height:32px"><svg width="32" height="32"><use href="#mark-fwd" /></svg></div><span>32px</span></div>
+          <div class="size-item"><div class="size-box" style="width:16px;height:16px"><svg width="16" height="16"><use href="#mark-fwd" /></svg></div><span>16px</span></div>
+          <div class="size-item" style="align-items:flex-start">
+            <div class="tab"><svg width="14" height="14"><use href="#mark-fwd" /></svg> kew.sh</div>
+            <span>browser tab</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Lockup -->
+      <section class="card lockup-card">
+        <div class="tag">Lockup · uso real no topbar</div>
+        <h2 class="name">Marca + wordmark</h2>
+        <p class="desc">Como apareceria no header do dashboard: o mark + "kew" em mono com cursor de terminal piscando. Troque o ícone abaixo pelo conceito que você escolher.</p>
+        <div class="stage" style="gap:42px;height:150px">
+          <div class="lockup">
+            <svg width="48" height="48"><use href="#mark-k" /></svg>
+            <span class="word mono">kew<span class="cursor"></span></span>
+          </div>
+          <div class="lockup">
+            <svg width="48" height="48"><use href="#mark-fwd" /></svg>
+            <span class="word mono">kew<span class="cursor"></span></span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      Tokens: violeta <code>#8b5cff</code> · barra apagada <code>#423e4e</code> ·
+      fundo <code>#16141c</code>. Tudo é geometria pura (retângulos + 2 retas) → escala infinita,
+      cor exata, sem grão/bloom. Escolha um e eu gero o <code>public/favicon.svg</code> + ploto no <code>index.html</code>.
+    </footer>
+  </body>
+</html>

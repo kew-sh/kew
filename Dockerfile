@@ -5,6 +5,7 @@ COPY package.json bun.lock ./
 COPY apps/dashboard/package.json apps/dashboard/package.json
 COPY apps/server/package.json apps/server/package.json
 COPY packages/core/package.json packages/core/package.json
+COPY packages/dashboard-ui/package.json packages/dashboard-ui/package.json
 RUN bun install --frozen-lockfile
 
 COPY . .
