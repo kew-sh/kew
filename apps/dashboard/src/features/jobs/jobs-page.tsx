@@ -11,6 +11,7 @@ import {
   useJobs,
   useQueue,
   type BulkAction,
+  type Job,
   type JobState,
 } from "@queue-panel/core";
 import { StateDot } from "@/components/state-badge";
@@ -18,6 +19,7 @@ import { STATE_META } from "@/components/state-meta";
 import { cn, compact } from "@/lib/utils";
 import { JobTable } from "./job-table";
 import { BulkBar } from "./bulk-bar";
+import { JobDrawer } from "./job-drawer";
 
 const TIME_WINDOWS = [
   { id: "all", label: "Any time", ms: Number.POSITIVE_INFINITY },
@@ -39,6 +41,7 @@ export function JobsPage() {
   const [search, setSearch] = useState("");
   const [win, setWin] = useState<WindowId>("all");
   const [selection, setSelection] = useState<RowSelectionState>({});
+  const [openJob, setOpenJob] = useState<Job | null>(null);
 
   const { data: page } = useJobs({
     queue: queueName,
@@ -56,13 +59,36 @@ export function JobsPage() {
     return page.jobs.filter((j) => j.timestamp >= cutoff);
   }, [page, win]);
 
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: ["jobs", queueName] });
+    qc.invalidateQueries({ queryKey: ["queue", queueName] });
+    qc.invalidateQueries({ queryKey: ["queues"] });
+  };
+
   const bulk = useMutation({
     mutationFn: (action: BulkAction) =>
       api.bulkAction({ queue: queueName, ids: Object.keys(selection), action }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["jobs", queueName] });
-      qc.invalidateQueries({ queryKey: ["queue", queueName] });
+      invalidate();
       setSelection({});
+    },
+  });
+
+  const single = useMutation({
+    mutationFn: (v: { action: BulkAction; id: string }) =>
+      api.bulkAction({ queue: queueName, ids: [v.id], action: v.action }),
+    onSuccess: () => {
+      invalidate();
+      setOpenJob(null);
+    },
+  });
+
+  const editRetry = useMutation({
+    mutationFn: (v: { id: string; data: unknown }) =>
+      api.retryWithData({ queue: queueName, id: v.id, data: v.data }),
+    onSuccess: () => {
+      invalidate();
+      setOpenJob(null);
     },
   });
 
@@ -148,6 +174,7 @@ export function JobsPage() {
             jobs={jobs}
             selection={selection}
             onSelectionChange={setSelection}
+            onOpenJob={setOpenJob}
             readOnly={readOnly}
           />
         )}
@@ -164,6 +191,15 @@ export function JobsPage() {
         pending={bulk.isPending}
         onAction={(a) => bulk.mutate(a)}
         onClear={() => setSelection({})}
+      />
+
+      <JobDrawer
+        job={openJob}
+        readOnly={readOnly}
+        pending={single.isPending || editRetry.isPending}
+        onClose={() => setOpenJob(null)}
+        onAction={(action, id) => single.mutate({ action, id })}
+        onRetryWithData={(id, data) => editRetry.mutate({ id, data })}
       />
     </div>
   );

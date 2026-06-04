@@ -22,6 +22,8 @@ export interface QueueApi {
     ids: string[];
     action: BulkAction;
   }): Promise<{ affected: number }>;
+  /** Retry a single failed job after editing its payload (BullMQ: updateData + retry). */
+  retryWithData(input: { queue: string; id: string; data: unknown }): Promise<void>;
 }
 
 const latency = (min = 60, max = 220) =>
@@ -70,5 +72,10 @@ export const api: QueueApi = {
   async bulkAction({ queue, ids, action }) {
     await latency(80, 260);
     return { affected: mock.bulkAction(queue, ids, action) };
+  },
+
+  async retryWithData({ queue, id, data }) {
+    await latency(80, 220);
+    mock.retryWithData(queue, id, data);
   },
 };

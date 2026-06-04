@@ -216,6 +216,21 @@ export function bulkAction(
   return affected;
 }
 
+export function retryWithData(name: string, id: string, data: unknown): void {
+  const q = world.find((x) => x.name === name);
+  const j = q?.jobs.find((x) => x.id === id);
+  if (!q || !j) return;
+  if (j.state !== "waiting") {
+    q.counts[j.state] = Math.max(0, q.counts[j.state] - 1);
+    j.state = "waiting";
+    q.counts.waiting += 1;
+  }
+  j.data = data;
+  j.attemptsMade = 0;
+  delete j.failedReason;
+  delete j.stacktrace;
+}
+
 export function getQueues(): QueueSummary[] {
   return world.map((q) => {
     const completedWindow = q.throughput.reduce((a, b) => a + b, 0);

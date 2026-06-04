@@ -83,11 +83,13 @@ export function JobTable({
   jobs,
   selection,
   onSelectionChange,
+  onOpenJob,
   readOnly,
 }: {
   jobs: Job[];
   selection: RowSelectionState;
   onSelectionChange: OnChangeFn<RowSelectionState>;
+  onOpenJob: (job: Job) => void;
   readOnly: boolean;
 }) {
   const parentRef = useRef<HTMLDivElement>(null);
@@ -132,15 +134,17 @@ export function JobTable({
               <div
                 key={row.id}
                 data-selected={row.getIsSelected()}
+                onClick={() => onOpenJob(row.original)}
                 className={cn(
                   GRID,
-                  "absolute inset-x-0 border-b border-line/40 text-sm transition-colors hover:bg-surface data-[selected=true]:bg-accent/10",
+                  "absolute inset-x-0 cursor-pointer border-b border-line/40 text-sm transition-colors hover:bg-surface data-[selected=true]:bg-accent/10",
                 )}
                 style={{ height: vi.size, transform: `translateY(${vi.start}px)` }}
               >
                 {row.getVisibleCells().map((cell) => (
                   <div
                     key={cell.id}
+                    onClick={cell.column.id === "select" ? (e) => e.stopPropagation() : undefined}
                     className={cn("min-w-0", cell.column.id === "durationMs" && "text-right")}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
