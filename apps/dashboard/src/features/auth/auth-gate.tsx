@@ -13,7 +13,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   if (isError) {
     return (
       <div className="grid h-screen place-items-center bg-canvas px-6 text-center text-sm text-muted">
-        <div>
+        <div role="alert">
           <p className="text-ink">Can’t reach the Kew backend.</p>
           <p className="mt-1 text-xs">Is the server running? Check REDIS_URL and retry.</p>
         </div>

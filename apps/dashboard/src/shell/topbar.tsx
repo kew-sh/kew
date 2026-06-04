@@ -1,4 +1,5 @@
-import { LogOut, Menu, Search } from "lucide-react";
+import { Bug, LogOut, Menu, Search } from "lucide-react";
+import { useState } from "react";
 import { StateDot } from "@/components/state-badge";
 import { ThemeToggle } from "@/components/theme";
 import { Button } from "@/components/ui/button";
@@ -12,12 +13,12 @@ export function Topbar({ onMenu }: { onMenu: () => void }) {
     <header className="flex h-14 shrink-0 items-center gap-3 border-b border-line bg-surface/70 px-3 backdrop-blur">
       <Button
         variant="ghost"
-        size="icon-sm"
+        size="icon"
         className="md:hidden"
         onClick={onMenu}
         aria-label="Open navigation"
       >
-        <Menu className="size-4" />
+        <Menu className="size-5" />
       </Button>
 
       <button
@@ -37,6 +38,7 @@ export function Topbar({ onMenu }: { onMenu: () => void }) {
           <StateDot state="completed" pulse />
           Live
         </span>
+        {import.meta.env.DEV && <CrashButton />}
         <ThemeToggle />
         {canLogout && (
           <Button
@@ -52,5 +54,22 @@ export function Topbar({ onMenu }: { onMenu: () => void }) {
         )}
       </div>
     </header>
+  );
+}
+
+function CrashButton() {
+  const [crash, setCrash] = useState(false);
+  if (crash) throw new Error("Forced error from the header crash button (dev only).");
+  return (
+    <Button
+      variant="ghost"
+      size="icon-sm"
+      onClick={() => setCrash(true)}
+      aria-label="Force an error (dev only)"
+      title="Force an error (dev only)"
+      className="text-muted hover:bg-failed/12 hover:text-failed"
+    >
+      <Bug className="size-4" />
+    </Button>
   );
 }

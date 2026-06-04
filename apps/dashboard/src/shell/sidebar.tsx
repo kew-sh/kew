@@ -38,7 +38,7 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
           <Link
             to="/"
             className={cn(
-              "flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm",
+              "flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm max-md:py-3",
               pathname === "/"
                 ? "bg-overlay font-medium text-ink"
                 : "text-ink-2 hover:bg-overlay/60 hover:text-ink",
@@ -50,7 +50,7 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
           <Link
             to="/schedulers"
             className={cn(
-              "flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm",
+              "flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm max-md:py-3",
               pathname === "/schedulers"
                 ? "bg-overlay font-medium text-ink"
                 : "text-ink-2 hover:bg-overlay/60 hover:text-ink",
@@ -64,7 +64,7 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
           <Link
             to="/flows"
             className={cn(
-              "flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm",
+              "flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm max-md:py-3",
               pathname === "/flows"
                 ? "bg-overlay font-medium text-ink"
                 : "text-ink-2 hover:bg-overlay/60 hover:text-ink",
@@ -78,7 +78,7 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
           <Link
             to="/metrics"
             className={cn(
-              "flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm",
+              "flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm max-md:py-3",
               pathname === "/metrics"
                 ? "bg-overlay font-medium text-ink"
                 : "text-ink-2 hover:bg-overlay/60 hover:text-ink",
@@ -116,9 +116,7 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
             <span className="min-w-0 flex-1 truncate font-mono text-muted">
               {conn?.url ?? "connecting…"}
             </span>
-            {conn && (
-              <span className="font-mono text-[10px] text-muted/70">v{conn.redisVersion}</span>
-            )}
+            {conn && <span className="font-mono text-[10px] text-muted">v{conn.redisVersion}</span>}
           </div>
         </div>
       </aside>
@@ -142,7 +140,7 @@ function QueueLink({
       params={{ queueName: q.name }}
       onClick={onNavigate}
       className={cn(
-        "flex items-center gap-2 rounded-md px-2 py-1.5",
+        "flex items-center gap-2 rounded-md px-2 py-1.5 max-md:py-3",
         active ? "bg-overlay text-ink" : "text-ink-2 hover:bg-overlay/60 hover:text-ink",
       )}
     >

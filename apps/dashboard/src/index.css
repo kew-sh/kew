@@ -25,6 +25,11 @@
   --accent: oklch(0.66 0.21 305);
   --accent-hover: oklch(0.72 0.2 305);
   --accent-ink: oklch(0.98 0.01 305);
+  /* darker violet for filled surfaces carrying --accent-ink text (≥4.5:1 AA);
+     darkens on hover so contrast holds. The bright --accent stays for thin
+     elements (focus ring, active icons, chart lines) that only need 3:1. */
+  --accent-strong: oklch(0.55 0.21 305);
+  --accent-strong-hover: oklch(0.49 0.21 305);
 
   --failed: oklch(0.66 0.2 25);
   --completed: oklch(0.74 0.15 150);
@@ -50,6 +55,8 @@
   --accent: oklch(0.55 0.2 305);
   --accent-hover: oklch(0.49 0.2 305);
   --accent-ink: oklch(0.99 0.01 305);
+  --accent-strong: oklch(0.55 0.2 305);
+  --accent-strong-hover: oklch(0.49 0.2 305);
 
   --failed: oklch(0.55 0.2 25);
   --completed: oklch(0.55 0.14 150);
@@ -110,6 +117,8 @@
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
   --color-accent-ink: var(--accent-ink);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-strong-hover: var(--accent-strong-hover);
 
   --color-failed: var(--failed);
   --color-completed: var(--completed);

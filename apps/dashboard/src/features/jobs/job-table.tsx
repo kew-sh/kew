@@ -12,7 +12,10 @@ import { useRef } from "react";
 import { StateBadge } from "@/components/state-badge";
 import { cn, duration, relativeTime } from "@/lib/utils";
 
-const GRID = "grid grid-cols-[34px_minmax(0,1fr)_132px_72px_64px_84px] items-center gap-3 px-3";
+const GRID =
+  "grid grid-cols-[34px_minmax(0,1fr)_auto_64px] items-center gap-3 px-3 md:grid-cols-[34px_minmax(0,1fr)_132px_72px_64px_84px]";
+
+const HIDE_SM = "hidden md:block";
 
 const helper = createColumnHelper<Job>();
 
@@ -120,7 +123,13 @@ export function JobTable({
         )}
       >
         {table.getHeaderGroups()[0].headers.map((h) => (
-          <div key={h.id} className={cn(h.column.id === "durationMs" && "text-right")}>
+          <div
+            key={h.id}
+            className={cn(
+              (h.column.id === "attemptsMade" || h.column.id === "durationMs") && HIDE_SM,
+              h.column.id === "durationMs" && "text-right",
+            )}
+          >
             {flexRender(h.column.columnDef.header, h.getContext())}
           </div>
         ))}
@@ -131,10 +140,20 @@ export function JobTable({
           {virtualizer.getVirtualItems().map((vi) => {
             const row = rows[vi.index];
             return (
+              // biome-ignore lint/a11y/useSemanticElements: row wraps a checkbox input, which a <button> can't legally contain
               <div
                 key={row.id}
+                role="button"
+                tabIndex={0}
+                aria-label={`Open job ${row.original.name} #${row.original.id}`}
                 data-selected={row.getIsSelected()}
                 onClick={() => onOpenJob(row.original)}
+                onKeyDown={(e) => {
+                  if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) {
+                    e.preventDefault();
+                    onOpenJob(row.original);
+                  }
+                }}
                 className={cn(
                   GRID,
                   "absolute inset-x-0 cursor-pointer border-b border-line/40 text-sm transition-colors hover:bg-surface data-[selected=true]:bg-accent/10",
@@ -145,7 +164,12 @@ export function JobTable({
                   <div
                     key={cell.id}
                     onClick={cell.column.id === "select" ? (e) => e.stopPropagation() : undefined}
-                    className={cn("min-w-0", cell.column.id === "durationMs" && "text-right")}
+                    className={cn(
+                      "min-w-0",
+                      (cell.column.id === "attemptsMade" || cell.column.id === "durationMs") &&
+                        HIDE_SM,
+                      cell.column.id === "durationMs" && "text-right",
+                    )}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </div>

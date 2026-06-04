@@ -4,6 +4,7 @@ import cronstrue from "cronstrue";
 import { CalendarClock, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { JsonView } from "@/components/json-view";
+import { toast } from "@/components/toast";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -183,7 +184,14 @@ export function SchedulerDrawer({
                     <AlertDialogAction
                       variant="danger"
                       disabled={remove.isPending}
-                      onClick={() => remove.mutate(s.id, { onSuccess: onClose })}
+                      onClick={() =>
+                        remove.mutate(s.id, {
+                          onSuccess: () => {
+                            toast.success("Scheduler removed");
+                            onClose();
+                          },
+                        })
+                      }
                     >
                       Remove
                     </AlertDialogAction>

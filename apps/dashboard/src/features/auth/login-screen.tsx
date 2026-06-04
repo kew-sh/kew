@@ -73,7 +73,9 @@ export function LoginScreen() {
             {login.isPending ? "Signing in…" : "Sign in"}
           </Button>
           {login.isError && (
-            <p className="text-center text-xs text-failed">{loginError(login.error)}</p>
+            <p role="alert" className="text-center text-xs text-failed">
+              {loginError(login.error)}
+            </p>
           )}
         </form>
       </div>

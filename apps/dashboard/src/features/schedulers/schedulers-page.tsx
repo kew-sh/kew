@@ -2,6 +2,8 @@ import type { Scheduler } from "@kew/core";
 import cronstrue from "cronstrue";
 import { CalendarClock, ChevronRight, Plus, Trash2, X } from "lucide-react";
 import { useMemo, useState } from "react";
+import { Skeleton } from "@/components/skeleton";
+import { toast } from "@/components/toast";
 import { Button } from "@/components/ui/button";
 import { useQueues } from "@/lib/use-queues";
 import { cn } from "@/lib/utils";
@@ -58,13 +60,20 @@ export function SchedulersPage() {
       )}
 
       <div className="mt-6 space-y-6">
-        {queues?.map((q) => (
-          <QueueSchedulers
-            key={q.name}
-            queue={q.name}
-            onOpen={(scheduler) => setOpen({ queue: q.name, scheduler })}
-          />
-        ))}
+        {!queues
+          ? ["a", "b"].map((k) => (
+              <div key={k}>
+                <Skeleton className="mb-2 h-3.5 w-28" />
+                <Skeleton className="h-24 w-full rounded-lg" />
+              </div>
+            ))
+          : queues.map((q) => (
+              <QueueSchedulers
+                key={q.name}
+                queue={q.name}
+                onOpen={(scheduler) => setOpen({ queue: q.name, scheduler })}
+              />
+            ))}
       </div>
 
       <SchedulerDrawer
@@ -93,9 +102,19 @@ function QueueSchedulers({
       <h2 className="mb-2 font-mono text-sm text-muted">{queue}</h2>
       <div className="overflow-hidden rounded-lg border border-line">
         {schedulers.map((s) => (
+          // biome-ignore lint/a11y/useSemanticElements: row wraps a remove button, which a <button> can't legally contain
           <div
             key={s.id}
+            role="button"
+            tabIndex={0}
+            aria-label={`Open scheduler ${s.name}`}
             onClick={() => onOpen(s)}
+            onKeyDown={(e) => {
+              if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) {
+                e.preventDefault();
+                onOpen(s);
+              }
+            }}
             className="group flex cursor-pointer items-center gap-3 border-b border-line/50 px-3 py-2.5 last:border-0 hover:bg-surface"
           >
             <CalendarClock className="size-4 shrink-0 text-children" />
@@ -106,7 +125,7 @@ function QueueSchedulers({
               </div>
               <div className="mt-0.5 text-xs text-muted">
                 {humanSchedule(s)}
-                {s.pattern && <span className="ml-2 font-mono text-muted/70">{s.pattern}</span>}
+                {s.pattern && <span className="ml-2 font-mono text-muted">{s.pattern}</span>}
                 {s.tz && <span className="ml-2">· {s.tz}</span>}
               </div>
             </div>
@@ -120,7 +139,7 @@ function QueueSchedulers({
               disabled={remove.isPending}
               onClick={(e) => {
                 e.stopPropagation();
-                remove.mutate(s.id);
+                remove.mutate(s.id, { onSuccess: () => toast.success("Scheduler removed") });
               }}
               aria-label={`Remove scheduler ${s.id}`}
             >
@@ -194,7 +213,12 @@ function CreateForm({ queues, onDone }: { queues: string[]; onDone: () => void }
           onClick={() =>
             create.mutate(
               { queue, id: id.trim() || name.trim(), name: name.trim(), pattern, tz },
-              { onSuccess: onDone },
+              {
+                onSuccess: () => {
+                  toast.success("Schedule created");
+                  onDone();
+                },
+              },
             )
           }
         >

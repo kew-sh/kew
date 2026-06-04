@@ -6,11 +6,13 @@ export function MetricChart({
   failures,
   className,
   height = 72,
+  label,
 }: {
   data: number[];
   failures?: number[];
   className?: string;
   height?: number;
+  label?: string;
 }) {
   const W = 600;
   const H = height;
@@ -23,13 +25,18 @@ export function MetricChart({
     arr.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
   const area = `0,${H} ${line(data)} ${W},${H}`;
 
+  const total = data.reduce((a, b) => a + b, 0);
+  const failTotal = failures?.reduce((a, b) => a + b, 0) ?? 0;
+  const summary = `${label ? `${label}: ` : ""}${total} completed, ${failTotal} failed over the window`;
+
   return (
     <svg
       viewBox={`0 0 ${W} ${H}`}
       style={{ height: H }}
       preserveAspectRatio="none"
       className={cn("w-full text-accent", className)}
-      aria-hidden
+      role="img"
+      aria-label={summary}
     >
       <polygon points={area} fill="currentColor" opacity={0.1} />
       <polyline

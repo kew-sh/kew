@@ -1,5 +1,6 @@
 import type { FlowNode } from "@kew/core";
 import { GitFork, Workflow } from "lucide-react";
+import { Skeleton } from "@/components/skeleton";
 import { StateBadge, StateDot } from "@/components/state-badge";
 import { useFlows } from "./use-flows";
 
@@ -14,6 +15,16 @@ export function FlowsPage() {
       </header>
 
       <div className="mt-6 space-y-4">
+        {!flows &&
+          ["a", "b"].map((k) => (
+            <div key={k} className="rounded-lg border border-line bg-surface p-3">
+              <Skeleton className="mb-2 h-3 w-24" />
+              <div className="space-y-2">
+                <Skeleton className="h-7 w-full" />
+                <Skeleton className="ml-4 h-7 w-3/4" />
+              </div>
+            </div>
+          ))}
         {flows?.length === 0 && <EmptyFlows />}
         {flows?.map((root) => (
           <section key={root.id} className="rounded-lg border border-line bg-surface p-3">
@@ -52,7 +63,7 @@ function NodeRow({ node }: { node: FlowNode }) {
       <span className="text-sm font-medium">{node.name}</span>
       <span className="font-mono text-xs text-muted">#{node.id}</span>
       {isParent && (
-        <span className="text-[11px] text-muted/70">
+        <span className="text-[11px] text-muted">
           {node.children.length} {node.children.length === 1 ? "child" : "children"}
         </span>
       )}

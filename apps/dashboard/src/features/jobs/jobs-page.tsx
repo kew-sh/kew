@@ -1,10 +1,12 @@
-import { JOB_STATES, type Job, type JobState, queueHealth } from "@kew/core";
+import { type BulkAction, JOB_STATES, type Job, type JobState, queueHealth } from "@kew/core";
 import { Link, useParams } from "@tanstack/react-router";
 import type { RowSelectionState } from "@tanstack/react-table";
 import { ArrowLeft, CheckCircle2, Pause, Play, SlidersHorizontal } from "lucide-react";
 import { useMemo, useState } from "react";
+import { Skeleton } from "@/components/skeleton";
 import { StateDot } from "@/components/state-badge";
 import { STATE_META } from "@/components/state-meta";
+import { toast } from "@/components/toast";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -29,6 +31,12 @@ const TIME_WINDOWS = [
 ] as const;
 
 type WindowId = (typeof TIME_WINDOWS)[number]["id"];
+
+const ACTION_PAST: Record<BulkAction, string> = {
+  retry: "re-queued",
+  promote: "promoted",
+  remove: "removed",
+};
 
 export function JobsPage() {
   const { queueName } = useParams({ from: "/queues/$queueName" });
@@ -127,7 +135,7 @@ export function JobsPage() {
             >
               <StateDot state={s} />
               {STATE_META[s].label}
-              <span className={cn("text-xs tnum", active ? "text-ink-2" : "text-muted/60")}>
+              <span className={cn("text-xs tnum", active ? "text-ink-2" : "text-muted")}>
                 {compact(queue?.counts[s] ?? 0)}
               </span>
             </button>
@@ -140,6 +148,7 @@ export function JobsPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search id, name, payload…"
+          aria-label="Search jobs by id, name, or payload"
           className="h-8 w-full max-w-xs rounded-md border border-line bg-surface px-2.5 text-sm outline-none transition-colors placeholder:text-muted focus:border-line-strong"
         />
         <Select value={win} onValueChange={(v) => setWin(v as WindowId)}>
@@ -159,7 +168,9 @@ export function JobsPage() {
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col px-4 pb-4 md:px-8">
-        {page && jobs.length === 0 ? (
+        {!page ? (
+          <JobTableSkeleton />
+        ) : jobs.length === 0 ? (
           <EmptyJobs state={state} filtered={Boolean(search) || win !== "all"} />
         ) : (
           <JobTable
@@ -181,12 +192,18 @@ export function JobsPage() {
       <BulkBar
         count={Object.keys(selection).length}
         pending={bulk.isPending}
-        onAction={(action) =>
+        onAction={(action) => {
+          const n = Object.keys(selection).length;
           bulk.mutate(
             { ids: Object.keys(selection), action },
-            { onSuccess: () => setSelection({}) },
-          )
-        }
+            {
+              onSuccess: () => {
+                toast.success(`${n} ${n === 1 ? "job" : "jobs"} ${ACTION_PAST[action]}`);
+                setSelection({});
+              },
+            },
+          );
+        }}
         onClear={() => setSelection({})}
       />
 
@@ -196,12 +213,51 @@ export function JobsPage() {
         pending={jobAction.isPending || retryWithData.isPending}
         onClose={() => setOpenJob(null)}
         onAction={(action, id) =>
-          jobAction.mutate({ id, action }, { onSuccess: () => setOpenJob(null) })
+          jobAction.mutate(
+            { id, action },
+            {
+              onSuccess: () => {
+                toast.success(`Job ${ACTION_PAST[action]}`);
+                setOpenJob(null);
+              },
+            },
+          )
         }
         onRetryWithData={(id, data) =>
-          retryWithData.mutate({ id, data }, { onSuccess: () => setOpenJob(null) })
+          retryWithData.mutate(
+            { id, data },
+            {
+              onSuccess: () => {
+                toast.success("Job re-queued with the edited payload");
+                setOpenJob(null);
+              },
+            },
+          )
         }
       />
+    </div>
+  );
+}
+
+function JobTableSkeleton() {
+  return (
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-line">
+      <div className="h-9 shrink-0 border-b border-line bg-surface" />
+      <div className="min-h-0 flex-1">
+        {["a", "b", "c", "d", "e", "f", "g", "h"].map((k) => (
+          <div
+            key={k}
+            className="grid h-13 grid-cols-[34px_minmax(0,1fr)_auto_64px] items-center gap-3 border-b border-line/40 px-3 md:grid-cols-[34px_minmax(0,1fr)_132px_72px_64px_84px]"
+          >
+            <Skeleton className="size-3.5" />
+            <Skeleton className="h-3.5 w-40 max-w-full" />
+            <Skeleton className="h-5 w-20 rounded-md" />
+            <Skeleton className="hidden h-3.5 w-8 md:block" />
+            <Skeleton className="h-3.5 w-10" />
+            <Skeleton className="hidden h-3.5 w-12 justify-self-end md:block" />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

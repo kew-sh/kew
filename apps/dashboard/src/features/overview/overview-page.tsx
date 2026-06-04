@@ -36,7 +36,7 @@ export function OverviewPage() {
           <h1 className="text-xl font-semibold tracking-tight">Queues</h1>
           <p className="mt-0.5 text-sm text-muted">
             {disconnected ? "Disconnected" : queues ? `${queues.length} queues` : "Connecting…"}
-            {!disconnected && <span className="text-muted/60"> · updating live</span>}
+            {!disconnected && <span className="text-muted"> · updating live</span>}
           </p>
         </div>
         <Select value={sort} onValueChange={(v) => setSort(v as Sort)}>
