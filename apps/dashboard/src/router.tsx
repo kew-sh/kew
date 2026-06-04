@@ -1,3 +1,4 @@
+import { lazy } from "react";
 import {
   createRootRoute,
   createRoute,
@@ -6,10 +7,23 @@ import {
 } from "@tanstack/react-router";
 import { AppShell } from "@/shell/app-shell";
 import { OverviewPage } from "@/features/overview/overview-page";
-import { JobsPage } from "@/features/jobs/jobs-page";
-import { SchedulersPage } from "@/features/schedulers/schedulers-page";
-import { FlowsPage } from "@/features/flows/flows-page";
-import { MetricsPage } from "@/features/metrics/metrics-page";
+
+// Overview is the landing route, kept eager. The rest are code-split so the
+// initial bundle stays lean (TanStack Table, cronstrue, cron-parser, etc. load
+// only when their route is visited). `defaultPreload: "intent"` prefetches the
+// chunk on hover.
+const JobsPage = lazy(() =>
+  import("@/features/jobs/jobs-page").then((m) => ({ default: m.JobsPage })),
+);
+const SchedulersPage = lazy(() =>
+  import("@/features/schedulers/schedulers-page").then((m) => ({ default: m.SchedulersPage })),
+);
+const FlowsPage = lazy(() =>
+  import("@/features/flows/flows-page").then((m) => ({ default: m.FlowsPage })),
+);
+const MetricsPage = lazy(() =>
+  import("@/features/metrics/metrics-page").then((m) => ({ default: m.MetricsPage })),
+);
 
 const rootRoute = createRootRoute({
   component: () => (

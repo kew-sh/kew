@@ -32,7 +32,7 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
           open ? "max-md:translate-x-0" : "max-md:-translate-x-full",
         )}
       >
-        {/* brand mark (placeholder until we name the product) */}
+        {/* brand mark — Layers glyph is a placeholder for the real Kew logo */}
         <div className="flex h-14 items-center gap-2.5 px-4">
           <span className="grid size-7 place-items-center rounded-md bg-accent text-accent-ink">
             <Layers className="size-4" strokeWidth={2.5} />
@@ -124,19 +124,6 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
         </div>
       </aside>
     </>
-  );
-}
-
-function NavSoon({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) {
-  return (
-    <div
-      className="flex cursor-default items-center gap-2.5 rounded-md px-2 py-1.5 text-sm text-muted/70"
-      title="Coming soon"
-    >
-      <span className="text-muted/50">{icon}</span>
-      <span className="flex-1">{children}</span>
-      <span className="rounded bg-overlay px-1 py-0.5 font-mono text-[10px] text-muted/60">soon</span>
-    </div>
   );
 }
 

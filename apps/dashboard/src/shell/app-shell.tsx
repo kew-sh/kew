@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { Sidebar } from "./sidebar";
 import { Topbar } from "./topbar";
 import { CommandMenu } from "@/components/command-menu";
@@ -10,7 +10,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <Sidebar open={mobileNav} onClose={() => setMobileNav(false)} />
       <div className="flex min-w-0 flex-1 flex-col">
         <Topbar onMenu={() => setMobileNav(true)} />
-        <main className="min-h-0 flex-1 overflow-y-auto">{children}</main>
+        <main className="min-h-0 flex-1 overflow-y-auto">
+          <Suspense fallback={<div className="p-8 text-sm text-muted">Loading…</div>}>
+            {children}
+          </Suspense>
+        </main>
       </div>
       <CommandMenu />
     </div>

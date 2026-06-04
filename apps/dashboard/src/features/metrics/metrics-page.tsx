@@ -16,7 +16,7 @@ export function MetricsPage() {
   }, [queues]);
 
   return (
-    <div className="mx-auto max-w-[1080px] px-4 py-6 md:px-8 md:py-8">
+    <div className="mx-auto max-w-270 px-4 py-6 md:px-8 md:py-8">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-xl font-semibold tracking-tight">Metrics</h1>

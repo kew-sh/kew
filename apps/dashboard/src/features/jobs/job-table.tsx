@@ -182,7 +182,7 @@ function Check({
         if (el) el.indeterminate = !!indeterminate && !checked;
       }}
       onChange={onChange}
-      className="size-3.5 cursor-pointer rounded border-line-strong accent-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40"
+      className="size-3.5 cursor-pointer rounded border-line-strong accent-accent disabled:cursor-not-allowed disabled:opacity-40"
     />
   );
 }
