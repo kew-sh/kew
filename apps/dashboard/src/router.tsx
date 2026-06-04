@@ -7,6 +7,7 @@ import {
 import { AppShell } from "@/shell/app-shell";
 import { OverviewPage } from "@/features/overview/overview-page";
 import { JobsPage } from "@/features/jobs/jobs-page";
+import { SchedulersPage } from "@/features/schedulers/schedulers-page";
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -28,7 +29,13 @@ const queueRoute = createRoute({
   component: JobsPage,
 });
 
-const routeTree = rootRoute.addChildren([indexRoute, queueRoute]);
+const schedulersRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/schedulers",
+  component: SchedulersPage,
+});
+
+const routeTree = rootRoute.addChildren([indexRoute, queueRoute, schedulersRoute]);
 
 export const router = createRouter({
   routeTree,

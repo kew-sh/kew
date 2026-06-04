@@ -54,7 +54,20 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
             <ListChecks className={cn("size-4", pathname === "/" ? "text-accent" : "text-muted")} />
             Overview
           </Link>
-          <NavSoon icon={<CalendarClock className="size-4" />}>Schedulers</NavSoon>
+          <Link
+            to="/schedulers"
+            className={cn(
+              "flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm",
+              pathname === "/schedulers"
+                ? "bg-overlay font-medium text-ink"
+                : "text-ink-2 hover:bg-overlay/60 hover:text-ink",
+            )}
+          >
+            <CalendarClock
+              className={cn("size-4", pathname === "/schedulers" ? "text-accent" : "text-muted")}
+            />
+            Schedulers
+          </Link>
           <NavSoon icon={<GitFork className="size-4" />}>Flows</NavSoon>
           <NavSoon icon={<BarChart3 className="size-4" />}>Metrics</NavSoon>
         </nav>
