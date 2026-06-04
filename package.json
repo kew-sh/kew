@@ -12,7 +12,8 @@
     "server": "bun --filter '@kew/server' start",
     "seed": "bun --filter '@kew/server' seed",
     "build": "bun --filter '@kew/dashboard' build",
-    "typecheck": "bun --filter '@kew/dashboard' typecheck",
+    "typecheck": "bun --filter '*' typecheck",
+    "test": "bun test",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write ."
