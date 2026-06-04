@@ -1,6 +1,7 @@
-import { backlog, type QueueSummary, useQueues } from "@kew/core";
+import { backlog, type QueueSummary } from "@kew/core";
 import { Inbox } from "lucide-react";
 import { useMemo, useState } from "react";
+import { useQueues } from "@/lib/use-queues";
 import { cn } from "@/lib/utils";
 import { QueueRow } from "./queue-row";
 
@@ -66,7 +67,6 @@ export function OverviewPage() {
   );
 }
 
-/** Rank failing/backed-up queues to the top under the default "health" sort. */
 function severity(q: QueueSummary) {
   return q.counts.failed * 2 + q.failRate * 600 + backlog(q) * 0.02;
 }

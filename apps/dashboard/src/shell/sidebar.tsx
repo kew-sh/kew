@@ -1,7 +1,9 @@
-import { type QueueSummary, queueHealth, useConnection, useQueues } from "@kew/core";
+import { type QueueSummary, queueHealth } from "@kew/core";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { BarChart3, CalendarClock, GitFork, Layers, ListChecks } from "lucide-react";
 import { StateDot } from "@/components/state-badge";
+import { useConnection } from "@/lib/use-connection";
+import { useQueues } from "@/lib/use-queues";
 import { cn, compact } from "@/lib/utils";
 
 export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {

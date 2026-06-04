@@ -1,5 +1,15 @@
-import type { Job, JobCounts, JobPage, JobState, QueueSummary } from "@kew/core/types";
-import { Queue } from "bullmq";
+import type {
+  BulkAction,
+  FlowNode,
+  Job,
+  JobCounts,
+  JobPage,
+  JobState,
+  QueueSummary,
+  Scheduler,
+  SchedulerInput,
+} from "@kew/core/types";
+import { FlowProducer, type JobNode, Queue } from "bullmq";
 import type { Redis } from "ioredis";
 import { BULLMQ_PREFIX } from "./redis";
 import { getWindow } from "./sampler";
@@ -17,7 +27,6 @@ export const STATES: JobState[] = [
 
 const SEARCH_SCAN_LIMIT = 500;
 
-/** Cache Queue instances; they're cheap getters sharing one connection. */
 const cache = new Map<string, Queue>();
 export function getQueue(name: string, connection: Redis): Queue {
   let q = cache.get(name);
@@ -28,7 +37,6 @@ export function getQueue(name: string, connection: Redis): Queue {
   return q;
 }
 
-/** BullMQ has no "list queues"; discover by scanning for `<prefix>:<name>:meta`. */
 export async function discoverQueues(redis: Redis): Promise<string[]> {
   const names = new Set<string>();
   const re = new RegExp(`^${BULLMQ_PREFIX}:(.+):meta$`);
@@ -90,7 +98,6 @@ export async function getJobsPage(
   const start = page * pageSize;
 
   if (search) {
-    // Redis can't index job data; do a bounded scan and filter. Honest: exact=false.
     const scanned = await q.getJobs([state], 0, SEARCH_SCAN_LIMIT - 1, false);
     const term = search.toLowerCase();
     const matched = scanned.filter((j) =>
@@ -110,4 +117,143 @@ export async function getJobsPage(
     total: (counts as Record<string, number>)[state] ?? raw.length,
     exact: true,
   };
+}
+
+async function applyOne(q: Queue, id: string, action: BulkAction): Promise<boolean> {
+  const job = await q.getJob(id);
+  if (!job) return false;
+  try {
+    if (action === "retry") await job.retry();
+    else if (action === "promote") await job.promote();
+    else await job.remove();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function applyBulk(
+  name: string,
+  ids: string[],
+  action: BulkAction,
+  redis: Redis,
+): Promise<{ affected: number }> {
+  const q = getQueue(name, redis);
+  let affected = 0;
+  for (const id of ids) {
+    if (await applyOne(q, id, action)) affected++;
+  }
+  return { affected };
+}
+
+export async function retryWithData(
+  name: string,
+  id: string,
+  data: unknown,
+  redis: Redis,
+): Promise<void> {
+  const job = await getQueue(name, redis).getJob(id);
+  if (!job) throw new Error(`job ${id} not found in ${name}`);
+  await job.updateData(data as never);
+  await job.retry();
+}
+
+export async function setQueuePaused(name: string, paused: boolean, redis: Redis): Promise<void> {
+  const q = getQueue(name, redis);
+  if (paused) await q.pause();
+  else await q.resume();
+}
+
+export async function listSchedulers(name: string, redis: Redis): Promise<Scheduler[]> {
+  const raw = await getQueue(name, redis).getJobSchedulers(0, -1, true);
+  return raw.map((s) => ({
+    id: s.key,
+    name: s.name,
+    pattern: s.pattern ?? undefined,
+    every: s.every ?? undefined,
+    tz: s.tz ?? undefined,
+    next: s.next ?? undefined,
+    data: s.template?.data,
+  }));
+}
+
+export async function upsertScheduler(input: SchedulerInput, redis: Redis): Promise<void> {
+  const repeat = input.pattern
+    ? { pattern: input.pattern, tz: input.tz }
+    : { every: input.every ?? 0 };
+  await getQueue(input.queue, redis).upsertJobScheduler(input.id, repeat, {
+    name: input.name,
+    data: input.data,
+  });
+}
+
+export async function removeScheduler(name: string, id: string, redis: Redis): Promise<void> {
+  await getQueue(name, redis).removeJobScheduler(id);
+}
+
+const FLOW_PARENT_SCAN = 25;
+
+async function safeGetFlow(
+  flow: FlowProducer,
+  id: string,
+  queueName: string,
+): Promise<JobNode | null> {
+  try {
+    return await flow.getFlow({
+      id,
+      queueName,
+      prefix: BULLMQ_PREFIX,
+      depth: 4,
+      maxChildren: 50,
+    });
+  } catch {
+    return null;
+  }
+}
+
+async function toFlowNode(node: JobNode): Promise<FlowNode> {
+  const { job, children } = node;
+  const state = await job.getState();
+  return {
+    id: String(job.id),
+    name: job.name,
+    queue: job.queueName,
+    state: state === "unknown" ? "waiting" : state,
+    children: children ? await Promise.all(children.map(toFlowNode)) : [],
+  };
+}
+
+export async function listFlows(redis: Redis): Promise<FlowNode[]> {
+  const names = await discoverQueues(redis);
+  const flow = new FlowProducer({ connection: redis, prefix: BULLMQ_PREFIX });
+  const roots: FlowNode[] = [];
+
+  for (const name of names) {
+    let parents: import("bullmq").Job[] = [];
+    try {
+      parents = await getQueue(name, redis).getJobs(
+        ["waiting-children"],
+        0,
+        FLOW_PARENT_SCAN - 1,
+        false,
+      );
+    } catch {
+      continue;
+    }
+    for (const p of parents) {
+      if (!p?.id) continue;
+      const node = await safeGetFlow(flow, String(p.id), name);
+      if (node) roots.push(await toFlowNode(node));
+    }
+  }
+
+  const childIds = new Set<string>();
+  const walk = (n: FlowNode) => {
+    for (const c of n.children) {
+      childIds.add(c.id);
+      walk(c);
+    }
+  };
+  for (const r of roots) walk(r);
+  return roots.filter((r) => !childIds.has(r.id));
 }

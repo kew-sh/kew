@@ -26,7 +26,6 @@ export function JobDrawer({
   const [error, setError] = useState<string | null>(null);
   const [confirmRemove, setConfirmRemove] = useState(false);
 
-  // reset local state whenever a different job opens
   useEffect(() => {
     if (!job) return;
     setEditing(false);

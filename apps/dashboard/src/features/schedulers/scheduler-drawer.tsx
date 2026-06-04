@@ -1,11 +1,11 @@
-import { api, type Scheduler } from "@kew/core";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { Scheduler } from "@kew/core";
 import { CronExpressionParser } from "cron-parser";
 import cronstrue from "cronstrue";
 import { CalendarClock, Trash2, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { JsonView } from "@/components/json-view";
 import { Button } from "@/components/ui/button";
+import { useRemoveScheduler } from "./use-schedulers";
 
 function human(s: Scheduler): string {
   if (s.pattern) {
@@ -54,8 +54,8 @@ export function SchedulerDrawer({
   scheduler: Scheduler | null;
   onClose: () => void;
 }) {
-  const qc = useQueryClient();
   const [confirm, setConfirm] = useState(false);
+  const remove = useRemoveScheduler(queue);
 
   useEffect(() => {
     if (scheduler) setConfirm(false);
@@ -69,14 +69,6 @@ export function SchedulerDrawer({
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [scheduler, onClose]);
-
-  const remove = useMutation({
-    mutationFn: () => api.removeScheduler({ queue, id: scheduler!.id }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["schedulers", queue] });
-      onClose();
-    },
-  });
 
   const runs = useMemo(() => (scheduler ? nextRuns(scheduler) : []), [scheduler]);
 
@@ -175,7 +167,7 @@ export function SchedulerDrawer({
                 variant="danger"
                 className="ml-auto"
                 disabled={remove.isPending}
-                onClick={() => remove.mutate()}
+                onClick={() => remove.mutate(scheduler.id, { onSuccess: onClose })}
               >
                 Confirm remove
               </Button>

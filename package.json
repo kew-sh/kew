@@ -9,6 +9,8 @@
   ],
   "scripts": {
     "dev": "bun --filter '@kew/dashboard' dev",
+    "server": "bun --filter '@kew/server' start",
+    "seed": "bun --filter '@kew/server' seed",
     "build": "bun --filter '@kew/dashboard' build",
     "typecheck": "bun --filter '@kew/dashboard' typecheck",
     "lint": "biome check .",

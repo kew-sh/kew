@@ -5,7 +5,8 @@ import { Sparkline } from "@/components/sparkline";
 import { StateDot } from "@/components/state-badge";
 import { cn, compact } from "@/lib/utils";
 
-const STRIP: JobState[] = ["active", "waiting", "delayed", "failed", "completed"];
+const CORE: JobState[] = ["active", "waiting", "delayed", "failed", "completed"];
+const EXTRA: JobState[] = ["prioritized", "waiting-children", "paused"];
 
 export function QueueRow({ q }: { q: QueueSummary }) {
   const health = queueHealth(q);
@@ -27,7 +28,10 @@ export function QueueRow({ q }: { q: QueueSummary }) {
       </div>
 
       <div className="hidden items-center gap-4 md:flex">
-        {STRIP.map((s) => (
+        {CORE.map((s) => (
+          <Count key={s} state={s} n={q.counts[s]} />
+        ))}
+        {EXTRA.filter((s) => q.counts[s] > 0).map((s) => (
           <Count key={s} state={s} n={q.counts[s]} />
         ))}
       </div>

@@ -1,6 +1,6 @@
-import { useQueues } from "@kew/core";
 import { useMemo } from "react";
 import { MetricChart } from "@/components/metric-chart";
+import { useQueues } from "@/lib/use-queues";
 import { cn, compact } from "@/lib/utils";
 
 export function MetricsPage() {

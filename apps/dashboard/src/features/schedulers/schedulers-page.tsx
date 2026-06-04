@@ -1,11 +1,12 @@
-import { api, type Scheduler, useQueues, useSchedulers } from "@kew/core";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { Scheduler } from "@kew/core";
 import cronstrue from "cronstrue";
 import { CalendarClock, ChevronRight, Plus, Trash2, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useQueues } from "@/lib/use-queues";
 import { cn } from "@/lib/utils";
 import { SchedulerDrawer } from "./scheduler-drawer";
+import { useRemoveScheduler, useSchedulers, useUpsertScheduler } from "./use-schedulers";
 
 function humanSchedule(s: Scheduler): string {
   if (s.pattern) {
@@ -82,12 +83,8 @@ function QueueSchedulers({
   queue: string;
   onOpen: (scheduler: Scheduler) => void;
 }) {
-  const qc = useQueryClient();
   const { data: schedulers } = useSchedulers(queue);
-  const remove = useMutation({
-    mutationFn: (id: string) => api.removeScheduler({ queue, id }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["schedulers", queue] }),
-  });
+  const remove = useRemoveScheduler(queue);
 
   if (!schedulers || schedulers.length === 0) return null;
 
@@ -138,7 +135,6 @@ function QueueSchedulers({
 }
 
 function CreateForm({ queues, onDone }: { queues: string[]; onDone: () => void }) {
-  const qc = useQueryClient();
   const [queue, setQueue] = useState(queues[0] ?? "");
   const [id, setId] = useState("");
   const [name, setName] = useState("");
@@ -153,14 +149,7 @@ function CreateForm({ queues, onDone }: { queues: string[]; onDone: () => void }
     }
   }, [pattern]);
 
-  const create = useMutation({
-    mutationFn: () =>
-      api.upsertScheduler({ queue, id: id.trim() || name.trim(), name: name.trim(), pattern, tz }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["schedulers", queue] });
-      onDone();
-    },
-  });
+  const create = useUpsertScheduler(queue);
 
   const valid = Boolean(queue && name.trim() && preview.ok);
 
@@ -202,7 +191,12 @@ function CreateForm({ queues, onDone }: { queues: string[]; onDone: () => void }
         <Button
           variant="accent"
           disabled={!valid || create.isPending}
-          onClick={() => create.mutate()}
+          onClick={() =>
+            create.mutate(
+              { queue, id: id.trim() || name.trim(), name: name.trim(), pattern, tz },
+              { onSuccess: onDone },
+            )
+          }
         >
           Create schedule
         </Button>

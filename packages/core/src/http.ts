@@ -1,0 +1,52 @@
+import type { QueueApi } from "./api";
+import { client } from "./client";
+import type { ConnectionInfo, FlowNode, JobPage, QueueSummary, Scheduler } from "./types";
+
+const enc = encodeURIComponent;
+
+export const httpApi: QueueApi = {
+  getConnection: () => client.get<ConnectionInfo>("/connection").then((r) => r.data),
+
+  listQueues: () => client.get<QueueSummary[]>("/queues").then((r) => r.data),
+
+  getQueue: (name) =>
+    client.get<QueueSummary | undefined>(`/queues/${enc(name)}`).then((r) => r.data),
+
+  async setQueuePaused({ queue, paused }) {
+    await client.post(`/queues/${enc(queue)}/${paused ? "pause" : "resume"}`);
+  },
+
+  getJobs: (query) =>
+    client
+      .get<JobPage>(`/queues/${enc(query.queue)}/jobs`, {
+        params: {
+          state: query.state,
+          page: query.page,
+          pageSize: query.pageSize,
+          search: query.search,
+        },
+      })
+      .then((r) => r.data),
+
+  bulkAction: ({ queue, ids, action }) =>
+    client
+      .post<{ affected: number }>(`/queues/${enc(queue)}/jobs/bulk`, { ids, action })
+      .then((r) => r.data),
+
+  async retryWithData({ queue, id, data }) {
+    await client.post(`/queues/${enc(queue)}/jobs/${enc(id)}/retry-with-data`, { data });
+  },
+
+  listSchedulers: (queue) =>
+    client.get<Scheduler[]>(`/queues/${enc(queue)}/schedulers`).then((r) => r.data),
+
+  async upsertScheduler(input) {
+    await client.post(`/queues/${enc(input.queue)}/schedulers`, input);
+  },
+
+  async removeScheduler({ queue, id }) {
+    await client.delete(`/queues/${enc(queue)}/schedulers/${enc(id)}`);
+  },
+
+  listFlows: () => client.get<FlowNode[]>("/flows").then((r) => r.data),
+};

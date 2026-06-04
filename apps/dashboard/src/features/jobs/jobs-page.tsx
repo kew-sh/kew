@@ -1,25 +1,18 @@
-import {
-  api,
-  type BulkAction,
-  JOB_STATES,
-  type Job,
-  type JobState,
-  queueHealth,
-  useConnection,
-  useJobs,
-  useQueue,
-} from "@kew/core";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { JOB_STATES, type Job, type JobState, queueHealth } from "@kew/core";
 import { Link, useParams } from "@tanstack/react-router";
 import type { RowSelectionState } from "@tanstack/react-table";
-import { ArrowLeft, CheckCircle2, SlidersHorizontal } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Pause, Play, SlidersHorizontal } from "lucide-react";
 import { useMemo, useState } from "react";
 import { StateDot } from "@/components/state-badge";
 import { STATE_META } from "@/components/state-meta";
+import { Button } from "@/components/ui/button";
+import { useConnection } from "@/lib/use-connection";
+import { useQueue, useSetQueuePaused } from "@/lib/use-queues";
 import { cn, compact } from "@/lib/utils";
 import { BulkBar } from "./bulk-bar";
 import { JobDrawer } from "./job-drawer";
 import { JobTable } from "./job-table";
+import { useBulkAction, useJobAction, useJobs, useRetryWithData } from "./use-jobs";
 
 const TIME_WINDOWS = [
   { id: "all", label: "Any time", ms: Number.POSITIVE_INFINITY },
@@ -32,7 +25,6 @@ type WindowId = (typeof TIME_WINDOWS)[number]["id"];
 
 export function JobsPage() {
   const { queueName } = useParams({ from: "/queues/$queueName" });
-  const qc = useQueryClient();
   const { data: queue } = useQueue(queueName);
   const { data: conn } = useConnection();
   const readOnly = conn?.readOnly ?? false;
@@ -59,38 +51,10 @@ export function JobsPage() {
     return page.jobs.filter((j) => j.timestamp >= cutoff);
   }, [page, win]);
 
-  const invalidate = () => {
-    qc.invalidateQueries({ queryKey: ["jobs", queueName] });
-    qc.invalidateQueries({ queryKey: ["queue", queueName] });
-    qc.invalidateQueries({ queryKey: ["queues"] });
-  };
-
-  const bulk = useMutation({
-    mutationFn: (action: BulkAction) =>
-      api.bulkAction({ queue: queueName, ids: Object.keys(selection), action }),
-    onSuccess: () => {
-      invalidate();
-      setSelection({});
-    },
-  });
-
-  const single = useMutation({
-    mutationFn: (v: { action: BulkAction; id: string }) =>
-      api.bulkAction({ queue: queueName, ids: [v.id], action: v.action }),
-    onSuccess: () => {
-      invalidate();
-      setOpenJob(null);
-    },
-  });
-
-  const editRetry = useMutation({
-    mutationFn: (v: { id: string; data: unknown }) =>
-      api.retryWithData({ queue: queueName, id: v.id, data: v.data }),
-    onSuccess: () => {
-      invalidate();
-      setOpenJob(null);
-    },
-  });
+  const bulk = useBulkAction(queueName);
+  const jobAction = useJobAction(queueName);
+  const retryWithData = useRetryWithData(queueName);
+  const pauseQueue = useSetQueuePaused();
 
   const pickState = (s: JobState) => {
     setState(s);
@@ -104,15 +68,36 @@ export function JobsPage() {
           <ArrowLeft className="size-3" />
           Queues
         </Link>
-        <h1 className="mt-2 flex items-center gap-2.5 text-lg font-semibold tracking-tight">
-          {queue && <StateDot state={queueHealth(queue)} pulse={queueHealth(queue) === "active"} />}
-          <span className="font-mono">{queueName}</span>
-          {readOnly && (
-            <span className="rounded bg-overlay px-1.5 py-0.5 text-[11px] font-normal text-delayed">
-              read-only
-            </span>
+        <div className="mt-2 flex items-center justify-between gap-3">
+          <h1 className="flex items-center gap-2.5 text-lg font-semibold tracking-tight">
+            {queue && (
+              <StateDot state={queueHealth(queue)} pulse={queueHealth(queue) === "active"} />
+            )}
+            <span className="font-mono">{queueName}</span>
+            {queue?.paused && (
+              <span className="inline-flex items-center gap-1 rounded bg-paused/15 px-1.5 py-0.5 text-[11px] font-normal text-paused">
+                <Pause className="size-2.5" strokeWidth={2.5} />
+                paused
+              </span>
+            )}
+            {readOnly && (
+              <span className="rounded bg-overlay px-1.5 py-0.5 text-[11px] font-normal text-delayed">
+                read-only
+              </span>
+            )}
+          </h1>
+          {!readOnly && queue && (
+            <Button
+              variant="subtle"
+              size="sm"
+              disabled={pauseQueue.isPending}
+              onClick={() => pauseQueue.mutate({ queue: queueName, paused: !queue.paused })}
+            >
+              {queue.paused ? <Play className="size-3.5" /> : <Pause className="size-3.5" />}
+              {queue.paused ? "Resume" : "Pause"}
+            </Button>
           )}
-        </h1>
+        </div>
       </div>
 
       <div
@@ -192,17 +177,26 @@ export function JobsPage() {
       <BulkBar
         count={Object.keys(selection).length}
         pending={bulk.isPending}
-        onAction={(a) => bulk.mutate(a)}
+        onAction={(action) =>
+          bulk.mutate(
+            { ids: Object.keys(selection), action },
+            { onSuccess: () => setSelection({}) },
+          )
+        }
         onClear={() => setSelection({})}
       />
 
       <JobDrawer
         job={openJob}
         readOnly={readOnly}
-        pending={single.isPending || editRetry.isPending}
+        pending={jobAction.isPending || retryWithData.isPending}
         onClose={() => setOpenJob(null)}
-        onAction={(action, id) => single.mutate({ action, id })}
-        onRetryWithData={(id, data) => editRetry.mutate({ id, data })}
+        onAction={(action, id) =>
+          jobAction.mutate({ id, action }, { onSuccess: () => setOpenJob(null) })
+        }
+        onRetryWithData={(id, data) =>
+          retryWithData.mutate({ id, data }, { onSuccess: () => setOpenJob(null) })
+        }
       />
     </div>
   );

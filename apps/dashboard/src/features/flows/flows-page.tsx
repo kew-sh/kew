@@ -1,6 +1,7 @@
-import { type FlowNode, useFlows } from "@kew/core";
+import type { FlowNode } from "@kew/core";
 import { GitFork, Workflow } from "lucide-react";
 import { StateBadge, StateDot } from "@/components/state-badge";
+import { useFlows } from "./use-flows";
 
 export function FlowsPage() {
   const { data: flows } = useFlows();
