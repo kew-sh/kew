@@ -1,9 +1,13 @@
-import { Menu, Search } from "lucide-react";
+import { LogOut, Menu, Search } from "lucide-react";
 import { StateDot } from "@/components/state-badge";
 import { ThemeToggle } from "@/components/theme";
 import { Button } from "@/components/ui/button";
+import { useAuth, useLogout } from "@/lib/use-auth";
 
 export function Topbar({ onMenu }: { onMenu: () => void }) {
+  const { data: auth } = useAuth();
+  const logout = useLogout();
+  const canLogout = Boolean(auth?.authRequired && auth.authenticated && auth.mode === "password");
   return (
     <header className="flex h-14 shrink-0 items-center gap-3 border-b border-line bg-surface/70 px-3 backdrop-blur">
       <Button
@@ -34,6 +38,18 @@ export function Topbar({ onMenu }: { onMenu: () => void }) {
           Live
         </span>
         <ThemeToggle />
+        {canLogout && (
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={() => logout.mutate()}
+            disabled={logout.isPending}
+            aria-label="Log out"
+            title="Log out"
+          >
+            <LogOut className="size-4" />
+          </Button>
+        )}
       </div>
     </header>
   );

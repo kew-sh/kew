@@ -1,9 +1,3 @@
-/**
- * Domain contract. These shapes mirror real BullMQ so the mock and the future
- * Bun+Redis backend are interchangeable behind `QueueApi`. When the backend
- * lands, this file moves to `packages/core` and both consumers reuse it.
- */
-
 export const JOB_STATES = [
   "active",
   "waiting",
@@ -84,6 +78,14 @@ export interface ConnectionInfo {
   status: "connected" | "connecting" | "error";
   readOnly: boolean;
   redisVersion: string;
+}
+
+export interface AuthInfo {
+  authRequired: boolean;
+  authenticated: boolean;
+  mode: "none" | "password" | "proxy";
+  requiresUser: boolean;
+  user?: string;
 }
 
 export type BulkAction = "retry" | "remove" | "promote";

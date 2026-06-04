@@ -1,10 +1,20 @@
 import type { QueueApi } from "./api";
 import { client } from "./client";
-import type { ConnectionInfo, FlowNode, JobPage, QueueSummary, Scheduler } from "./types";
+import type { AuthInfo, ConnectionInfo, FlowNode, JobPage, QueueSummary, Scheduler } from "./types";
 
 const enc = encodeURIComponent;
 
 export const httpApi: QueueApi = {
+  getAuth: () => client.get<AuthInfo>("/auth/me").then((r) => r.data),
+
+  async login({ email, password }) {
+    await client.post("/auth/login", { email, password });
+  },
+
+  async logout() {
+    await client.post("/auth/logout");
+  },
+
   getConnection: () => client.get<ConnectionInfo>("/connection").then((r) => r.data),
 
   listQueues: () => client.get<QueueSummary[]>("/queues").then((r) => r.data),

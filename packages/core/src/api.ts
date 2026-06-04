@@ -1,5 +1,6 @@
 import { httpApi } from "./http";
 import type {
+  AuthInfo,
   BulkAction,
   ConnectionInfo,
   FlowNode,
@@ -11,6 +12,9 @@ import type {
 } from "./types";
 
 export interface QueueApi {
+  getAuth(): Promise<AuthInfo>;
+  login(input: { email?: string; password: string }): Promise<void>;
+  logout(): Promise<void>;
   getConnection(): Promise<ConnectionInfo>;
   listQueues(): Promise<QueueSummary[]>;
   getQueue(name: string): Promise<QueueSummary | undefined>;

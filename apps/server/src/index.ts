@@ -4,6 +4,7 @@ import type { BulkAction, JobState, SchedulerInput } from "@kew/core/types";
 import { Hono } from "hono";
 import { serveStatic } from "hono/bun";
 import { cors } from "hono/cors";
+import { AUTH_MODE, handleLogin, handleLogout, handleMe, requireAuth } from "./auth";
 import {
   applyBulk,
   discoverQueues,
@@ -17,31 +18,45 @@ import {
   setQueuePaused,
   upsertScheduler,
 } from "./queue-service";
-import { createRedis, REDIS_URL } from "./redis";
+import { createRedis, REDIS_URL, redactRedisUrl } from "./redis";
 import { startSampler } from "./sampler";
 
 const redis = createRedis();
 const READ_ONLY = process.env.READ_ONLY === "1";
 const PORT = Number(process.env.PORT ?? 3000);
+const HOST = process.env.HOST ?? "127.0.0.1";
+
+if (HOST !== "127.0.0.1" && HOST !== "localhost" && AUTH_MODE === "none") {
+  console.warn(
+    `\n⚠  Kew is listening on ${HOST}:${PORT} with no authentication.\n` +
+      "   Anyone who can reach this port can read job payloads and mutate queues.\n" +
+      "   Set KEW_AUTH_TOKEN=<secret>, or front Kew with an auth proxy and set KEW_TRUST_PROXY_AUTH=1.\n",
+  );
+}
 
 startSampler(redis, () => discoverQueues(redis));
 
 const app = new Hono();
 app.use("/api/*", cors());
+app.use("/api/*", requireAuth);
+
+app.get("/api/auth/me", handleMe);
+app.post("/api/auth/login", handleLogin);
+app.post("/api/auth/logout", handleLogout);
 
 app.get("/api/connection", async (c) => {
   try {
     const info = await redis.info("server");
     const version = /redis_version:([^\r\n]+)/.exec(info)?.[1] ?? "unknown";
     return c.json({
-      url: REDIS_URL,
+      url: redactRedisUrl(REDIS_URL),
       status: "connected",
       readOnly: READ_ONLY,
       redisVersion: version,
     });
   } catch {
     return c.json({
-      url: REDIS_URL,
+      url: redactRedisUrl(REDIS_URL),
       status: "error",
       readOnly: READ_ONLY,
       redisVersion: "unknown",
@@ -121,6 +136,8 @@ if (existsSync(dist)) {
   app.get("/*", serveStatic({ path: "index.html", root: dist }));
 }
 
-console.log(`queue-panel server → http://localhost:${PORT}  (redis: ${REDIS_URL})`);
+console.log(
+  `Kew server → http://${HOST}:${PORT}  (redis: ${redactRedisUrl(REDIS_URL)}, auth: ${AUTH_MODE})`,
+);
 
-export default { port: PORT, fetch: app.fetch };
+export default { port: PORT, hostname: HOST, fetch: app.fetch };

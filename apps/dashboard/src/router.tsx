@@ -1,5 +1,6 @@
 import { createRootRoute, createRoute, createRouter, Outlet } from "@tanstack/react-router";
 import { lazy } from "react";
+import { AuthGate } from "@/features/auth/auth-gate";
 import { OverviewPage } from "@/features/overview/overview-page";
 import { AppShell } from "@/shell/app-shell";
 
@@ -22,9 +23,11 @@ const MetricsPage = lazy(() =>
 
 const rootRoute = createRootRoute({
   component: () => (
-    <AppShell>
-      <Outlet />
-    </AppShell>
+    <AuthGate>
+      <AppShell>
+        <Outlet />
+      </AppShell>
+    </AuthGate>
   ),
 });
 
