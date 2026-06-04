@@ -1,5 +1,5 @@
 {
-  "name": "@queue-panel/server",
+  "name": "@kew/server",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -11,7 +11,7 @@
     "demo": "bun src/demo.ts"
   },
   "dependencies": {
-    "@queue-panel/core": "workspace:*",
+    "@kew/core": "workspace:*",
     "bullmq": "^5.34.0",
     "hono": "^4.6.14",
     "ioredis": "^5.4.2"

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Command } from "cmdk";
 import { useNavigate } from "@tanstack/react-router";
 import { LayoutGrid, MoonStar, Search } from "lucide-react";
-import { useQueues, queueHealth } from "@queue-panel/core";
+import { useQueues, queueHealth } from "@kew/core";
 import { useTheme } from "./theme";
 import { StateDot } from "./state-badge";
 

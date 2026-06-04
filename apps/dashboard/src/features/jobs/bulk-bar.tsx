@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ArrowUp, RotateCw, Trash2, X } from "lucide-react";
-import type { BulkAction } from "@queue-panel/core";
+import type { BulkAction } from "@kew/core";
 import { Button } from "@/components/ui/button";
 
 export function BulkBar({

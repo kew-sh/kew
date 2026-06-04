@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import type { JobState } from "@queue-panel/core";
+import type { JobState } from "@kew/core";
 import { STATE_META } from "./state-meta";
 
 export function StateBadge({ state, className }: { state: JobState; className?: string }) {

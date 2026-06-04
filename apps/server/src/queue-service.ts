@@ -6,7 +6,7 @@ import type {
   JobPage,
   JobState,
   QueueSummary,
-} from "@queue-panel/core/types";
+} from "@kew/core/types";
 import { BULLMQ_PREFIX } from "./redis";
 import { getWindow } from "./sampler";
 

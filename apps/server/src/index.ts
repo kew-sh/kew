@@ -3,7 +3,7 @@ import { cors } from "hono/cors";
 import { serveStatic } from "hono/bun";
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import type { JobState } from "@queue-panel/core/types";
+import type { JobState } from "@kew/core/types";
 import { createRedis, REDIS_URL } from "./redis";
 import { discoverQueues, getJobsPage, getQueueSummary, STATES } from "./queue-service";
 import { startSampler } from "./sampler";

@@ -9,7 +9,7 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
-import type { JobState } from "@queue-panel/core";
+import type { JobState } from "@kew/core";
 
 export interface StateMeta {
   label: string;

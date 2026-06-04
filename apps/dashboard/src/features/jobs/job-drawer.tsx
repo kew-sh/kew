@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ArrowUp, Pencil, RotateCw, Trash2, X } from "lucide-react";
-import type { Job } from "@queue-panel/core";
+import type { Job } from "@kew/core";
 import { StateBadge } from "@/components/state-badge";
 import { Button } from "@/components/ui/button";
 import { JsonView } from "@/components/json-view";

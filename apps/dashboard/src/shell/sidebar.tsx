@@ -11,7 +11,7 @@ import {
   useConnection,
   useQueues,
   type QueueSummary,
-} from "@queue-panel/core";
+} from "@kew/core";
 import { StateDot } from "@/components/state-badge";
 import { cn, compact } from "@/lib/utils";
 
@@ -37,7 +37,7 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
           <span className="grid size-7 place-items-center rounded-md bg-accent text-accent-ink">
             <Layers className="size-4" strokeWidth={2.5} />
           </span>
-          <span className="font-semibold tracking-tight">Queue Panel</span>
+          <span className="font-semibold tracking-tight">Kew</span>
           <span className="rounded bg-overlay px-1 py-0.5 font-mono text-[10px] text-muted">beta</span>
         </div>
 

@@ -13,7 +13,7 @@ import {
   type BulkAction,
   type Job,
   type JobState,
-} from "@queue-panel/core";
+} from "@kew/core";
 import { StateDot } from "@/components/state-badge";
 import { STATE_META } from "@/components/state-meta";
 import { cn, compact } from "@/lib/utils";

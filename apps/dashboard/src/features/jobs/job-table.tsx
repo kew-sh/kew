@@ -8,7 +8,7 @@ import {
   type RowSelectionState,
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import type { Job } from "@queue-panel/core";
+import type { Job } from "@kew/core";
 import { StateBadge } from "@/components/state-badge";
 import { cn, duration, relativeTime } from "@/lib/utils";
 

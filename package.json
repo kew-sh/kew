@@ -1,12 +1,12 @@
 {
-  "name": "queue-panel",
+  "name": "kew",
   "private": true,
   "version": "0.0.0",
   "description": "Open-source dashboard for BullMQ queues and crons (codename).",
   "workspaces": ["apps/*", "packages/*"],
   "scripts": {
-    "dev": "bun --filter '@queue-panel/dashboard' dev",
-    "build": "bun --filter '@queue-panel/dashboard' build",
-    "typecheck": "bun --filter '@queue-panel/dashboard' typecheck"
+    "dev": "bun --filter '@kew/dashboard' dev",
+    "build": "bun --filter '@kew/dashboard' build",
+    "typecheck": "bun --filter '@kew/dashboard' typecheck"
   }
 }

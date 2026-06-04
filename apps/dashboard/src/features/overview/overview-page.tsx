@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Inbox } from "lucide-react";
-import { backlog, useQueues, type QueueSummary } from "@queue-panel/core";
+import { backlog, useQueues, type QueueSummary } from "@kew/core";
 import { cn } from "@/lib/utils";
 import { QueueRow } from "./queue-row";
 
