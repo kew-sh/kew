@@ -288,6 +288,55 @@ export function retryWithData(name: string, id: string, data: unknown): void {
   delete j.stacktrace;
 }
 
+type FNode = {
+  id: string;
+  name: string;
+  queue: string;
+  state: JobState;
+  children: FNode[];
+};
+
+const flows: FNode[] = [
+  {
+    id: "910001",
+    name: "assemble-report",
+    queue: "media-processing",
+    state: "waiting-children",
+    children: [
+      { id: "910002", name: "render-chart", queue: "media-processing", state: "completed", children: [] },
+      {
+        id: "910003",
+        name: "build-summary",
+        queue: "media-processing",
+        state: "active",
+        children: [
+          { id: "910006", name: "fetch-rows", queue: "media-processing", state: "completed", children: [] },
+        ],
+      },
+      { id: "910004", name: "make-cover", queue: "media-processing", state: "waiting", children: [] },
+    ],
+  },
+  {
+    id: "920001",
+    name: "batch-embed",
+    queue: "ai-inference",
+    state: "waiting-children",
+    children: [
+      { id: "920002", name: "embed-doc", queue: "ai-inference", state: "completed", children: [] },
+      { id: "920003", name: "embed-doc", queue: "ai-inference", state: "failed", children: [] },
+      { id: "920004", name: "embed-doc", queue: "ai-inference", state: "completed", children: [] },
+    ],
+  },
+];
+
+function cloneFlow(n: FNode): FNode {
+  return { ...n, children: n.children.map(cloneFlow) };
+}
+
+export function getFlows(): FNode[] {
+  return flows.map(cloneFlow);
+}
+
 export function getQueues(): QueueSummary[] {
   return world.map((q) => {
     const completedWindow = q.throughput.reduce((a, b) => a + b, 0);

@@ -68,7 +68,18 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
             />
             Schedulers
           </Link>
-          <NavSoon icon={<GitFork className="size-4" />}>Flows</NavSoon>
+          <Link
+            to="/flows"
+            className={cn(
+              "flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm",
+              pathname === "/flows"
+                ? "bg-overlay font-medium text-ink"
+                : "text-ink-2 hover:bg-overlay/60 hover:text-ink",
+            )}
+          >
+            <GitFork className={cn("size-4", pathname === "/flows" ? "text-accent" : "text-muted")} />
+            Flows
+          </Link>
           <NavSoon icon={<BarChart3 className="size-4" />}>Metrics</NavSoon>
         </nav>
 

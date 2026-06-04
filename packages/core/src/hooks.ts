@@ -43,3 +43,11 @@ export function useSchedulers(queue: string) {
     refetchInterval: 5000,
   });
 }
+
+export function useFlows() {
+  return useQuery({
+    queryKey: ["flows"],
+    queryFn: () => api.listFlows(),
+    refetchInterval: 4000,
+  });
+}

@@ -8,6 +8,7 @@ import { AppShell } from "@/shell/app-shell";
 import { OverviewPage } from "@/features/overview/overview-page";
 import { JobsPage } from "@/features/jobs/jobs-page";
 import { SchedulersPage } from "@/features/schedulers/schedulers-page";
+import { FlowsPage } from "@/features/flows/flows-page";
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -35,7 +36,13 @@ const schedulersRoute = createRoute({
   component: SchedulersPage,
 });
 
-const routeTree = rootRoute.addChildren([indexRoute, queueRoute, schedulersRoute]);
+const flowsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/flows",
+  component: FlowsPage,
+});
+
+const routeTree = rootRoute.addChildren([indexRoute, queueRoute, schedulersRoute, flowsRoute]);
 
 export const router = createRouter({
   routeTree,

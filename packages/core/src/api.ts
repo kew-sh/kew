@@ -2,6 +2,7 @@ import * as mock from "./mock";
 import type {
   BulkAction,
   ConnectionInfo,
+  FlowNode,
   JobPage,
   JobQuery,
   QueueSummary,
@@ -12,7 +13,7 @@ import type {
 /**
  * The single contract the UI talks to. Today it is mock-backed; the Bun+Redis
  * backend implements the same interface (over fetch) with zero UI changes.
- * Keep this surface aligned with BullMQ's QueueGetters + Job + JobScheduler API.
+ * Keep this surface aligned with BullMQ's QueueGetters + Job + JobScheduler + Flows.
  */
 export interface QueueApi {
   getConnection(): Promise<ConnectionInfo>;
@@ -30,6 +31,8 @@ export interface QueueApi {
   listSchedulers(queue: string): Promise<Scheduler[]>;
   upsertScheduler(input: SchedulerInput): Promise<void>;
   removeScheduler(input: { queue: string; id: string }): Promise<void>;
+  /** Parent/child job trees via BullMQ Flows. */
+  listFlows(): Promise<FlowNode[]>;
 }
 
 const latency = (min = 60, max = 220) =>
@@ -98,5 +101,10 @@ export const api: QueueApi = {
   async removeScheduler({ queue, id }) {
     await latency(80, 220);
     mock.removeScheduler(queue, id);
+  },
+
+  async listFlows() {
+    await latency();
+    return mock.getFlows();
   },
 };

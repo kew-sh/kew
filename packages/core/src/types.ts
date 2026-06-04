@@ -112,3 +112,12 @@ export interface SchedulerInput {
   tz?: string;
   data?: unknown;
 }
+
+/** A node in a BullMQ Flow tree (parent waits for children to complete). */
+export interface FlowNode {
+  id: string;
+  name: string;
+  queue: string;
+  state: JobState;
+  children: FlowNode[];
+}
