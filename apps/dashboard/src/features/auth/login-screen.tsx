@@ -3,8 +3,11 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth, useLogin } from "@/lib/use-auth";
 
-function is401(error: unknown): boolean {
-  return (error as { response?: { status?: number } } | null)?.response?.status === 401;
+function loginError(error: unknown): string {
+  const status = (error as { response?: { status?: number } } | null)?.response?.status;
+  if (status === 401) return "Incorrect email or password.";
+  if (status === 429) return "Too many attempts. Wait a minute and try again.";
+  return "Could not reach the server.";
 }
 
 export function LoginScreen() {
@@ -70,9 +73,7 @@ export function LoginScreen() {
             {login.isPending ? "Signing in…" : "Sign in"}
           </Button>
           {login.isError && (
-            <p className="text-center text-xs text-failed">
-              {is401(login.error) ? "Incorrect email or password." : "Could not reach the server."}
-            </p>
+            <p className="text-center text-xs text-failed">{loginError(login.error)}</p>
           )}
         </form>
       </div>

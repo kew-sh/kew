@@ -5,6 +5,7 @@ export function useConnection() {
   return useQuery({
     queryKey: ["connection"],
     queryFn: () => api.getConnection(),
-    staleTime: 30_000,
+    refetchInterval: 5000,
+    staleTime: 2000,
   });
 }

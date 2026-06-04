@@ -14,6 +14,9 @@ const SIGNING_KEY =
 
 const COOKIE = "kew_session";
 const TTL_SECONDS = 7 * 24 * 60 * 60;
+const MAX_ATTEMPTS = 10;
+const WINDOW_MS = 60_000;
+const attempts = new Map<string, { count: number; resetAt: number }>();
 
 export const AUTH_MODE: AuthInfo["mode"] = TRUST_PROXY ? "proxy" : TOKEN ? "password" : "none";
 
@@ -71,22 +74,36 @@ export async function handleMe(c: Context) {
   return c.json(info);
 }
 
+function rateKey(c: Context): string {
+  const xff = c.req.header("x-forwarded-for");
+  if (xff) return xff.split(",")[0].trim();
+  return c.req.header("x-real-ip") ?? "local";
+}
+
 export async function handleLogin(c: Context) {
   if (AUTH_MODE !== "password") return c.json({ error: "password login disabled" }, 400);
+
+  const key = rateKey(c);
+  const now = Date.now();
+  const slot = attempts.get(key);
+  if (slot && now < slot.resetAt && slot.count >= MAX_ATTEMPTS) {
+    return c.json({ error: "too many attempts" }, 429, { "retry-after": "60" });
+  }
+
   const body = await c.req
     .json<{ email?: string; password?: string }>()
     .catch(() => ({}) as { email?: string; password?: string });
-  if (!body.password || !safeEqual(body.password, TOKEN)) {
+  const okPassword = Boolean(body.password) && safeEqual(body.password as string, TOKEN);
+  const okEmail = !USER || safeEqual((body.email ?? "").trim().toLowerCase(), USER.toLowerCase());
+  if (!okPassword || !okEmail) {
+    if (slot && now < slot.resetAt) slot.count += 1;
+    else attempts.set(key, { count: 1, resetAt: now + WINDOW_MS });
     return c.json({ error: "invalid credentials" }, 401);
   }
-  if (USER) {
-    const email = (body.email ?? "").trim().toLowerCase();
-    if (!email || !safeEqual(email, USER.toLowerCase())) {
-      return c.json({ error: "invalid credentials" }, 401);
-    }
-  }
-  const now = Math.floor(Date.now() / 1000);
-  const token = await sign({ sub: USER ?? "kew", iat: now, exp: now + TTL_SECONDS }, SIGNING_KEY);
+
+  attempts.delete(key);
+  const iat = Math.floor(now / 1000);
+  const token = await sign({ sub: USER ?? "kew", iat, exp: iat + TTL_SECONDS }, SIGNING_KEY);
   setCookie(c, COOKIE, token, {
     httpOnly: true,
     sameSite: "Lax",

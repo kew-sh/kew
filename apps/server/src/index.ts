@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import type { BulkAction, JobState, SchedulerInput } from "@kew/core/types";
+import type { MiddlewareHandler } from "hono";
 import { Hono } from "hono";
 import { serveStatic } from "hono/bun";
 import { cors } from "hono/cors";
@@ -18,7 +19,7 @@ import {
   setQueuePaused,
   upsertScheduler,
 } from "./queue-service";
-import { createRedis, REDIS_URL, redactRedisUrl } from "./redis";
+import { createRedis, REDIS_URL, redactRedisUrl, redisStatus } from "./redis";
 import { startSampler } from "./sampler";
 
 const redis = createRedis();
@@ -34,6 +35,27 @@ if (HOST !== "127.0.0.1" && HOST !== "localhost" && AUTH_MODE === "none") {
   );
 }
 
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error("timeout")), ms);
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error) => {
+        clearTimeout(timer);
+        reject(error);
+      },
+    );
+  });
+}
+
+const requireRedis: MiddlewareHandler = async (c, next) => {
+  if (redisStatus(redis) !== "connected") return c.json({ error: "redis unavailable" }, 503);
+  await next();
+};
+
 startSampler(redis, () => discoverQueues(redis));
 
 const app = new Hono();
@@ -44,25 +66,25 @@ app.get("/api/auth/me", handleMe);
 app.post("/api/auth/login", handleLogin);
 app.post("/api/auth/logout", handleLogout);
 
+app.get("/healthz", (c) => c.json({ status: "ok", redis: redisStatus(redis) }));
+
 app.get("/api/connection", async (c) => {
-  try {
-    const info = await redis.info("server");
-    const version = /redis_version:([^\r\n]+)/.exec(info)?.[1] ?? "unknown";
-    return c.json({
-      url: redactRedisUrl(REDIS_URL),
-      status: "connected",
-      readOnly: READ_ONLY,
-      redisVersion: version,
-    });
-  } catch {
-    return c.json({
-      url: redactRedisUrl(REDIS_URL),
-      status: "error",
-      readOnly: READ_ONLY,
-      redisVersion: "unknown",
-    });
+  const status = redisStatus(redis);
+  let redisVersion = "unknown";
+  if (status === "connected") {
+    try {
+      const info = await withTimeout(redis.info("server"), 1500);
+      redisVersion = /redis_version:([^\r\n]+)/.exec(info)?.[1] ?? "unknown";
+    } catch {
+      redisVersion = "unknown";
+    }
   }
+  return c.json({ url: redactRedisUrl(REDIS_URL), status, readOnly: READ_ONLY, redisVersion });
 });
+
+app.use("/api/queues", requireRedis);
+app.use("/api/queues/*", requireRedis);
+app.use("/api/flows", requireRedis);
 
 app.get("/api/queues", async (c) => {
   const names = await discoverQueues(redis);
@@ -139,5 +161,11 @@ if (existsSync(dist)) {
 console.log(
   `Kew server → http://${HOST}:${PORT}  (redis: ${redactRedisUrl(REDIS_URL)}, auth: ${AUTH_MODE})`,
 );
+
+for (const signal of ["SIGTERM", "SIGINT"] as const) {
+  process.on(signal, () => {
+    redis.quit().finally(() => process.exit(0));
+  });
+}
 
 export default { port: PORT, hostname: HOST, fetch: app.fetch };

@@ -1,6 +1,7 @@
 import { backlog, type QueueSummary } from "@kew/core";
-import { Inbox } from "lucide-react";
+import { Inbox, Unplug } from "lucide-react";
 import { useMemo, useState } from "react";
+import { useConnection } from "@/lib/use-connection";
 import { useQueues } from "@/lib/use-queues";
 import { cn } from "@/lib/utils";
 import { QueueRow } from "./queue-row";
@@ -8,8 +9,10 @@ import { QueueRow } from "./queue-row";
 type Sort = "health" | "backlog" | "name";
 
 export function OverviewPage() {
-  const { data: queues, isLoading } = useQueues();
+  const { data: queues } = useQueues();
+  const { data: conn } = useConnection();
   const [sort, setSort] = useState<Sort>("health");
+  const disconnected = conn?.status === "error";
 
   const sorted = useMemo(() => {
     if (!queues) return [];
@@ -26,8 +29,8 @@ export function OverviewPage() {
         <div>
           <h1 className="text-xl font-semibold tracking-tight">Queues</h1>
           <p className="mt-0.5 text-sm text-muted">
-            {queues ? `${queues.length} queues` : "Loading…"}
-            <span className="text-muted/60"> · updating live</span>
+            {disconnected ? "Disconnected" : queues ? `${queues.length} queues` : "Connecting…"}
+            {!disconnected && <span className="text-muted/60"> · updating live</span>}
           </p>
         </div>
         <div className="flex items-center gap-0.5 rounded-lg border border-line bg-surface p-0.5 text-sm">
@@ -48,20 +51,31 @@ export function OverviewPage() {
       </header>
 
       <div className="mt-5">
-        <div className="hidden grid-cols-[minmax(0,1.4fr)_minmax(0,2fr)_112px_72px] gap-4 px-3 pb-2 text-[11px] font-medium uppercase tracking-wider text-muted md:grid">
-          <span>Queue</span>
-          <span>States</span>
-          <span>30-min throughput</span>
-          <span className="text-right">Rate</span>
-        </div>
-
-        <div className="space-y-1.5">
-          {isLoading && !queues
-            ? ["a", "b", "c", "d", "e"].map((k) => <RowSkeleton key={k} />)
-            : sorted.map((q) => <QueueRow key={q.name} q={q} />)}
-        </div>
-
-        {queues?.length === 0 && <EmptyQueues />}
+        {disconnected ? (
+          <DisconnectedQueues url={conn?.url} />
+        ) : !queues ? (
+          <div className="space-y-1.5">
+            {["a", "b", "c", "d", "e"].map((k) => (
+              <RowSkeleton key={k} />
+            ))}
+          </div>
+        ) : queues.length === 0 ? (
+          <EmptyQueues url={conn?.url} />
+        ) : (
+          <>
+            <div className="hidden grid-cols-[minmax(0,1.4fr)_minmax(0,2fr)_112px_72px] gap-4 px-3 pb-2 text-[11px] font-medium uppercase tracking-wider text-muted md:grid">
+              <span>Queue</span>
+              <span>States</span>
+              <span>30-min throughput</span>
+              <span className="text-right">Rate</span>
+            </div>
+            <div className="space-y-1.5">
+              {sorted.map((q) => (
+                <QueueRow key={q.name} q={q} />
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
@@ -81,14 +95,29 @@ function RowSkeleton() {
   );
 }
 
-function EmptyQueues() {
+function EmptyQueues({ url }: { url?: string }) {
   return (
-    <div className="mt-2 flex flex-col items-center rounded-lg border border-dashed border-line bg-surface/50 px-6 py-16 text-center">
+    <div className="flex flex-col items-center rounded-lg border border-dashed border-line bg-surface/50 px-6 py-16 text-center">
       <Inbox className="size-7 text-muted" />
       <h2 className="mt-3 text-sm font-medium text-ink">No queues found on this Redis</h2>
-      <p className="mt-1 max-w-sm text-sm text-muted">
-        BullMQ queues appear here once a producer adds a job or a worker starts. Check that the
-        panel points at the same Redis as your app.
+      <p className="mt-1 max-w-md text-sm text-muted">
+        Connected to <span className="font-mono text-ink-2">{url ?? "Redis"}</span>, but no BullMQ
+        queues are registered yet. They appear once a producer adds a job or a worker starts. If you
+        expected some, check the <span className="font-mono text-ink-2">BULLMQ_PREFIX</span>.
+      </p>
+    </div>
+  );
+}
+
+function DisconnectedQueues({ url }: { url?: string }) {
+  return (
+    <div className="flex flex-col items-center rounded-lg border border-dashed border-failed/40 bg-failed/5 px-6 py-16 text-center">
+      <Unplug className="size-7 text-failed" />
+      <h2 className="mt-3 text-sm font-medium text-ink">Can’t reach Redis</h2>
+      <p className="mt-1 max-w-md text-sm text-muted">
+        The dashboard is running, but it can’t connect to{" "}
+        <span className="font-mono text-ink-2">{url ?? "Redis"}</span>. Check that Redis is up and
+        the URL is correct. Retrying automatically…
       </p>
     </div>
   );

@@ -15,18 +15,27 @@
 
 ## Quick start
 
+### Docker
+
+```bash
+docker compose up --build              # Kew on http://localhost:3000, plus a Redis to play with
+bun --filter '@kew/server' seed        # (optional) load realistic sample data into that Redis
+```
+
+Point Kew at your own Redis with `REDIS_URL` (every setting is documented in `.env.example`). To require a login, set `KEW_AUTH_TOKEN` (and optionally `KEW_AUTH_USER` for an email + password form). The server binds `127.0.0.1` by default and warns loudly if you expose it without auth.
+
+### From source
+
 ```bash
 bun install
-
-# Dashboard with mock data (no Redis needed):
-bun run dev                          # → http://localhost:5173
-
-# Against a real Redis:
-docker compose up -d redis
-bun --filter '@kew/server' seed      # seed realistic BullMQ data
-bun --filter '@kew/server' demo      # (optional) live load generator
-bun --filter '@kew/server' start     # API on :3000
+docker compose up -d redis             # or set REDIS_URL to your own
+bun --filter '@kew/server' seed        # realistic sample data
+bun --filter '@kew/server' demo        # (optional) live load generator
+bun run server                         # API + embedded dashboard on :3000
+bun run dev                            # or the Vite dev server on :5173 (proxies /api → :3000)
 ```
+
+The dashboard always talks to a real backend (no mock), so bring up Redis and the server first.
 
 ## Stack
 
