@@ -6,6 +6,13 @@ import { useMemo, useState } from "react";
 import { StateDot } from "@/components/state-badge";
 import { STATE_META } from "@/components/state-meta";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useConnection } from "@/lib/use-connection";
 import { useQueue, useSetQueuePaused } from "@/lib/use-queues";
 import { cn, compact } from "@/lib/utils";
@@ -135,22 +142,19 @@ export function JobsPage() {
           placeholder="Search id, name, payload…"
           className="h-8 w-full max-w-xs rounded-md border border-line bg-surface px-2.5 text-sm outline-none transition-colors placeholder:text-muted focus:border-line-strong"
         />
-        <div className="flex items-center gap-0.5 rounded-md border border-line bg-surface p-0.5 text-xs">
-          <SlidersHorizontal className="ml-1 size-3 text-muted" />
-          {TIME_WINDOWS.map((t) => (
-            <button
-              type="button"
-              key={t.id}
-              onClick={() => setWin(t.id)}
-              className={cn(
-                "rounded px-2 py-1 transition-colors",
-                win === t.id ? "bg-overlay text-ink" : "text-muted hover:text-ink",
-              )}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
+        <Select value={win} onValueChange={(v) => setWin(v as WindowId)}>
+          <SelectTrigger size="sm" className="w-36">
+            <SlidersHorizontal className="size-3 text-muted" />
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {TIME_WINDOWS.map((t) => (
+              <SelectItem key={t.id} value={t.id}>
+                {t.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <span className="ml-auto text-xs tnum text-muted">{jobs.length} shown</span>
       </div>
 

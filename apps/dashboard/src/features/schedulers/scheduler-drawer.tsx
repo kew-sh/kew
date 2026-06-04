@@ -1,10 +1,28 @@
 import type { Scheduler } from "@kew/core";
 import { CronExpressionParser } from "cron-parser";
 import cronstrue from "cronstrue";
-import { CalendarClock, Trash2, X } from "lucide-react";
+import { CalendarClock, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { JsonView } from "@/components/json-view";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { useRemoveScheduler } from "./use-schedulers";
 
 function human(s: Scheduler): string {
@@ -54,135 +72,128 @@ export function SchedulerDrawer({
   scheduler: Scheduler | null;
   onClose: () => void;
 }) {
-  const [confirm, setConfirm] = useState(false);
   const remove = useRemoveScheduler(queue);
+  const [shown, setShown] = useState<Scheduler | null>(scheduler);
 
   useEffect(() => {
-    if (scheduler) setConfirm(false);
-  }, [scheduler?.id, scheduler]);
+    if (scheduler) setShown(scheduler);
+  }, [scheduler]);
 
-  useEffect(() => {
-    if (!scheduler) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [scheduler, onClose]);
-
-  const runs = useMemo(() => (scheduler ? nextRuns(scheduler) : []), [scheduler]);
-
-  if (!scheduler) return null;
+  const s = scheduler ?? shown;
+  const runs = useMemo(() => (s ? nextRuns(s) : []), [s]);
 
   return (
-    <>
-      <div
-        className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[1px]"
-        onClick={onClose}
-        aria-hidden
-      />
-      <aside
-        role="dialog"
-        aria-label={`Scheduler ${scheduler.id}`}
-        className="fixed inset-y-0 right-0 z-50 flex w-full max-w-lg flex-col border-l border-line-strong bg-overlay shadow-2xl"
-      >
-        <div className="flex items-start justify-between gap-3 border-b border-line p-4">
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <CalendarClock className="size-4 text-children" />
-              <span className="font-mono text-xs text-muted">{scheduler.id}</span>
-            </div>
-            <h2 className="mt-1.5 truncate font-mono text-base font-semibold">{scheduler.name}</h2>
-            <p className="text-xs text-muted">
-              in <span className="font-mono">{queue}</span>
-            </p>
-          </div>
-          <Button variant="ghost" size="icon-sm" onClick={onClose} aria-label="Close">
-            <X className="size-4" />
-          </Button>
-        </div>
-
-        <div className="min-h-0 flex-1 space-y-5 overflow-y-auto p-4">
-          <section>
-            <h3 className="mb-1.5 text-xs font-medium uppercase tracking-wider text-muted">
-              Schedule
-            </h3>
-            <p className="text-sm">{human(scheduler)}</p>
-            <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted">
-              {scheduler.pattern && <span className="font-mono">{scheduler.pattern}</span>}
-              {scheduler.every && <span className="font-mono">every {scheduler.every}ms</span>}
-              {scheduler.tz && <span>tz: {scheduler.tz}</span>}
-            </div>
-          </section>
-
-          <section>
-            <h3 className="mb-1.5 text-xs font-medium uppercase tracking-wider text-muted">
-              Creates job
-            </h3>
-            <div className="rounded-md border border-line bg-canvas p-3">
-              <div className="font-mono text-sm">{scheduler.name}</div>
-              <div className="mt-0.5 text-xs text-muted">
-                enqueued into <span className="font-mono">{queue}</span> on every run
+    <Sheet
+      open={scheduler !== null}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
+      <SheetContent className="w-full gap-0 sm:max-w-lg">
+        {s && (
+          <>
+            <SheetHeader className="gap-1.5 border-b border-line p-4">
+              <div className="flex items-center gap-2">
+                <CalendarClock className="size-4 text-children" />
+                <span className="font-mono text-xs text-muted">{s.id}</span>
               </div>
-              {scheduler.data != null && (
-                <div className="mt-2.5">
-                  <div className="mb-1 text-[11px] uppercase tracking-wider text-muted">
-                    with data
-                  </div>
-                  <JsonView value={scheduler.data} />
+              <SheetTitle className="truncate font-mono text-base font-semibold">
+                {s.name}
+              </SheetTitle>
+              <SheetDescription className="text-xs text-muted">
+                in <span className="font-mono">{queue}</span>
+              </SheetDescription>
+            </SheetHeader>
+
+            <div className="min-h-0 flex-1 space-y-5 overflow-y-auto p-4">
+              <section>
+                <h3 className="mb-1.5 text-xs font-medium uppercase tracking-wider text-muted">
+                  Schedule
+                </h3>
+                <p className="text-sm">{human(s)}</p>
+                <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted">
+                  {s.pattern && <span className="font-mono">{s.pattern}</span>}
+                  {s.every && <span className="font-mono">every {s.every}ms</span>}
+                  {s.tz && <span>tz: {s.tz}</span>}
                 </div>
-              )}
+              </section>
+
+              <section>
+                <h3 className="mb-1.5 text-xs font-medium uppercase tracking-wider text-muted">
+                  Creates job
+                </h3>
+                <div className="rounded-md border border-line bg-canvas p-3">
+                  <div className="font-mono text-sm">{s.name}</div>
+                  <div className="mt-0.5 text-xs text-muted">
+                    enqueued into <span className="font-mono">{queue}</span> on every run
+                  </div>
+                  {s.data != null && (
+                    <div className="mt-2.5">
+                      <div className="mb-1 text-[11px] uppercase tracking-wider text-muted">
+                        with data
+                      </div>
+                      <JsonView value={s.data} />
+                    </div>
+                  )}
+                </div>
+              </section>
+
+              <section>
+                <h3 className="mb-1.5 text-xs font-medium uppercase tracking-wider text-muted">
+                  Next runs
+                </h3>
+                {runs.length === 0 ? (
+                  <p className="text-sm text-muted">
+                    Couldn't compute upcoming runs from this pattern.
+                  </p>
+                ) : (
+                  <ol className="overflow-hidden rounded-md border border-line">
+                    {runs.map((d, i) => (
+                      <li
+                        key={d.getTime()}
+                        className="flex items-center justify-between border-b border-line/50 px-3 py-2 text-sm last:border-0"
+                      >
+                        <span className="tnum">{fmt.format(d)}</span>
+                        <span className="text-xs text-muted">{i === 0 ? "next" : `+${i}`}</span>
+                      </li>
+                    ))}
+                  </ol>
+                )}
+              </section>
             </div>
-          </section>
 
-          <section>
-            <h3 className="mb-1.5 text-xs font-medium uppercase tracking-wider text-muted">
-              Next runs
-            </h3>
-            {runs.length === 0 ? (
-              <p className="text-sm text-muted">
-                Couldn't compute upcoming runs from this pattern.
-              </p>
-            ) : (
-              <ol className="overflow-hidden rounded-md border border-line">
-                {runs.map((d, i) => (
-                  <li
-                    key={d.getTime()}
-                    className="flex items-center justify-between border-b border-line/50 px-3 py-2 text-sm last:border-0"
-                  >
-                    <span className="tnum">{fmt.format(d)}</span>
-                    <span className="text-xs text-muted">{i === 0 ? "next" : `+${i}`}</span>
-                  </li>
-                ))}
-              </ol>
-            )}
-          </section>
-        </div>
-
-        <div className="flex items-center gap-2 border-t border-line p-3">
-          {confirm ? (
-            <>
-              <span className="text-sm text-muted">Remove this scheduler?</span>
-              <Button
-                variant="danger"
-                className="ml-auto"
-                disabled={remove.isPending}
-                onClick={() => remove.mutate(scheduler.id, { onSuccess: onClose })}
-              >
-                Confirm remove
-              </Button>
-              <Button variant="ghost" onClick={() => setConfirm(false)}>
-                Cancel
-              </Button>
-            </>
-          ) : (
-            <Button variant="danger" className="ml-auto" onClick={() => setConfirm(true)}>
-              <Trash2 className="size-3.5" />
-              Remove scheduler
-            </Button>
-          )}
-        </div>
-      </aside>
-    </>
+            <div className="flex items-center justify-end border-t border-line p-3">
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="danger">
+                    <Trash2 className="size-3.5" />
+                    Remove scheduler
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Remove this scheduler?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      <span className="font-mono">{s.name}</span> will stop enqueueing jobs into{" "}
+                      <span className="font-mono">{queue}</span>. Jobs it already created are kept.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      variant="danger"
+                      disabled={remove.isPending}
+                      onClick={() => remove.mutate(s.id, { onSuccess: onClose })}
+                    >
+                      Remove
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          </>
+        )}
+      </SheetContent>
+    </Sheet>
   );
 }

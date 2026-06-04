@@ -1,6 +1,16 @@
 import type { BulkAction } from "@kew/core";
 import { ArrowUp, RotateCw, Trash2, X } from "lucide-react";
-import { useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 
 export function BulkBar({
@@ -14,7 +24,6 @@ export function BulkBar({
   onAction: (action: BulkAction) => void;
   onClear: () => void;
 }) {
-  const [confirmRemove, setConfirmRemove] = useState(false);
   if (count === 0) return null;
 
   return (
@@ -26,53 +35,40 @@ export function BulkBar({
         </span>
         <div className="mx-1 h-5 w-px bg-line" />
 
-        {confirmRemove ? (
-          <>
-            <span className="px-1 text-sm text-muted">Remove {count}?</span>
-            <Button
-              size="sm"
-              variant="danger"
-              disabled={pending}
-              onClick={() => {
-                onAction("remove");
-                setConfirmRemove(false);
-              }}
-            >
-              Confirm
-            </Button>
-            <Button size="sm" variant="ghost" onClick={() => setConfirmRemove(false)}>
-              Cancel
-            </Button>
-          </>
-        ) : (
-          <>
-            <Button size="sm" variant="subtle" disabled={pending} onClick={() => onAction("retry")}>
-              <RotateCw className="size-3.5" />
-              Retry
-            </Button>
-            <Button
-              size="sm"
-              variant="subtle"
-              disabled={pending}
-              onClick={() => onAction("promote")}
-            >
-              <ArrowUp className="size-3.5" />
-              Promote
-            </Button>
-            <Button
-              size="sm"
-              variant="danger"
-              disabled={pending}
-              onClick={() => setConfirmRemove(true)}
-            >
+        <Button size="sm" variant="subtle" disabled={pending} onClick={() => onAction("retry")}>
+          <RotateCw className="size-3.5" />
+          Retry
+        </Button>
+        <Button size="sm" variant="subtle" disabled={pending} onClick={() => onAction("promote")}>
+          <ArrowUp className="size-3.5" />
+          Promote
+        </Button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button size="sm" variant="danger" disabled={pending}>
               <Trash2 className="size-3.5" />
               Remove
             </Button>
-            <Button size="icon-sm" variant="ghost" onClick={onClear} aria-label="Clear selection">
-              <X className="size-4" />
-            </Button>
-          </>
-        )}
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Remove {count} jobs?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This permanently removes the {count} selected jobs. BullMQ can't restore removed
+                jobs.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction variant="danger" onClick={() => onAction("remove")}>
+                Remove {count}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+        <Button size="icon-sm" variant="ghost" onClick={onClear} aria-label="Clear selection">
+          <X className="size-4" />
+        </Button>
       </div>
     </div>
   );

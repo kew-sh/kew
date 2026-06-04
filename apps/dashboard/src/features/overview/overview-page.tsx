@@ -1,9 +1,15 @@
 import { backlog, type QueueSummary } from "@kew/core";
 import { Inbox, Unplug } from "lucide-react";
 import { useMemo, useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useConnection } from "@/lib/use-connection";
 import { useQueues } from "@/lib/use-queues";
-import { cn } from "@/lib/utils";
 import { QueueRow } from "./queue-row";
 
 type Sort = "health" | "backlog" | "name";
@@ -33,21 +39,16 @@ export function OverviewPage() {
             {!disconnected && <span className="text-muted/60"> · updating live</span>}
           </p>
         </div>
-        <div className="flex items-center gap-0.5 rounded-lg border border-line bg-surface p-0.5 text-sm">
-          {(["health", "backlog", "name"] as Sort[]).map((s) => (
-            <button
-              type="button"
-              key={s}
-              onClick={() => setSort(s)}
-              className={cn(
-                "rounded-md px-2.5 py-1 capitalize transition-colors",
-                sort === s ? "bg-overlay text-ink" : "text-muted hover:text-ink",
-              )}
-            >
-              {s}
-            </button>
-          ))}
-        </div>
+        <Select value={sort} onValueChange={(v) => setSort(v as Sort)}>
+          <SelectTrigger size="sm" className="w-34">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="health">Health</SelectItem>
+            <SelectItem value="backlog">Backlog</SelectItem>
+            <SelectItem value="name">Name</SelectItem>
+          </SelectContent>
+        </Select>
       </header>
 
       <div className="mt-5">

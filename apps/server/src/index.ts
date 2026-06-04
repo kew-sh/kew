@@ -35,6 +35,13 @@ if (HOST !== "127.0.0.1" && HOST !== "localhost" && AUTH_MODE === "none") {
   );
 }
 
+process.on("uncaughtException", (err) => {
+  console.error(`kew: uncaught ${err.message}`);
+});
+process.on("unhandledRejection", (reason) => {
+  console.error(`kew: unhandled rejection ${String(reason)}`);
+});
+
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => reject(new Error("timeout")), ms);
