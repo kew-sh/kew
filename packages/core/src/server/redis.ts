@@ -1,5 +1,5 @@
-import type { ConnectionInfo } from "@kew/core/types";
 import { Redis } from "ioredis";
+import type { ConnectionInfo } from "../types";
 
 export const REDIS_URL = process.env.REDIS_URL ?? "redis://localhost:6379";
 export const BULLMQ_PREFIX = process.env.BULLMQ_PREFIX ?? "bull";

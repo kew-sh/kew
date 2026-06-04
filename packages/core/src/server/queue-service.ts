@@ -1,3 +1,5 @@
+import { FlowProducer, type JobNode, Queue } from "bullmq";
+import type { Redis } from "ioredis";
 import type {
   BulkAction,
   FlowNode,
@@ -8,9 +10,7 @@ import type {
   QueueSummary,
   Scheduler,
   SchedulerInput,
-} from "@kew/core/types";
-import { FlowProducer, type JobNode, Queue } from "bullmq";
-import type { Redis } from "ioredis";
+} from "../types";
 import { BULLMQ_PREFIX } from "./redis";
 import { getWindow } from "./sampler";
 

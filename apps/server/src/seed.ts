@@ -1,5 +1,5 @@
+import { createRedis } from "@kew/core/server";
 import { FlowProducer, Queue, Worker } from "bullmq";
-import { createRedis } from "./redis";
 
 /**
  * Populates Redis with a realistic, varied snapshot of BullMQ data so the

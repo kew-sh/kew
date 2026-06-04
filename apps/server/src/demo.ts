@@ -1,5 +1,5 @@
+import { createRedis } from "@kew/core/server";
 import { Queue, Worker } from "bullmq";
-import { createRedis } from "./redis";
 
 /**
  * Live load generator: trickles jobs into a few queues and processes them, so
