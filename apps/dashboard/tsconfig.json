@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@queue-panel/core": ["../../packages/core/src/index.ts"]
+    }
+  },
+  "include": ["src"]
+}

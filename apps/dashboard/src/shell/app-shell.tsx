@@ -1,0 +1,18 @@
+import { useState } from "react";
+import { Sidebar } from "./sidebar";
+import { Topbar } from "./topbar";
+import { CommandMenu } from "@/components/command-menu";
+
+export function AppShell({ children }: { children: React.ReactNode }) {
+  const [mobileNav, setMobileNav] = useState(false);
+  return (
+    <div className="flex h-screen overflow-hidden bg-canvas text-ink">
+      <Sidebar open={mobileNav} onClose={() => setMobileNav(false)} />
+      <div className="flex min-w-0 flex-1 flex-col">
+        <Topbar onMenu={() => setMobileNav(true)} />
+        <main className="min-h-0 flex-1 overflow-y-auto">{children}</main>
+      </div>
+      <CommandMenu />
+    </div>
+  );
+}
