@@ -1,5 +1,6 @@
 import * as mock from "./mock";
 import type {
+  BulkAction,
   ConnectionInfo,
   JobPage,
   JobQuery,
@@ -8,14 +9,19 @@ import type {
 
 /**
  * The single contract the UI talks to. Today it is mock-backed; the Bun+Redis
- * backend will implement the same interface (over fetch/WebSocket) with zero UI
- * changes. Keep this surface aligned with BullMQ's QueueGetters + Job actions.
+ * backend implements the same interface (over fetch) with zero UI changes.
+ * Keep this surface aligned with BullMQ's QueueGetters + Job actions.
  */
 export interface QueueApi {
   getConnection(): Promise<ConnectionInfo>;
   listQueues(): Promise<QueueSummary[]>;
   getQueue(name: string): Promise<QueueSummary | undefined>;
   getJobs(query: JobQuery): Promise<JobPage>;
+  bulkAction(input: {
+    queue: string;
+    ids: string[];
+    action: BulkAction;
+  }): Promise<{ affected: number }>;
 }
 
 const latency = (min = 60, max = 220) =>
@@ -50,19 +56,19 @@ export const api: QueueApi = {
     const term = query.search?.trim().toLowerCase();
     const filtered = term
       ? all.filter((j) =>
-          [j.id, j.name, JSON.stringify(j.data)]
-            .join(" ")
-            .toLowerCase()
-            .includes(term),
+          [j.id, j.name, JSON.stringify(j.data)].join(" ").toLowerCase().includes(term),
         )
       : all;
     const start = query.page * query.pageSize;
-    const jobs = filtered.slice(start, start + query.pageSize);
     return {
-      jobs,
+      jobs: filtered.slice(start, start + query.pageSize),
       total: filtered.length,
-      // payload search is a bounded scan in the real backend; be honest about it
       exact: !term,
     };
+  },
+
+  async bulkAction({ queue, ids, action }) {
+    await latency(80, 260);
+    return { affected: mock.bulkAction(queue, ids, action) };
   },
 };

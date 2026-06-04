@@ -175,6 +175,47 @@ function tick() {
 }
 setInterval(tick, 1500);
 
+export function bulkAction(
+  name: string,
+  ids: string[],
+  action: "retry" | "remove" | "promote",
+): number {
+  const q = world.find((x) => x.name === name);
+  if (!q) return 0;
+  const idset = new Set(ids);
+  let affected = 0;
+
+  if (action === "remove") {
+    const before = q.jobs.length;
+    q.jobs = q.jobs.filter((j) => {
+      if (!idset.has(j.id)) return true;
+      q.counts[j.state] = Math.max(0, q.counts[j.state] - 1);
+      return false;
+    });
+    return before - q.jobs.length;
+  }
+
+  for (const j of q.jobs) {
+    if (!idset.has(j.id)) continue;
+    if (action === "retry" && j.state === "failed") {
+      q.counts.failed = Math.max(0, q.counts.failed - 1);
+      j.state = "waiting";
+      j.attemptsMade = 0;
+      delete j.failedReason;
+      delete j.stacktrace;
+      q.counts.waiting += 1;
+      affected++;
+    } else if (action === "promote" && j.state === "delayed") {
+      q.counts.delayed = Math.max(0, q.counts.delayed - 1);
+      j.state = "waiting";
+      delete j.delayUntil;
+      q.counts.waiting += 1;
+      affected++;
+    }
+  }
+  return affected;
+}
+
 export function getQueues(): QueueSummary[] {
   return world.map((q) => {
     const completedWindow = q.throughput.reduce((a, b) => a + b, 0);

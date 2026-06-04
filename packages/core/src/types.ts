@@ -85,3 +85,5 @@ export interface ConnectionInfo {
   readOnly: boolean;
   redisVersion: string;
 }
+
+export type BulkAction = "retry" | "remove" | "promote";

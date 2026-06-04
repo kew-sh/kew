@@ -1,0 +1,22 @@
+{
+  "name": "@queue-panel/server",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Standalone backend: reads a real Redis via BullMQ and serves the QueueApi contract + the built dashboard.",
+  "scripts": {
+    "dev": "bun --watch src/index.ts",
+    "start": "bun src/index.ts",
+    "seed": "bun src/seed.ts",
+    "demo": "bun src/demo.ts"
+  },
+  "dependencies": {
+    "@queue-panel/core": "workspace:*",
+    "bullmq": "^5.34.0",
+    "hono": "^4.6.14",
+    "ioredis": "^5.4.2"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.1.14"
+  }
+}
