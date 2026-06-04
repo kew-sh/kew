@@ -175,6 +175,63 @@ function tick() {
 }
 setInterval(tick, 1500);
 
+type Sched = {
+  id: string;
+  name: string;
+  pattern?: string;
+  every?: number;
+  tz?: string;
+  next?: number;
+  data?: unknown;
+};
+
+const schedulers: Record<string, Sched[]> = {
+  emails: [
+    { id: "daily-digest", name: "digest", pattern: "0 9 * * *", tz: "UTC", next: Date.now() + 3_600_000, data: { kind: "digest" } },
+    { id: "weekly-report", name: "report", pattern: "0 8 * * 1", tz: "UTC", next: Date.now() + 86_400_000 },
+  ],
+  "media-processing": [
+    { id: "temp-cleanup", name: "cleanup-temp", every: 3_600_000, next: Date.now() + 600_000 },
+  ],
+  webhooks: [
+    { id: "retry-sweep", name: "retry-sweep", every: 300_000, next: Date.now() + 120_000 },
+  ],
+};
+
+export function getSchedulers(name: string): Sched[] {
+  return (schedulers[name] ?? []).map((s) => ({ ...s }));
+}
+
+export function upsertScheduler(input: {
+  queue: string;
+  id: string;
+  name: string;
+  pattern?: string;
+  every?: number;
+  tz?: string;
+  data?: unknown;
+}): void {
+  const list = (schedulers[input.queue] ??= []);
+  const next = Date.now() + (input.every ?? 60_000);
+  const rec: Sched = {
+    id: input.id,
+    name: input.name,
+    pattern: input.pattern,
+    every: input.every,
+    tz: input.tz,
+    data: input.data,
+    next,
+  };
+  const existing = list.find((s) => s.id === input.id);
+  if (existing) Object.assign(existing, rec);
+  else list.push(rec);
+}
+
+export function removeScheduler(name: string, id: string): void {
+  const list = schedulers[name];
+  if (list) schedulers[name] = list.filter((s) => s.id !== id);
+}
+
 export function bulkAction(
   name: string,
   ids: string[],

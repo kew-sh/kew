@@ -35,3 +35,11 @@ export function useJobs(query: JobQuery) {
     placeholderData: (prev) => prev,
   });
 }
+
+export function useSchedulers(queue: string) {
+  return useQuery({
+    queryKey: ["schedulers", queue],
+    queryFn: () => api.listSchedulers(queue),
+    refetchInterval: 5000,
+  });
+}

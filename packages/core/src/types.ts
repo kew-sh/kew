@@ -87,3 +87,28 @@ export interface ConnectionInfo {
 }
 
 export type BulkAction = "retry" | "remove" | "promote";
+
+export interface Scheduler {
+  id: string;
+  name: string;
+  /** cron expression, e.g. "0 9 * * *" */
+  pattern?: string;
+  /** or a fixed interval in ms (mutually exclusive with pattern) */
+  every?: number;
+  /** IANA timezone for the cron, e.g. "America/Sao_Paulo" */
+  tz?: string;
+  /** next run timestamp (ms); BullMQ provides this via getJobSchedulers */
+  next?: number;
+  /** template payload for the jobs this scheduler produces */
+  data?: unknown;
+}
+
+export interface SchedulerInput {
+  queue: string;
+  id: string;
+  name: string;
+  pattern?: string;
+  every?: number;
+  tz?: string;
+  data?: unknown;
+}

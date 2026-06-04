@@ -5,12 +5,14 @@ import type {
   JobPage,
   JobQuery,
   QueueSummary,
+  Scheduler,
+  SchedulerInput,
 } from "./types";
 
 /**
  * The single contract the UI talks to. Today it is mock-backed; the Bun+Redis
  * backend implements the same interface (over fetch) with zero UI changes.
- * Keep this surface aligned with BullMQ's QueueGetters + Job actions.
+ * Keep this surface aligned with BullMQ's QueueGetters + Job + JobScheduler API.
  */
 export interface QueueApi {
   getConnection(): Promise<ConnectionInfo>;
@@ -24,6 +26,10 @@ export interface QueueApi {
   }): Promise<{ affected: number }>;
   /** Retry a single failed job after editing its payload (BullMQ: updateData + retry). */
   retryWithData(input: { queue: string; id: string; data: unknown }): Promise<void>;
+  /** Cron / repeatable jobs via BullMQ Job Schedulers. */
+  listSchedulers(queue: string): Promise<Scheduler[]>;
+  upsertScheduler(input: SchedulerInput): Promise<void>;
+  removeScheduler(input: { queue: string; id: string }): Promise<void>;
 }
 
 const latency = (min = 60, max = 220) =>
@@ -77,5 +83,20 @@ export const api: QueueApi = {
   async retryWithData({ queue, id, data }) {
     await latency(80, 220);
     mock.retryWithData(queue, id, data);
+  },
+
+  async listSchedulers(queue) {
+    await latency();
+    return mock.getSchedulers(queue);
+  },
+
+  async upsertScheduler(input) {
+    await latency(80, 220);
+    mock.upsertScheduler(input);
+  },
+
+  async removeScheduler({ queue, id }) {
+    await latency(80, 220);
+    mock.removeScheduler(queue, id);
   },
 };
