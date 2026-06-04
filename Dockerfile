@@ -12,6 +12,12 @@ RUN bun run build
 
 FROM oven/bun:1-slim AS runtime
 WORKDIR /app
+
+LABEL org.opencontainers.image.title="Kew" \
+      org.opencontainers.image.description="The dashboard for BullMQ. Standalone, fast, and complete." \
+      org.opencontainers.image.url="https://kew.sh" \
+      org.opencontainers.image.licenses="BUSL-1.1"
+
 ENV NODE_ENV=production \
     HOST=0.0.0.0 \
     PORT=3000

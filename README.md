@@ -49,4 +49,4 @@ Monorepo (Bun workspaces):
 
 ## License
 
-Business Source License 1.1 (source-available; converts to open source after the change date).
+[Business Source License 1.1](LICENSE) — source-available. Read it, modify it, self-host it, and run it in production freely; you just may not offer Kew to third parties as a competing hosted or managed service. It converts to Apache 2.0 on the Change Date. See [NOTICE](NOTICE) for trademark and third-party attributions.
