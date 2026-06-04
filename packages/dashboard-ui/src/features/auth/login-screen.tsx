@@ -1,5 +1,5 @@
-import { Layers } from "lucide-react";
 import { useState } from "react";
+import { KewMark } from "../../components/brand";
 import { Button } from "../../components/ui/button";
 import { useAuth, useLogin } from "../../lib/use-auth";
 
@@ -23,9 +23,7 @@ export function LoginScreen() {
     <div className="grid h-screen place-items-center bg-canvas px-6 text-ink">
       <div className="w-full max-w-76">
         <div className="mb-7 flex flex-col items-center gap-3 text-center">
-          <span className="grid size-10 place-items-center rounded-lg bg-accent text-accent-ink">
-            <Layers className="size-5" strokeWidth={2.5} />
-          </span>
+          <KewMark className="size-10" />
           <div>
             <div className="text-base font-semibold tracking-tight">Kew</div>
             <p className="mt-1 text-xs text-muted">

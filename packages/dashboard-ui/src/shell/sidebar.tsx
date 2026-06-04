@@ -1,6 +1,7 @@
 import { type QueueSummary, queueHealth } from "@kew/core";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { BarChart3, CalendarClock, GitFork, Layers, ListChecks } from "lucide-react";
+import { BarChart3, CalendarClock, GitFork, ListChecks } from "lucide-react";
+import { KewMark } from "../components/brand";
 import { StateDot } from "../components/state-badge";
 import { Slot } from "../extensions";
 import { useConnection } from "../lib/use-connection";
@@ -24,11 +25,8 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
           open ? "max-md:translate-x-0" : "max-md:-translate-x-full",
         )}
       >
-        {/* brand mark — Layers glyph is a placeholder for the real Kew logo */}
         <div className="flex h-14 items-center gap-2.5 px-4">
-          <span className="grid size-7 place-items-center rounded-md bg-accent text-accent-ink">
-            <Layers className="size-4" strokeWidth={2.5} />
-          </span>
+          <KewMark className="size-7" />
           <span className="font-semibold tracking-tight">Kew</span>
           <span className="rounded bg-overlay px-1 py-0.5 font-mono text-[10px] text-muted">
             beta
