@@ -9,6 +9,7 @@ import { OverviewPage } from "@/features/overview/overview-page";
 import { JobsPage } from "@/features/jobs/jobs-page";
 import { SchedulersPage } from "@/features/schedulers/schedulers-page";
 import { FlowsPage } from "@/features/flows/flows-page";
+import { MetricsPage } from "@/features/metrics/metrics-page";
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -42,7 +43,19 @@ const flowsRoute = createRoute({
   component: FlowsPage,
 });
 
-const routeTree = rootRoute.addChildren([indexRoute, queueRoute, schedulersRoute, flowsRoute]);
+const metricsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/metrics",
+  component: MetricsPage,
+});
+
+const routeTree = rootRoute.addChildren([
+  indexRoute,
+  queueRoute,
+  schedulersRoute,
+  flowsRoute,
+  metricsRoute,
+]);
 
 export const router = createRouter({
   routeTree,

@@ -80,7 +80,18 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
             <GitFork className={cn("size-4", pathname === "/flows" ? "text-accent" : "text-muted")} />
             Flows
           </Link>
-          <NavSoon icon={<BarChart3 className="size-4" />}>Metrics</NavSoon>
+          <Link
+            to="/metrics"
+            className={cn(
+              "flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm",
+              pathname === "/metrics"
+                ? "bg-overlay font-medium text-ink"
+                : "text-ink-2 hover:bg-overlay/60 hover:text-ink",
+            )}
+          >
+            <BarChart3 className={cn("size-4", pathname === "/metrics" ? "text-accent" : "text-muted")} />
+            Metrics
+          </Link>
         </nav>
 
         <div className="mt-5 flex min-h-0 flex-1 flex-col">
