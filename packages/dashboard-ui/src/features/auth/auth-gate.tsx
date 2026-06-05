@@ -1,8 +1,16 @@
+import { useDashboardConfig } from "../../extensions";
 import { useAuth } from "../../lib/use-auth";
 import { LoginScreen } from "./login-screen";
 
 export function AuthGate({ children }: { children: React.ReactNode }) {
+  const { auth } = useDashboardConfig();
   const { data, isLoading, isError } = useAuth();
+  const path = window.location.pathname;
+
+  if (auth?.acceptInvite && path === "/accept-invite") {
+    const Screen = auth.acceptInvite;
+    return <Screen />;
+  }
 
   if (isLoading) {
     return (
@@ -21,7 +29,13 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (data?.authRequired && !data.authenticated) return <LoginScreen />;
+  if (data?.authRequired && !data.authenticated) {
+    if (auth?.signup && path === "/signup") {
+      const Screen = auth.signup;
+      return <Screen />;
+    }
+    return <LoginScreen />;
+  }
 
   return <>{children}</>;
 }

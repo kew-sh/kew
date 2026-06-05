@@ -35,9 +35,16 @@ export type ExtraRoute = {
   component: ComponentType;
 };
 
+export type AuthScreens = {
+  signup?: ComponentType;
+  acceptInvite?: ComponentType;
+  loginFooter?: ComponentType;
+};
+
 export type DashboardConfig = {
   extraRoutes?: ExtraRoute[];
   slots?: SlotMap;
+  auth?: AuthScreens;
 };
 
 const ConfigContext = createContext<DashboardConfig>({});

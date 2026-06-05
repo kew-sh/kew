@@ -10,7 +10,9 @@ import { Toaster, toast } from "./components/toast";
 import { ConfigProvider, type DashboardConfig } from "./extensions";
 import { buildRouter } from "./router";
 
+export { KewMark } from "./components/brand";
 export type {
+  AuthScreens,
   DashboardConfig,
   ExtraRoute,
   JobDrawerContext,

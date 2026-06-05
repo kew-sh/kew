@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { KewMark } from "../../components/brand";
 import { Button } from "../../components/ui/button";
+import { useDashboardConfig } from "../../extensions";
 import { useAuth, useLogin } from "../../lib/use-auth";
 
 function loginError(error: unknown): string {
@@ -12,6 +13,8 @@ function loginError(error: unknown): string {
 
 export function LoginScreen() {
   const { data: auth } = useAuth();
+  const { auth: authConfig } = useDashboardConfig();
+  const LoginFooter = authConfig?.loginFooter;
   const login = useLogin();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -76,6 +79,7 @@ export function LoginScreen() {
             </p>
           )}
         </form>
+        {LoginFooter && <LoginFooter />}
       </div>
     </div>
   );
