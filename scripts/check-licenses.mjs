@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync, statSync, existsSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 
 const FORBIDDEN =
@@ -62,9 +62,7 @@ if (offenders.length > 0) {
   for (const offender of [...new Set(offenders)].sort()) {
     console.error(`  ${offender}`);
   }
-  console.error(
-    "\nThese licenses are incompatible with redistributing Kew under the FSL and with",
-  );
+  console.error("\nThese licenses are incompatible with redistributing Kew under the FSL and with");
   console.error(
     "reusing community contributions in the proprietary cloud. Remove them before merging.",
   );
