@@ -1,7 +1,6 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
       "@kew/dashboard-ui": ["../../packages/dashboard-ui/src/index.tsx"]
     }

@@ -27,6 +27,18 @@ describe("redactRedisUrl", () => {
     );
     expect(redactRedisUrl("redis://localhost:6379")).toBe("redis://localhost:6379");
   });
+
+  test("masks passwords containing slashes and every node of a cluster URL", () => {
+    expect(redactRedisUrl("redis://:p%2Fw@host:6379")).toBe("redis://:***@host:6379");
+    expect(redactRedisUrl("redis://:pw@h1:6379,h2:6380")).toBe("redis://:***@h1:6379,h2:6380");
+    expect(redactRedisUrl("redis://user:pw@h1:6379,redis://user:pw@h2:6380")).toBe(
+      "redis://user:***@h1:6379,redis://user:***@h2:6380",
+    );
+    expect(redactRedisUrl("redis://user:pw@h1:6379,user:pw@h2:6380")).toBe(
+      "redis://user:***@h1:6379,user:***@h2:6380",
+    );
+    expect(redactRedisUrl("redis://h:6379?password=secret")).toBe("redis://h:6379?password=***");
+  });
 });
 
 describe("auth gate (password mode)", () => {

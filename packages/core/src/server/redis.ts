@@ -4,8 +4,25 @@ import type { ConnectionInfo } from "../types";
 export const REDIS_URL = process.env.REDIS_URL ?? "redis://localhost:6379";
 export const BULLMQ_PREFIX = process.env.BULLMQ_PREFIX ?? "bull";
 
+const SECRET_QUERY_KEY = /^(password|pass|pwd|auth|token|secret)$/i;
+
+function redactNode(node: string): string {
+  const hasScheme = node.includes("://");
+  try {
+    const parsed = new URL(hasScheme ? node : `redis://${node}`);
+    if (parsed.password) parsed.password = "***";
+    for (const key of [...parsed.searchParams.keys()]) {
+      if (SECRET_QUERY_KEY.test(key)) parsed.searchParams.set(key, "***");
+    }
+    const out = parsed.toString();
+    return hasScheme ? out : out.replace(/^redis:\/\//, "");
+  } catch {
+    return node.replace(/(\/\/[^/@]*:)[^@]*@/, "$1***@");
+  }
+}
+
 export function redactRedisUrl(url: string): string {
-  return url.replace(/(\/\/[^:/@]*:)[^@/]*@/, "$1***@");
+  return url.split(",").map(redactNode).join(",");
 }
 
 let everReady = false;

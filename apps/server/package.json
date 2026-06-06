@@ -15,7 +15,8 @@
     "@kew/core": "workspace:*",
     "bullmq": "^5.34.0",
     "hono": "^4.6.14",
-    "ioredis": "5.10.1"
+    "ioredis": "5.10.1",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/bun": "^1.1.14"

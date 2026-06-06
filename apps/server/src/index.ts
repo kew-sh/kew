@@ -18,17 +18,37 @@ import {
   startSampler,
   upsertScheduler,
 } from "@kew/core/server";
-import type { BulkAction, JobState, SchedulerInput } from "@kew/core/types";
+import type { JobState } from "@kew/core/types";
 import type { MiddlewareHandler } from "hono";
 import { Hono } from "hono";
 import { serveStatic } from "hono/bun";
 import { cors } from "hono/cors";
+import { z } from "zod";
 import { AUTH_MODE, handleLogin, handleLogout, handleMe, requireAuth } from "./auth";
+import { env } from "./env";
 
 const redis = createRedis();
-const READ_ONLY = process.env.READ_ONLY === "1";
-const PORT = Number(process.env.PORT ?? 3000);
-const HOST = process.env.HOST ?? "127.0.0.1";
+const { READ_ONLY, PORT, HOST } = env;
+
+const bulkSchema = z.object({
+  ids: z.array(z.string().min(1).max(256)).min(1).max(1000),
+  action: z.enum(["retry", "remove", "promote"]),
+});
+
+const schedulerSchema = z
+  .object({
+    id: z.string().min(1).max(256),
+    name: z.string().min(1).max(256).optional(),
+    pattern: z.string().max(256).optional(),
+    every: z.number().int().positive().optional(),
+    tz: z.string().max(64).optional(),
+    data: z.unknown().optional(),
+  })
+  .refine((v) => Boolean(v.pattern) || typeof v.every === "number", {
+    message: "pattern or every required",
+  });
+
+const retryWithDataSchema = z.object({ data: z.unknown() });
 
 if (HOST !== "127.0.0.1" && HOST !== "localhost" && AUTH_MODE === "none") {
   console.warn(
@@ -130,15 +150,16 @@ app.get("/api/queues/:name/jobs", async (c) => {
 
 app.post("/api/queues/:name/jobs/bulk", async (c) => {
   if (READ_ONLY) return c.json({ error: "read-only" }, 403);
-  const { ids, action } = await c.req.json<{ ids: string[]; action: BulkAction }>();
-  if (!Array.isArray(ids) || ids.length === 0) return c.json({ error: "ids required" }, 400);
-  return c.json(await applyBulk(c.req.param("name"), ids, action, redis));
+  const parsed = bulkSchema.safeParse(await c.req.json().catch(() => ({})));
+  if (!parsed.success) return c.json({ error: "invalid bulk request" }, 400);
+  return c.json(await applyBulk(c.req.param("name"), parsed.data.ids, parsed.data.action, redis));
 });
 
 app.post("/api/queues/:name/jobs/:id/retry-with-data", async (c) => {
   if (READ_ONLY) return c.json({ error: "read-only" }, 403);
-  const { data } = await c.req.json<{ data: unknown }>();
-  await retryWithData(c.req.param("name"), c.req.param("id"), data, redis);
+  const parsed = retryWithDataSchema.safeParse(await c.req.json().catch(() => undefined));
+  if (!parsed.success) return c.json({ error: "invalid request" }, 400);
+  await retryWithData(c.req.param("name"), c.req.param("id"), parsed.data.data, redis);
   return c.body(null, 204);
 });
 
@@ -148,9 +169,13 @@ app.get("/api/queues/:name/schedulers", async (c) =>
 
 app.post("/api/queues/:name/schedulers", async (c) => {
   if (READ_ONLY) return c.json({ error: "read-only" }, 403);
-  const body = await c.req.json<SchedulerInput>();
-  if (!body.pattern && !body.every) return c.json({ error: "pattern or every required" }, 400);
-  await upsertScheduler({ ...body, queue: c.req.param("name") }, redis);
+  const parsed = schedulerSchema.safeParse(await c.req.json().catch(() => ({})));
+  if (!parsed.success) return c.json({ error: "invalid scheduler" }, 400);
+  const { name } = parsed.data;
+  await upsertScheduler(
+    { ...parsed.data, name: name ?? parsed.data.id, queue: c.req.param("name") },
+    redis,
+  );
   return c.body(null, 204);
 });
 

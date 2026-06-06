@@ -27,12 +27,24 @@ export const STATES: JobState[] = [
 
 const SEARCH_SCAN_LIMIT = 500;
 
+const MAX_CACHED_QUEUES = 256;
 const cache = new Map<string, Queue>();
 export function getQueue(name: string, connection: Redis): Queue {
-  let q = cache.get(name);
-  if (!q) {
-    q = new Queue(name, { connection, prefix: BULLMQ_PREFIX });
-    cache.set(name, q);
+  const cached = cache.get(name);
+  if (cached) {
+    cache.delete(name);
+    cache.set(name, cached);
+    return cached;
+  }
+  const q = new Queue(name, { connection, prefix: BULLMQ_PREFIX });
+  cache.set(name, q);
+  if (cache.size > MAX_CACHED_QUEUES) {
+    const oldest = cache.keys().next().value;
+    if (oldest !== undefined) {
+      const evicted = cache.get(oldest);
+      cache.delete(oldest);
+      void evicted?.close();
+    }
   }
   return q;
 }
@@ -125,7 +137,8 @@ async function applyOne(q: Queue, id: string, action: BulkAction): Promise<boole
   try {
     if (action === "retry") await job.retry();
     else if (action === "promote") await job.promote();
-    else await job.remove();
+    else if (action === "remove") await job.remove();
+    else return false;
     return true;
   } catch {
     return false;
