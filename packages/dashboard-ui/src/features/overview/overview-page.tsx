@@ -1,19 +1,19 @@
 import { backlog, type QueueSummary } from "@kew/core";
 import { Inbox, Unplug } from "lucide-react";
 import { useMemo, useState } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../components/ui/select";
 import { Slot } from "../../extensions";
 import { useConnection } from "../../lib/use-connection";
 import { useQueues } from "../../lib/use-queues";
+import { cn } from "../../lib/utils";
 import { QueueRow } from "./queue-row";
 
 type Sort = "health" | "backlog" | "name";
+
+const SORTS: { id: Sort; label: string }[] = [
+  { id: "health", label: "Health" },
+  { id: "backlog", label: "Backlog" },
+  { id: "name", label: "Name" },
+];
 
 export function OverviewPage() {
   const { data: queues } = useQueues();
@@ -21,17 +21,24 @@ export function OverviewPage() {
   const [sort, setSort] = useState<Sort>("health");
   const disconnected = conn?.status === "error";
 
-  const sorted = useMemo(() => {
+  const nameKey = JSON.stringify((queues ?? []).map((q) => q.name));
+  // biome-ignore lint/correctness/useExhaustiveDependencies: the order is intentionally frozen against live metric updates — it re-sorts only when the sort mode or the set of queues changes, so rows stay put while their numbers update underneath.
+  const order = useMemo(() => {
     if (!queues) return [];
     const arr = [...queues];
     if (sort === "name") arr.sort((a, b) => a.name.localeCompare(b.name));
     else if (sort === "backlog") arr.sort((a, b) => backlog(b) - backlog(a));
     else arr.sort((a, b) => severity(b) - severity(a));
-    return arr;
-  }, [queues, sort]);
+    return arr.map((q) => q.name);
+  }, [sort, nameKey]);
+
+  const sorted = useMemo(() => {
+    const byName = new Map((queues ?? []).map((q) => [q.name, q] as const));
+    return order.map((n) => byName.get(n)).filter((q): q is QueueSummary => Boolean(q));
+  }, [order, queues]);
 
   return (
-    <div className="mx-auto max-w-270 px-4 py-6 md:px-8 md:py-8">
+    <div className="mx-auto max-w-[1600px] px-4 py-6 md:px-8 md:py-8">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-xl font-semibold tracking-tight">Queues</h1>
@@ -40,16 +47,25 @@ export function OverviewPage() {
             {!disconnected && <span className="text-muted"> · updating live</span>}
           </p>
         </div>
-        <Select value={sort} onValueChange={(v) => setSort(v as Sort)}>
-          <SelectTrigger size="sm" className="w-34">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="health">Health</SelectItem>
-            <SelectItem value="backlog">Backlog</SelectItem>
-            <SelectItem value="name">Name</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted">Sort</span>
+          <div className="inline-flex items-center gap-0.5 rounded-md border border-line bg-surface p-0.5">
+            {SORTS.map((s) => (
+              <button
+                key={s.id}
+                type="button"
+                aria-pressed={sort === s.id}
+                onClick={() => setSort(s.id)}
+                className={cn(
+                  "rounded px-2.5 py-1 text-xs transition-colors",
+                  sort === s.id ? "bg-overlay font-medium text-ink" : "text-muted hover:text-ink",
+                )}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+        </div>
         <Slot name="overview.header.actions" ctx={{ queues }} />
       </header>
 
@@ -69,7 +85,7 @@ export function OverviewPage() {
             <div className="hidden grid-cols-[minmax(0,1.4fr)_minmax(0,2fr)_112px_72px] gap-4 px-3 pb-2 text-[11px] font-medium uppercase tracking-wider text-muted md:grid">
               <span>Queue</span>
               <span>States</span>
-              <span>30-min throughput</span>
+              <span>throughput · 60s</span>
               <span className="text-right">Rate</span>
             </div>
             <div className="space-y-1.5">

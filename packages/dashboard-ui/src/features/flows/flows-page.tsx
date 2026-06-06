@@ -8,7 +8,7 @@ export function FlowsPage() {
   const { data: flows } = useFlows();
 
   return (
-    <div className="mx-auto max-w-270 px-4 py-6 md:px-8 md:py-8">
+    <div className="mx-auto max-w-[1600px] px-4 py-6 md:px-8 md:py-8">
       <header>
         <h1 className="text-xl font-semibold tracking-tight">Flows</h1>
         <p className="mt-0.5 text-sm text-muted">Parent / child job trees (BullMQ Flows)</p>

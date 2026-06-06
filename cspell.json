@@ -1,0 +1,18 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    "AUTOINCREMENT",
+    "bullmq",
+    "ioredis",
+    "oklch",
+    "tnum",
+    "drizzle",
+    "healthz",
+    "cronstrue",
+    "Topbar",
+    "Sparkline",
+    "virtualizer"
+  ],
+  "ignorePaths": ["node_modules", "dist", "bun.lock", "*.db", "*.db-wal", "*.db-shm"]
+}

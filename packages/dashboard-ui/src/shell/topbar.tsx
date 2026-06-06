@@ -1,5 +1,4 @@
-import { Bug, LogOut, Menu, Search } from "lucide-react";
-import { useState } from "react";
+import { LogOut, Menu, Search } from "lucide-react";
 import { StateDot } from "../components/state-badge";
 import { ThemeToggle } from "../components/theme";
 import { Button } from "../components/ui/button";
@@ -40,7 +39,6 @@ export function Topbar({ onMenu }: { onMenu: () => void }) {
           <StateDot state="completed" pulse />
           Live
         </span>
-        {import.meta.env.DEV && <CrashButton />}
         <ThemeToggle />
         {canLogout && (
           <Button
@@ -56,22 +54,5 @@ export function Topbar({ onMenu }: { onMenu: () => void }) {
         )}
       </div>
     </header>
-  );
-}
-
-function CrashButton() {
-  const [crash, setCrash] = useState(false);
-  if (crash) throw new Error("Forced error from the header crash button (dev only).");
-  return (
-    <Button
-      variant="ghost"
-      size="icon-sm"
-      onClick={() => setCrash(true)}
-      aria-label="Force an error (dev only)"
-      title="Force an error (dev only)"
-      className="text-muted hover:bg-failed/12 hover:text-failed"
-    >
-      <Bug className="size-4" />
-    </Button>
   );
 }

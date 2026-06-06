@@ -38,6 +38,21 @@ export const httpApi: QueueApi = {
       })
       .then((r) => r.data),
 
+  getHistory: (query) =>
+    client
+      .get<JobPage>("/history", {
+        params: {
+          queue: query.queue,
+          state: query.state,
+          from: query.from,
+          to: query.to,
+          search: query.search,
+          page: query.page,
+          pageSize: query.pageSize,
+        },
+      })
+      .then((r) => r.data),
+
   bulkAction: ({ queue, ids, action }) =>
     client
       .post<{ affected: number }>(`/queues/${enc(queue)}/jobs/bulk`, { ids, action })

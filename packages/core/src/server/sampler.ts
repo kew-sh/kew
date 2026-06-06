@@ -9,7 +9,8 @@ import { getQueue } from "./queue-service";
  */
 
 const WINDOW = 30;
-const INTERVAL_MS = 2500;
+const INTERVAL_MS = 2000;
+const WINDOW_MINUTES = (WINDOW * INTERVAL_MS) / 60_000;
 
 interface Win {
   throughput: number[];
@@ -32,7 +33,7 @@ export function getWindow(name: string) {
   return {
     throughput: w.throughput,
     failures: w.failures,
-    ratePerMin: w.throughput[w.throughput.length - 1] ?? 0,
+    ratePerMin: Math.round(completed / WINDOW_MINUTES),
     failRate: completed + failed === 0 ? 0 : failed / (completed + failed),
   };
 }

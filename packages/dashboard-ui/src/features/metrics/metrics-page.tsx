@@ -17,11 +17,11 @@ export function MetricsPage() {
   }, [queues]);
 
   return (
-    <div className="mx-auto max-w-270 px-4 py-6 md:px-8 md:py-8">
+    <div className="mx-auto max-w-[1600px] px-4 py-6 md:px-8 md:py-8">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-xl font-semibold tracking-tight">Metrics</h1>
-          <p className="mt-0.5 text-sm text-muted">Live throughput &amp; failures · last 30 min</p>
+          <p className="mt-0.5 text-sm text-muted">Live throughput &amp; failures · last 60s</p>
         </div>
         <Legend />
       </header>
@@ -37,9 +37,9 @@ export function MetricsPage() {
         <>
           <div className="mt-4 flex flex-wrap gap-x-8 gap-y-2 rounded-lg border border-line bg-surface px-4 py-3">
             <Stat label="Throughput" value={`${compact(agg.rate)}/m`} />
-            <Stat label="Completed · 30m" value={compact(agg.completed)} />
+            <Stat label="Completed · 60s" value={compact(agg.completed)} />
             <Stat
-              label="Failed · 30m"
+              label="Failed · 60s"
               value={compact(agg.failed)}
               tone={agg.failed > 0 ? "failed" : undefined}
             />

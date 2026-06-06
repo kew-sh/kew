@@ -73,6 +73,16 @@ export interface JobQuery {
   search?: string;
 }
 
+export interface HistoryQuery {
+  queue?: string;
+  state?: "completed" | "failed";
+  from?: number;
+  to?: number;
+  search?: string;
+  page: number;
+  pageSize: number;
+}
+
 export interface ConnectionInfo {
   url: string;
   status: "connected" | "connecting" | "error";

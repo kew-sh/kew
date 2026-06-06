@@ -9,12 +9,14 @@ import {
   listFlows,
   listSchedulers,
   REDIS_URL,
+  type RetentionHandle,
   redactRedisUrl,
   redisStatus,
   removeScheduler,
   retryWithData,
   STATES,
   setQueuePaused,
+  startRetention,
   startSampler,
   upsertScheduler,
 } from "@kew/core/server";
@@ -26,9 +28,22 @@ import { cors } from "hono/cors";
 import { z } from "zod";
 import { AUTH_MODE, handleLogin, handleLogout, handleMe, requireAuth } from "./auth";
 import { env } from "./env";
+import { createSqliteRetention, type RetentionStore } from "./retention-store";
 
 const redis = createRedis();
 const { READ_ONLY, PORT, HOST } = env;
+
+let retention: RetentionHandle | undefined;
+let retentionStore: RetentionStore | undefined;
+if (env.KEW_RETENTION) {
+  retentionStore = createSqliteRetention({
+    path: env.KEW_RETENTION_DB_PATH,
+    maxAgeMs:
+      env.KEW_RETENTION_MAX_AGE_DAYS > 0 ? env.KEW_RETENTION_MAX_AGE_DAYS * 86_400_000 : undefined,
+    maxRows: env.KEW_RETENTION_MAX_ROWS > 0 ? env.KEW_RETENTION_MAX_ROWS : undefined,
+  });
+  retention = startRetention(redis, () => discoverQueues(redis), retentionStore.sink);
+}
 
 const bulkSchema = z.object({
   ids: z.array(z.string().min(1).max(256)).min(1).max(1000),
@@ -110,6 +125,22 @@ app.get("/api/connection", async (c) => {
     }
   }
   return c.json({ url: redactRedisUrl(REDIS_URL), status, readOnly: READ_ONLY, redisVersion });
+});
+
+app.get("/api/history", (c) => {
+  if (!retentionStore) return c.json({ jobs: [], total: 0, exact: true });
+  const stateRaw = c.req.query("state");
+  return c.json(
+    retentionStore.query({
+      queue: c.req.query("queue") || undefined,
+      state: stateRaw === "completed" || stateRaw === "failed" ? stateRaw : undefined,
+      from: Number(c.req.query("from")) || undefined,
+      to: Number(c.req.query("to")) || undefined,
+      search: c.req.query("search") || undefined,
+      page: Math.max(0, Number(c.req.query("page") ?? 0)),
+      pageSize: Math.min(200, Math.max(1, Number(c.req.query("pageSize") ?? 50))),
+    }),
+  );
 });
 
 app.use("/api/queues", requireRedis);
@@ -194,12 +225,15 @@ if (existsSync(dist)) {
 }
 
 console.log(
-  `Kew server → http://${HOST}:${PORT}  (redis: ${redactRedisUrl(REDIS_URL)}, auth: ${AUTH_MODE})`,
+  `Kew server → http://${HOST}:${PORT}  (redis: ${redactRedisUrl(REDIS_URL)}, auth: ${AUTH_MODE}, retention: ${env.KEW_RETENTION ? "on" : "off"})`,
 );
 
 for (const signal of ["SIGTERM", "SIGINT"] as const) {
-  process.on(signal, () => {
-    redis.quit().finally(() => process.exit(0));
+  process.on(signal, async () => {
+    await retention?.stop().catch(() => {});
+    retentionStore?.close();
+    await redis.quit().catch(() => {});
+    process.exit(0);
   });
 }
 

@@ -21,7 +21,11 @@ LABEL org.opencontainers.image.title="Kew" \
 
 ENV NODE_ENV=production \
     HOST=0.0.0.0 \
-    PORT=3000
+    PORT=3000 \
+    KEW_RETENTION_DB_PATH=/data/kew-retention.db
+
+RUN mkdir -p /data
+VOLUME /data
 
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json

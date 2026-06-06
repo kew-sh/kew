@@ -24,6 +24,9 @@ const FlowsPage = lazy(() =>
 const MetricsPage = lazy(() =>
   import("./features/metrics/metrics-page").then((m) => ({ default: m.MetricsPage })),
 );
+const HistoryPage = lazy(() =>
+  import("./features/history/history-page").then((m) => ({ default: m.HistoryPage })),
+);
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -65,6 +68,12 @@ const metricsRoute = createRoute({
   component: MetricsPage,
 });
 
+const historyRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/history",
+  component: HistoryPage,
+});
+
 export function buildRouter(extraRoutes: ExtraRoute[] = []) {
   const extra = extraRoutes.map((r) =>
     createRoute({
@@ -79,6 +88,7 @@ export function buildRouter(extraRoutes: ExtraRoute[] = []) {
     schedulersRoute,
     flowsRoute,
     metricsRoute,
+    historyRoute,
     ...extra,
   ]);
   return createRouter({

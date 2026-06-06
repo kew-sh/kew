@@ -45,7 +45,7 @@ export function JobsPage() {
   const { data: conn } = useConnection();
   const readOnly = conn?.readOnly ?? false;
 
-  const [state, setState] = useState<JobState>("failed");
+  const [state, setState] = useState<JobState>("completed");
   const [search, setSearch] = useState("");
   const [win, setWin] = useState<WindowId>("all");
   const [selection, setSelection] = useState<RowSelectionState>({});
@@ -78,7 +78,7 @@ export function JobsPage() {
   };
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="mx-auto flex h-full w-full max-w-[1600px] flex-col">
       <div className="px-4 pt-4 md:px-8">
         <Link to="/" className="inline-flex items-center gap-1 text-xs text-muted hover:text-ink">
           <ArrowLeft className="size-3" />

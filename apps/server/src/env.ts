@@ -27,6 +27,11 @@ const schema = z.object({
 
   REDIS_URL: z.string().default("redis://localhost:6379"),
   BULLMQ_PREFIX: z.string().default("bull"),
+
+  KEW_RETENTION: oneIsTrue,
+  KEW_RETENTION_DB_PATH: z.string().default("./kew-retention.db"),
+  KEW_RETENTION_MAX_AGE_DAYS: z.coerce.number().int().min(0).default(30),
+  KEW_RETENTION_MAX_ROWS: z.coerce.number().int().min(0).default(0),
 });
 
 const parsed = schema.safeParse(process.env);

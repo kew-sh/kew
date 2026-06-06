@@ -4,6 +4,7 @@ import type {
   BulkAction,
   ConnectionInfo,
   FlowNode,
+  HistoryQuery,
   JobPage,
   JobQuery,
   QueueSummary,
@@ -20,6 +21,7 @@ export interface QueueApi {
   getQueue(name: string): Promise<QueueSummary | undefined>;
   setQueuePaused(input: { queue: string; paused: boolean }): Promise<void>;
   getJobs(query: JobQuery): Promise<JobPage>;
+  getHistory(query: HistoryQuery): Promise<JobPage>;
   bulkAction(input: {
     queue: string;
     ids: string[];

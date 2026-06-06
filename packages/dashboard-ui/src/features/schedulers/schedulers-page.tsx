@@ -1,4 +1,5 @@
-import type { Scheduler } from "@kew/core";
+import { api, type Scheduler } from "@kew/core";
+import { useQueries } from "@tanstack/react-query";
 import cronstrue from "cronstrue";
 import { CalendarClock, ChevronRight, Plus, Trash2, X } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -42,8 +43,19 @@ export function SchedulersPage() {
   const [creating, setCreating] = useState(false);
   const [open, setOpen] = useState<{ queue: string; scheduler: Scheduler } | null>(null);
 
+  const schedulerQueries = useQueries({
+    queries: (queues ?? []).map((q) => ({
+      queryKey: ["schedulers", q.name],
+      queryFn: () => api.listSchedulers(q.name),
+      refetchInterval: 5000,
+    })),
+  });
+  const loadingSchedulers = schedulerQueries.some((r) => r.isLoading);
+  const totalSchedulers = schedulerQueries.reduce((a, r) => a + (r.data?.length ?? 0), 0);
+  const isEmpty = Boolean(queues) && !loadingSchedulers && totalSchedulers === 0;
+
   return (
-    <div className="mx-auto max-w-270 px-4 py-6 md:px-8 md:py-8">
+    <div className="mx-auto max-w-[1600px] px-4 py-6 md:px-8 md:py-8">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-xl font-semibold tracking-tight">Schedulers</h1>
@@ -60,20 +72,24 @@ export function SchedulersPage() {
       )}
 
       <div className="mt-6 space-y-6">
-        {!queues
-          ? ["a", "b"].map((k) => (
-              <div key={k}>
-                <Skeleton className="mb-2 h-3.5 w-28" />
-                <Skeleton className="h-24 w-full rounded-lg" />
-              </div>
-            ))
-          : queues.map((q) => (
-              <QueueSchedulers
-                key={q.name}
-                queue={q.name}
-                onOpen={(scheduler) => setOpen({ queue: q.name, scheduler })}
-              />
-            ))}
+        {!queues ? (
+          ["a", "b"].map((k) => (
+            <div key={k}>
+              <Skeleton className="mb-2 h-3.5 w-28" />
+              <Skeleton className="h-24 w-full rounded-lg" />
+            </div>
+          ))
+        ) : isEmpty && !creating ? (
+          <EmptySchedulers />
+        ) : (
+          queues.map((q) => (
+            <QueueSchedulers
+              key={q.name}
+              queue={q.name}
+              onOpen={(scheduler) => setOpen({ queue: q.name, scheduler })}
+            />
+          ))
+        )}
       </div>
 
       <SchedulerDrawer
@@ -81,6 +97,20 @@ export function SchedulersPage() {
         scheduler={open?.scheduler ?? null}
         onClose={() => setOpen(null)}
       />
+    </div>
+  );
+}
+
+function EmptySchedulers() {
+  return (
+    <div className="flex flex-col items-center rounded-lg border border-dashed border-line bg-surface/50 px-6 py-16 text-center">
+      <CalendarClock className="size-7 text-muted" />
+      <h2 className="mt-3 text-sm font-medium text-ink">No schedulers yet</h2>
+      <p className="mt-1 max-w-sm text-sm text-muted">
+        Cron and repeatable jobs you register show up here, grouped by queue. Add one with{" "}
+        <span className="font-mono text-ink-2">New schedule</span>, or call{" "}
+        <span className="font-mono text-ink-2">queue.upsertJobScheduler()</span> from your app.
+      </p>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { type QueueSummary, queueHealth } from "@kew/core";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { BarChart3, CalendarClock, GitFork, ListChecks } from "lucide-react";
+import { BarChart3, CalendarClock, GitFork, History, ListChecks } from "lucide-react";
 import { KewMark } from "../components/brand";
 import { StateDot } from "../components/state-badge";
 import { Slot } from "../extensions";
@@ -21,16 +21,13 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
       <aside
         className={cn(
           "z-40 flex w-60 shrink-0 flex-col border-r border-line bg-surface",
-          "max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:shadow-2xl max-md:transition-transform max-md:duration-200 max-md:ease-[var(--ease-out-quart)]",
+          "max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:shadow-2xl max-md:transition-transform max-md:duration-200 max-md:ease-out-quart",
           open ? "max-md:translate-x-0" : "max-md:-translate-x-full",
         )}
       >
         <div className="flex h-14 items-center gap-2.5 px-4">
           <KewMark className="size-7" />
           <span className="font-semibold tracking-tight">Kew</span>
-          <span className="rounded bg-overlay px-1 py-0.5 font-mono text-[10px] text-muted">
-            beta
-          </span>
         </div>
 
         <nav className="space-y-0.5 px-2 pt-1">
@@ -87,6 +84,20 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
               className={cn("size-4", pathname === "/metrics" ? "text-accent" : "text-muted")}
             />
             Metrics
+          </Link>
+          <Link
+            to="/history"
+            className={cn(
+              "flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm max-md:py-3",
+              pathname === "/history"
+                ? "bg-overlay font-medium text-ink"
+                : "text-ink-2 hover:bg-overlay/60 hover:text-ink",
+            )}
+          >
+            <History
+              className={cn("size-4", pathname === "/history" ? "text-accent" : "text-muted")}
+            />
+            History
           </Link>
           <Slot name="sidebar.nav.extra" />
         </nav>

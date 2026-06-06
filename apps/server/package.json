@@ -9,6 +9,7 @@
     "start": "bun src/index.ts",
     "seed": "bun src/seed.ts",
     "demo": "bun src/demo.ts",
+    "feed": "bun src/test-feeder.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

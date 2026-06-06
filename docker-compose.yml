@@ -17,9 +17,14 @@ services:
       - "3000:3000"
     environment:
       REDIS_URL: redis://redis:6379
+      # Keep a durable job history (completed/failed), even when removeOnComplete
+      # clears jobs from Redis. Stored in SQLite on the kew-data volume below.
+      KEW_RETENTION: "1"
       # Set a secret to require login (recommended whenever this is reachable):
       # KEW_AUTH_TOKEN: change-me
       # KEW_AUTH_USER: you@example.com
+    volumes:
+      - kew-data:/data
     healthcheck:
       test:
         - CMD
@@ -32,3 +37,4 @@ services:
 
 volumes:
   redis-data:
+  kew-data:

@@ -88,12 +88,14 @@ export function JobTable({
   onSelectionChange,
   onOpenJob,
   readOnly,
+  rowId,
 }: {
   jobs: Job[];
   selection: RowSelectionState;
   onSelectionChange: OnChangeFn<RowSelectionState>;
   onOpenJob: (job: Job) => void;
   readOnly: boolean;
+  rowId?: (job: Job) => string;
 }) {
   const parentRef = useRef<HTMLDivElement>(null);
   const table = useReactTable({
@@ -102,7 +104,7 @@ export function JobTable({
     state: { rowSelection: selection },
     enableRowSelection: !readOnly,
     onRowSelectionChange: onSelectionChange,
-    getRowId: (j) => j.id,
+    getRowId: rowId ?? ((j) => j.id),
     getCoreRowModel: getCoreRowModel(),
   });
 
