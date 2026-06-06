@@ -18,7 +18,7 @@
 ### Docker
 
 ```bash
-docker compose up --build              # Kew on http://localhost:3000, plus a Redis to play with
+docker compose up --build              # Kew on http://localhost:5399, plus a Redis to play with
 bun --filter '@kew/server' seed        # (optional) load realistic sample data into that Redis
 ```
 
@@ -31,8 +31,8 @@ bun install
 docker compose up -d redis             # or set REDIS_URL to your own
 bun --filter '@kew/server' seed        # realistic sample data
 bun --filter '@kew/server' demo        # (optional) live load generator
-bun run server                         # API + embedded dashboard on :3000
-bun run dev                            # or the Vite dev server on :5173 (proxies /api → :3000)
+bun run server                         # API + embedded dashboard on :5399
+bun run dev                            # or the Vite dev server on :5173 (proxies /api → :5399)
 ```
 
 The dashboard always talks to a real backend (no mock), so bring up Redis and the server first.

@@ -21,7 +21,7 @@ LABEL org.opencontainers.image.title="Kew" \
 
 ENV NODE_ENV=production \
     HOST=0.0.0.0 \
-    PORT=3000 \
+    PORT=5399 \
     KEW_RETENTION_DB_PATH=/data/kew-retention.db
 
 RUN mkdir -p /data
@@ -34,5 +34,5 @@ COPY --from=builder /app/apps/server ./apps/server
 COPY --from=builder /app/apps/dashboard/package.json ./apps/dashboard/package.json
 COPY --from=builder /app/apps/dashboard/dist ./apps/dashboard/dist
 
-EXPOSE 3000
+EXPOSE 5399
 CMD ["bun", "apps/server/src/index.ts"]

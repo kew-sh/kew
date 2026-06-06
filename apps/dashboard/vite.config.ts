@@ -12,7 +12,7 @@ export default defineConfig({
     host: true,
     proxy: {
       "/api": {
-        target: process.env.KEW_API_TARGET ?? "http://localhost:3000",
+        target: process.env.KEW_API_TARGET ?? "http://localhost:5399",
         changeOrigin: true,
       },
     },

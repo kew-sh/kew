@@ -11,7 +11,7 @@ const optionalString = z
   .transform((v) => (v ? v : undefined));
 
 const schema = z.object({
-  PORT: z.coerce.number().int().positive().default(3000),
+  PORT: z.coerce.number().int().positive().default(5399),
   HOST: z.string().default("127.0.0.1"),
   READ_ONLY: oneIsTrue,
 
