@@ -1,25 +1,18 @@
-import { LogOut, Menu, Search } from "lucide-react";
+import { LogOut, Search } from "lucide-react";
 import { StateDot } from "../components/state-badge";
 import { ThemeToggle } from "../components/theme";
 import { Button } from "../components/ui/button";
+import { SidebarTrigger } from "../components/ui/sidebar";
 import { Slot } from "../extensions";
 import { useAuth, useLogout } from "../lib/use-auth";
 
-export function Topbar({ onMenu }: { onMenu: () => void }) {
+export function Topbar() {
   const { data: auth } = useAuth();
   const logout = useLogout();
   const canLogout = Boolean(auth?.authRequired && auth.authenticated && auth.mode === "password");
   return (
     <header className="flex h-14 shrink-0 items-center gap-3 border-b border-line bg-surface/70 px-3 backdrop-blur">
-      <Button
-        variant="ghost"
-        size="icon"
-        className="md:hidden"
-        onClick={onMenu}
-        aria-label="Open navigation"
-      >
-        <Menu className="size-5" />
-      </Button>
+      <SidebarTrigger className="size-7 text-muted hover:text-ink [&_svg]:size-4" />
 
       <button
         type="button"

@@ -10,6 +10,7 @@ import type {
   QueueSummary,
   Scheduler,
   SchedulerInput,
+  VersionInfo,
 } from "./types";
 
 export interface QueueApi {
@@ -17,6 +18,7 @@ export interface QueueApi {
   login(input: { email?: string; password: string }): Promise<void>;
   logout(): Promise<void>;
   getConnection(): Promise<ConnectionInfo>;
+  getVersion(): Promise<VersionInfo>;
   listQueues(): Promise<QueueSummary[]>;
   getQueue(name: string): Promise<QueueSummary | undefined>;
   setQueuePaused(input: { queue: string; paused: boolean }): Promise<void>;

@@ -90,6 +90,12 @@ export interface ConnectionInfo {
   redisVersion: string;
 }
 
+export interface VersionInfo {
+  current: string;
+  latest?: string;
+  updateAvailable: boolean;
+}
+
 export interface AuthInfo {
   authRequired: boolean;
   authenticated: boolean;

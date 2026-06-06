@@ -29,6 +29,7 @@ import { z } from "zod";
 import { AUTH_MODE, handleLogin, handleLogout, handleMe, requireAuth } from "./auth";
 import { env } from "./env";
 import { createSqliteRetention, type RetentionStore } from "./retention-store";
+import { getVersionInfo } from "./version";
 
 const redis = createRedis();
 const { READ_ONLY, PORT, HOST } = env;
@@ -102,6 +103,7 @@ const requireRedis: MiddlewareHandler = async (c, next) => {
 };
 
 startSampler(redis, () => discoverQueues(redis));
+void getVersionInfo();
 
 const app = new Hono();
 app.use("/api/*", cors());
@@ -126,6 +128,8 @@ app.get("/api/connection", async (c) => {
   }
   return c.json({ url: redactRedisUrl(REDIS_URL), status, readOnly: READ_ONLY, redisVersion });
 });
+
+app.get("/api/version", async (c) => c.json(await getVersionInfo()));
 
 app.get("/api/history", (c) => {
   if (!retentionStore) return c.json({ jobs: [], total: 0, exact: true });
@@ -220,7 +224,7 @@ app.get("/api/flows", async (c) => c.json(await listFlows(redis)));
 
 const dist = fileURLToPath(new URL("../../dashboard/dist", import.meta.url));
 if (existsSync(dist)) {
-  app.use("/assets/*", serveStatic({ root: dist }));
+  app.use("/*", serveStatic({ root: dist }));
   app.get("/*", serveStatic({ path: "index.html", root: dist }));
 }
 

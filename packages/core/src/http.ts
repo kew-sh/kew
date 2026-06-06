@@ -1,6 +1,14 @@
 import type { QueueApi } from "./api";
 import { client } from "./client";
-import type { AuthInfo, ConnectionInfo, FlowNode, JobPage, QueueSummary, Scheduler } from "./types";
+import type {
+  AuthInfo,
+  ConnectionInfo,
+  FlowNode,
+  JobPage,
+  QueueSummary,
+  Scheduler,
+  VersionInfo,
+} from "./types";
 
 const enc = encodeURIComponent;
 
@@ -16,6 +24,8 @@ export const httpApi: QueueApi = {
   },
 
   getConnection: () => client.get<ConnectionInfo>("/connection").then((r) => r.data),
+
+  getVersion: () => client.get<VersionInfo>("/version").then((r) => r.data),
 
   listQueues: () => client.get<QueueSummary[]>("/queues").then((r) => r.data),
 
