@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "description": "The Kew dashboard UI as a reusable library. createKewDashboard() returns the full BullMQ dashboard (shell, routes, features, design tokens). Consumed by the OSS app and (Fase 2) the cloud web app.",
+  "license": "FSL-1.1-ALv2",
   "scripts": {
     "typecheck": "tsc --noEmit"
   },

@@ -16,7 +16,7 @@ Watch and manage your queues, jobs, and crons from one clean, fast UI.
 
 <br>
 
-[![License: BSL 1.1](https://img.shields.io/badge/license-BSL%201.1-a855f7?style=for-the-badge)](LICENSE)
+[![License: FSL-1.1](https://img.shields.io/badge/license-FSL%201.1-a855f7?style=for-the-badge)](LICENSE)
 [![Release](https://img.shields.io/github/v/release/kew-sh/kew?style=for-the-badge&color=a855f7&label=release)](https://github.com/kew-sh/kew/releases)
 [![Container](https://img.shields.io/badge/ghcr.io-kew--sh%2Fkew-a855f7?style=for-the-badge&logo=docker&logoColor=white)](https://github.com/kew-sh/kew/pkgs/container/kew)
 [![Stars](https://img.shields.io/github/stars/kew-sh/kew?style=for-the-badge&color=a855f7)](https://github.com/kew-sh/kew/stargazers)
@@ -190,7 +190,18 @@ Auth in the self-hosted edition is **one shared login**, not per-user accounts: 
 
 ## License
 
-[Business Source License 1.1](LICENSE) — source-available. Run it, modify it, and self-host it in production freely; you just may not offer Kew to others as a competing hosted or managed service. It converts to Apache 2.0 on the Change Date. See [NOTICE](NOTICE) for trademark and third-party attributions.
+**[Functional Source License 1.1](LICENSE)** (`FSL-1.1-ALv2`) — source-available. The short version:
+
+| ✅ You can | ❌ You can't |
+|---|---|
+| Run Kew in production, inside your company | Offer Kew to others as a competing hosted or managed service |
+| Self-host it for your own client | Resell it or ship a product with the same / substantially similar functionality |
+| Read, modify, fork, and redistribute the source | Remove the copyright or license notices |
+| Use it for education and research | |
+
+**It is not lock-in:** every release automatically converts to the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0) two years after it ships, on a rolling basis — so the exact version you run today becomes fully open source in two years.
+
+See [NOTICE](NOTICE) for trademark and third-party attributions.
 
 <div align="center">
 <br>

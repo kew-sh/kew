@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "description": "Domain contract + data layer for the queue panel. Reused by the dashboard, the server, and the future connector.",
+  "license": "FSL-1.1-ALv2",
   "scripts": {
     "typecheck": "tsc --noEmit"
   },

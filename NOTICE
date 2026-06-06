@@ -1,9 +1,9 @@
 Kew — the dashboard for BullMQ
-Copyright (c) 2026 The Kew Authors
+Copyright (c) 2026 Pedro Henrique Gomes Rodrigues Marques
 
-This product is source-available under the Business Source License 1.1; see the
-LICENSE file. It converts to the Apache License, Version 2.0 on the Change Date
-stated there.
+This product is source-available under the Functional Source License, Version
+1.1 (FSL-1.1-ALv2); see the LICENSE file. Each released version converts to the
+Apache License, Version 2.0 on the second anniversary of its release.
 
 -------------------------------------------------------------------------------
 Trademarks
@@ -14,6 +14,10 @@ sponsored by the BullMQ project or Taskforce.sh Inc. "BullMQ" is a trademark of
 its respective owner; Kew uses the name only nominatively, to describe
 compatibility (a dashboard "for BullMQ").
 
+"Kew" and the Kew logo are trademarks of Pedro Henrique Gomes Rodrigues Marques.
+The Functional Source License covers the source code; it does not grant any right
+to use these marks. See TRADEMARKS.md for what is and isn't allowed.
+
 -------------------------------------------------------------------------------
 Third-party software
 -------------------------------------------------------------------------------
@@ -23,6 +27,17 @@ Kew builds on open-source software. Notably:
   BullMQ — https://github.com/taskforcesh/bullmq
   MIT License. Copyright (c) 2018 BullForce Labs AB and contributors.
 
-Other dependencies are distributed under their own licenses (MIT, Apache-2.0,
-ISC, and similar); see each package's metadata under node_modules for the full
-texts.
+Most dependencies are distributed under permissive licenses (MIT, Apache-2.0,
+ISC, BSD, 0BSD). A few carry additional attribution or source-availability
+terms, which we acknowledge here:
+
+  lightningcss — Mozilla Public License 2.0 (MPL-2.0).
+    Source: https://github.com/parcel-bundler/lightningcss
+
+  Geist and Geist Mono fonts (@fontsource-variable/geist*) — SIL Open Font
+    License 1.1 (OFL-1.1). Copyright Vercel, Inc.
+
+  caniuse-lite — Creative Commons Attribution 4.0 (CC-BY-4.0).
+    Source: https://github.com/browserslist/caniuse-lite
+
+See each package's metadata under node_modules for the full license texts.

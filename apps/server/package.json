@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "description": "Standalone backend: reads a real Redis via BullMQ and serves the QueueApi contract + the built dashboard.",
+  "license": "FSL-1.1-ALv2",
   "scripts": {
     "dev": "bun --watch src/index.ts",
     "start": "bun src/index.ts",
