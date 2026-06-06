@@ -21,8 +21,8 @@ services:
       # clears jobs from Redis. Stored in SQLite on the kew-data volume below.
       KEW_RETENTION: "1"
       # Set a secret to require login (recommended whenever this is reachable):
-      # KEW_AUTH_TOKEN: change-me
-      # KEW_AUTH_USER: you@example.com
+      # KEW_AUTH_PASSWORD: change-me
+      # KEW_AUTH_EMAIL: you@example.com
     volumes:
       - kew-data:/data
     healthcheck:

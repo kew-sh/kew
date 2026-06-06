@@ -69,7 +69,7 @@ if (HOST !== "127.0.0.1" && HOST !== "localhost" && AUTH_MODE === "none") {
   console.warn(
     `\n⚠  Kew is listening on ${HOST}:${PORT} with no authentication.\n` +
       "   Anyone who can reach this port can read job payloads and mutate queues.\n" +
-      "   Set KEW_AUTH_TOKEN=<secret>, or front Kew with an auth proxy and set KEW_TRUST_PROXY_AUTH=1.\n",
+      "   Set KEW_AUTH_PASSWORD=<secret>, or front Kew with an auth proxy and set KEW_TRUST_PROXY_AUTH=1.\n",
   );
 }
 

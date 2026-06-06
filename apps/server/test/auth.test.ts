@@ -2,8 +2,8 @@ import { beforeAll, describe, expect, test } from "bun:test";
 import { redactRedisUrl } from "@kew/core/server";
 import { Hono } from "hono";
 
-process.env.KEW_AUTH_TOKEN = "test-secret-xyz";
-process.env.KEW_AUTH_USER = "";
+process.env.KEW_AUTH_PASSWORD = "test-secret-xyz";
+process.env.KEW_AUTH_EMAIL = "";
 process.env.KEW_TRUST_PROXY_AUTH = "";
 
 let app: Hono;

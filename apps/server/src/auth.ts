@@ -8,14 +8,14 @@ import { sign, verify } from "hono/jwt";
 
 import { env } from "./env";
 
-const TOKEN = env.KEW_AUTH_TOKEN;
-const USER = env.KEW_AUTH_USER;
+const PASSWORD = env.KEW_AUTH_PASSWORD;
+const EMAIL = env.KEW_AUTH_EMAIL;
 const TRUST_PROXY = env.KEW_TRUST_PROXY_AUTH;
 const PROXY_HEADER = env.KEW_PROXY_USER_HEADER;
 const HOPS = env.KEW_TRUSTED_PROXY_HOPS;
 const SIGNING_KEY =
   env.KEW_SESSION_SECRET ??
-  (TOKEN ? createHash("sha256").update(`kew-session::${TOKEN}`).digest("hex") : "");
+  (PASSWORD ? createHash("sha256").update(`kew-session::${PASSWORD}`).digest("hex") : "");
 
 const COOKIE = "kew_session";
 const TTL_SECONDS = 7 * 24 * 60 * 60;
@@ -34,7 +34,7 @@ function pruneAttempts(now: number): void {
   }
 }
 
-export const AUTH_MODE: AuthInfo["mode"] = TRUST_PROXY ? "proxy" : TOKEN ? "password" : "none";
+export const AUTH_MODE: AuthInfo["mode"] = TRUST_PROXY ? "proxy" : PASSWORD ? "password" : "none";
 
 function safeEqual(a: string, b: string): boolean {
   const ha = createHash("sha256").update(a).digest();
@@ -107,7 +107,7 @@ export async function handleMe(c: Context) {
     authRequired: AUTH_MODE !== "none",
     authenticated: AUTH_MODE === "none" || Boolean(user),
     mode: AUTH_MODE,
-    requiresUser: AUTH_MODE === "password" && Boolean(USER),
+    requiresUser: AUTH_MODE === "password" && Boolean(EMAIL),
     user,
   };
   return c.json(info);
@@ -126,8 +126,8 @@ export async function handleLogin(c: Context) {
   const body = await c.req
     .json<{ email?: string; password?: string }>()
     .catch(() => ({}) as { email?: string; password?: string });
-  const okPassword = Boolean(body.password) && safeEqual(body.password as string, TOKEN);
-  const okEmail = !USER || safeEqual((body.email ?? "").trim().toLowerCase(), USER.toLowerCase());
+  const okPassword = Boolean(body.password) && safeEqual(body.password as string, PASSWORD);
+  const okEmail = !EMAIL || safeEqual((body.email ?? "").trim().toLowerCase(), EMAIL.toLowerCase());
   if (!okPassword || !okEmail) {
     if (slot && now < slot.resetAt) {
       slot.count += 1;
@@ -140,7 +140,7 @@ export async function handleLogin(c: Context) {
 
   attempts.delete(key);
   const iat = Math.floor(now / 1000);
-  const token = await sign({ sub: USER ?? "kew", iat, exp: iat + TTL_SECONDS }, SIGNING_KEY);
+  const token = await sign({ sub: EMAIL ?? "kew", iat, exp: iat + TTL_SECONDS }, SIGNING_KEY);
   setCookie(c, COOKIE, token, {
     httpOnly: true,
     sameSite: "Lax",
