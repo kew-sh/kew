@@ -15,6 +15,7 @@ export interface RetentionStore {
   counts(queue: string): { completed: number; failed: number };
   countOverlap(queue: string, state: "completed" | "failed", ids: string[]): number;
   get(queue: string, jobId: string): Job | undefined;
+  remove(queue: string, ids: string[]): number;
   prune(): void;
   close(): void;
 }
@@ -245,6 +246,24 @@ export function createSqliteRetention(options: SqliteRetentionOptions): Retentio
     return row ? toJob(row) : undefined;
   }
 
+  function remove(queue: string, ids: string[]): number {
+    if (ids.length === 0) return 0;
+    const placeholders = ids.map(() => "?").join(",");
+    const removed = (
+      db
+        .query(
+          `SELECT COUNT(DISTINCT job_id) AS c FROM retained_jobs
+           WHERE queue = ? AND job_id IN (${placeholders})`,
+        )
+        .get(queue, ...ids) as { c: number }
+    ).c;
+    db.run(`DELETE FROM retained_jobs WHERE queue = ? AND job_id IN (${placeholders})`, [
+      queue,
+      ...ids,
+    ]);
+    return removed;
+  }
+
   const pruneTimer = setInterval(prune, options.pruneIntervalMs ?? DEFAULT_PRUNE_INTERVAL_MS);
 
   return {
@@ -253,6 +272,7 @@ export function createSqliteRetention(options: SqliteRetentionOptions): Retentio
     counts,
     countOverlap,
     get,
+    remove,
     prune,
     close() {
       clearInterval(pruneTimer);

@@ -104,6 +104,44 @@ describe("sqlite retention store", () => {
     }
   });
 
+  test("remove deletes all rows for the given ids and returns distinct ids removed", () => {
+    const store = createSqliteRetention({ path: ":memory:" });
+    try {
+      store.sink.write([
+        rec({ jobId: "1", queue: "q", state: "failed", capturedAt: 1000 }),
+        rec({ jobId: "1", queue: "q", state: "failed", capturedAt: 1001 }),
+        rec({ jobId: "2", queue: "q", state: "completed", capturedAt: 1002 }),
+        rec({ jobId: "9", queue: "other", state: "failed", capturedAt: 1003 }),
+      ]);
+
+      const removed = store.remove("q", ["1", "missing"]);
+      expect(removed).toBe(1);
+      expect(store.query({ queue: "q", page: 0, pageSize: 50 }).total).toBe(1);
+      expect(store.query({ queue: "other", page: 0, pageSize: 50 }).total).toBe(1);
+      expect(store.remove("q", [])).toBe(0);
+    } finally {
+      store.close();
+    }
+  });
+
+  test("counts distinct job ids per state; get returns the newest row", () => {
+    const store = createSqliteRetention({ path: ":memory:" });
+    try {
+      store.sink.write([
+        rec({ jobId: "1", queue: "q", state: "failed", capturedAt: 1000, failedReason: "first" }),
+        rec({ jobId: "1", queue: "q", state: "failed", capturedAt: 2000, failedReason: "second" }),
+        rec({ jobId: "2", queue: "q", state: "completed", capturedAt: 1500 }),
+      ]);
+
+      expect(store.counts("q")).toEqual({ completed: 1, failed: 1 });
+      expect(store.countOverlap("q", "failed", ["1", "x"])).toBe(1);
+      expect(store.get("q", "1")?.failedReason).toBe("second");
+      expect(store.get("q", "nope")).toBeUndefined();
+    } finally {
+      store.close();
+    }
+  });
+
   test("prune by maxRows keeps the newest rows", () => {
     const store = createSqliteRetention({ path: ":memory:", maxRows: 2 });
     try {

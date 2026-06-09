@@ -171,9 +171,29 @@ export function JobDrawer({
                   <RotateCw className="size-3.5" />
                   Re-run
                 </Button>
-                <span className="text-xs text-muted">
-                  Creates a new job from the saved payload.
-                </span>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="danger" className="ml-auto" disabled={pending}>
+                      <Trash2 className="size-3.5" />
+                      Remove
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Remove this record?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This deletes the retained record of job #{j.id} from Kew's history. The job
+                        is already gone from Redis.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction variant="danger" onClick={() => onAction("remove", j.id)}>
+                        Remove
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             )}
 

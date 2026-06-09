@@ -244,7 +244,14 @@ app.post("/api/queues/:name/jobs/bulk", async (c) => {
   if (READ_ONLY) return c.json({ error: "read-only" }, 403);
   const parsed = bulkSchema.safeParse(await c.req.json().catch(() => ({})));
   if (!parsed.success) return c.json({ error: "invalid bulk request" }, 400);
-  return c.json(await applyBulk(c.req.param("name"), parsed.data.ids, parsed.data.action, redis));
+  const name = c.req.param("name");
+  const { ids, action } = parsed.data;
+  const result = await applyBulk(name, ids, action, redis);
+  if (action === "remove" && retentionStore) {
+    const removed = retentionStore.remove(name, ids);
+    return c.json({ affected: Math.max(result.affected, removed) });
+  }
+  return c.json(result);
 });
 
 app.post("/api/queues/:name/jobs/:id/retry-with-data", async (c) => {
