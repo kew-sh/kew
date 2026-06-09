@@ -40,7 +40,7 @@ export function JobDrawer({
   onClose: () => void;
   onAction: (action: "retry" | "promote" | "remove", id: string) => void;
   onRetryWithData: (id: string, data: unknown) => void;
-  onRerun: (id: string) => void;
+  onRerun: (id: string, data?: unknown) => void;
 }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
@@ -62,7 +62,8 @@ export function JobDrawer({
     try {
       const parsed = JSON.parse(draft);
       setError(null);
-      onRetryWithData(j.id, parsed);
+      if (j.retained) onRerun(j.id, parsed);
+      else onRetryWithData(j.id, parsed);
     } catch {
       setError("Invalid JSON — fix the payload before retrying.");
     }
@@ -118,7 +119,7 @@ export function JobDrawer({
               <Section
                 title="Payload"
                 action={
-                  !readOnly && !editing && !j.retained ? (
+                  !readOnly && !editing ? (
                     <Button variant="ghost" size="sm" onClick={() => setEditing(true)}>
                       <Pencil className="size-3" />
                       Edit
@@ -136,7 +137,9 @@ export function JobDrawer({
                     />
                     {error && <p className="text-xs text-failed">{error}</p>}
                     <p className="text-xs text-muted">
-                      Editing re-enqueues this job with the new payload (BullMQ updateData + retry).
+                      {j.retained
+                        ? "Editing re-enqueues a new job from this payload."
+                        : "Editing re-enqueues this job with the new payload (BullMQ updateData + retry)."}
                     </p>
                   </div>
                 ) : (
@@ -167,33 +170,50 @@ export function JobDrawer({
 
             {!readOnly && j.retained && (
               <div className="flex items-center gap-2 border-t border-line p-3">
-                <Button variant="subtle" disabled={pending} onClick={() => onRerun(j.id)}>
-                  <RotateCw className="size-3.5" />
-                  Re-run
-                </Button>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="danger" className="ml-auto" disabled={pending}>
-                      <Trash2 className="size-3.5" />
-                      Remove
+                {editing ? (
+                  <>
+                    <Button variant="accent" disabled={pending} onClick={submitEdited}>
+                      <RotateCw className="size-3.5" />
+                      Re-run with changes
                     </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Remove this record?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This deletes the retained record of job #{j.id} from Kew's history. The job
-                        is already gone from Redis.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction variant="danger" onClick={() => onAction("remove", j.id)}>
-                        Remove
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                    <Button variant="ghost" onClick={() => setEditing(false)}>
+                      Cancel
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button variant="subtle" disabled={pending} onClick={() => onRerun(j.id)}>
+                      <RotateCw className="size-3.5" />
+                      Re-run
+                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="danger" className="ml-auto" disabled={pending}>
+                          <Trash2 className="size-3.5" />
+                          Remove
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Remove this record?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This deletes the retained record of job #{j.id} from Kew's history. The
+                            job is already gone from Redis.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            variant="danger"
+                            onClick={() => onAction("remove", j.id)}
+                          >
+                            Remove
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </>
+                )}
               </div>
             )}
 

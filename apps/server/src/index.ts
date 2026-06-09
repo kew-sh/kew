@@ -268,7 +268,9 @@ app.post("/api/queues/:name/jobs/:id/rerun", async (c) => {
   const name = c.req.param("name");
   const job = retentionStore.get(name, c.req.param("id"));
   if (!job) return c.json({ error: "not found" }, 404);
-  const added = await getQueue(name, redis).add(job.name, job.data, sanitizeRerunOpts(job.opts));
+  const body = (await c.req.json().catch(() => null)) as { data?: unknown } | null;
+  const data = body && "data" in body ? body.data : job.data;
+  const added = await getQueue(name, redis).add(job.name, data, sanitizeRerunOpts(job.opts));
   return c.json({ id: String(added.id) });
 });
 

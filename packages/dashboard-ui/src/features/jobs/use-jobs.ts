@@ -49,7 +49,7 @@ export function useRetryWithData(queue: string) {
 export function useRerun(queue: string) {
   const invalidate = useInvalidateQueue(queue);
   return useMutation({
-    mutationFn: (id: string) => api.rerun({ queue, id }),
+    mutationFn: (input: { id: string; data?: unknown }) => api.rerun({ queue, ...input }),
     onSuccess: invalidate,
   });
 }

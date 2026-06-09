@@ -72,8 +72,13 @@ export const httpApi: QueueApi = {
     await client.post(`/queues/${enc(queue)}/jobs/${enc(id)}/retry-with-data`, { data });
   },
 
-  rerun: ({ queue, id }) =>
-    client.post<{ id: string }>(`/queues/${enc(queue)}/jobs/${enc(id)}/rerun`).then((r) => r.data),
+  rerun: ({ queue, id, data }) =>
+    client
+      .post<{ id: string }>(
+        `/queues/${enc(queue)}/jobs/${enc(id)}/rerun`,
+        data !== undefined ? { data } : undefined,
+      )
+      .then((r) => r.data),
 
   listSchedulers: (queue) =>
     client.get<Scheduler[]>(`/queues/${enc(queue)}/schedulers`).then((r) => r.data),

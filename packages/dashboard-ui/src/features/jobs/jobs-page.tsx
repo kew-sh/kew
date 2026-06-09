@@ -238,13 +238,16 @@ export function JobsPage() {
             },
           )
         }
-        onRerun={(id) =>
-          rerun.mutate(id, {
-            onSuccess: (res) => {
-              toast.success(`Re-queued as job #${res.id}`);
-              setOpenJob(null);
+        onRerun={(id, data) =>
+          rerun.mutate(
+            { id, data },
+            {
+              onSuccess: (res) => {
+                toast.success(`Re-queued as job #${res.id}`);
+                setOpenJob(null);
+              },
             },
-          })
+          )
         }
       />
     </div>

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.2] - 2026-06-08
+
+### Added
+
+- **Edit a retained job's payload before re-running it**: the job drawer's Edit action now works for retained jobs (completed or failed) — tweak the payload and re-run it as a new job. The `POST /api/queues/:name/jobs/:id/rerun` endpoint accepts an optional `data` override.
+
 ## [1.2.1] - 2026-06-08
 
 ### Added
@@ -59,7 +65,8 @@ The first public release of Kew: a standalone, self-hosted dashboard for BullMQ.
 - **Single Docker image** that serves the dashboard and API on one port (`5399`), published multi-arch (linux/amd64 and linux/arm64) to GHCR.
 - A `⌘K` command palette, a dark-first UI, and colorblind-safe job states (color, icon, and label).
 
-[Unreleased]: https://github.com/kew-sh/kew/compare/v1.2.1...HEAD
+[Unreleased]: https://github.com/kew-sh/kew/compare/v1.2.2...HEAD
+[1.2.2]: https://github.com/kew-sh/kew/compare/v1.2.1...v1.2.2
 [1.2.1]: https://github.com/kew-sh/kew/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/kew-sh/kew/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/kew-sh/kew/compare/v1.0.0...v1.1.0
