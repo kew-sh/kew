@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-06-08
+
+### Added
+
+- **Retained jobs in the per-queue Completed and Failed tabs**: completed and failed jobs recorded by retention now appear inline in each queue's own tabs, merged with live Redis jobs and de-duplicated (the live copy wins, keeping its stacktrace and actions). Jobs cleared by `removeOnComplete` are finally visible where you'd expect them, not only in the global History page. Retained-only rows are tagged `retained`, excluded from bulk actions, and the tab badge counts include them (de-duplicated by job id).
+- **Re-run**: a retained job that is gone from Redis can be re-enqueued as a new job from its saved payload, via a Re-run action in the job drawer and the `POST /api/queues/:name/jobs/:id/rerun` endpoint. Disabled in `READ_ONLY` mode.
+
+### Changed
+
+- **Retention is now enabled by default.** `KEW_RETENTION` defaults to on; set `KEW_RETENTION=0` to disable. Previously it was opt-in via `KEW_RETENTION=1`.
+
+### Fixed
+
+- **Payload capture for short-lived jobs**: retention now snapshots the job on the `waiting` event in addition to `active`, so the payload is captured before `removeOnComplete` deletes very fast jobs from Redis.
+
 ## [1.1.0] - 2026-06-06
 
 ### Added
@@ -34,6 +49,7 @@ The first public release of Kew: a standalone, self-hosted dashboard for BullMQ.
 - **Single Docker image** that serves the dashboard and API on one port (`5399`), published multi-arch (linux/amd64 and linux/arm64) to GHCR.
 - A `⌘K` command palette, a dark-first UI, and colorblind-safe job states (color, icon, and label).
 
-[Unreleased]: https://github.com/kew-sh/kew/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/kew-sh/kew/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/kew-sh/kew/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/kew-sh/kew/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/kew-sh/kew/releases/tag/v1.0.0

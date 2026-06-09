@@ -12,6 +12,9 @@ export interface SqliteRetentionOptions {
 export interface RetentionStore {
   sink: RetentionSink;
   query(q: HistoryQuery): JobPage;
+  counts(queue: string): { completed: number; failed: number };
+  countOverlap(queue: string, state: "completed" | "failed", ids: string[]): number;
+  get(queue: string, jobId: string): Job | undefined;
   prune(): void;
   close(): void;
 }
@@ -73,6 +76,7 @@ function toJob(row: Row): Job {
     opts,
     returnValue: fromJson(row.return_value),
     failedReason: row.failed_reason ?? undefined,
+    retained: true,
   };
 }
 
@@ -207,11 +211,48 @@ export function createSqliteRetention(options: SqliteRetentionOptions): Retentio
     return { jobs: rows.map(toJob), total, exact: true };
   }
 
+  function counts(queue: string): { completed: number; failed: number } {
+    const row = db
+      .query(
+        `SELECT
+           COUNT(DISTINCT CASE WHEN state = 'completed' THEN job_id END) AS completed,
+           COUNT(DISTINCT CASE WHEN state = 'failed' THEN job_id END) AS failed
+         FROM retained_jobs WHERE queue = ?`,
+      )
+      .get(queue) as { completed: number | null; failed: number | null };
+    return { completed: row.completed ?? 0, failed: row.failed ?? 0 };
+  }
+
+  function countOverlap(queue: string, state: "completed" | "failed", ids: string[]): number {
+    if (ids.length === 0) return 0;
+    const placeholders = ids.map(() => "?").join(",");
+    const row = db
+      .query(
+        `SELECT COUNT(DISTINCT job_id) AS c FROM retained_jobs
+         WHERE queue = ? AND state = ? AND job_id IN (${placeholders})`,
+      )
+      .get(queue, state, ...ids) as { c: number };
+    return row.c;
+  }
+
+  function get(queue: string, jobId: string): Job | undefined {
+    const row = db
+      .query(
+        `SELECT * FROM retained_jobs WHERE queue = ? AND job_id = ?
+         ORDER BY captured_at DESC, id DESC LIMIT 1`,
+      )
+      .get(queue, jobId) as Row | null;
+    return row ? toJob(row) : undefined;
+  }
+
   const pruneTimer = setInterval(prune, options.pruneIntervalMs ?? DEFAULT_PRUNE_INTERVAL_MS);
 
   return {
     sink: { write: (records) => insertMany(records) },
     query,
+    counts,
+    countOverlap,
+    get,
     prune,
     close() {
       clearInterval(pruneTimer);

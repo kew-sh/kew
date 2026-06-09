@@ -207,6 +207,7 @@ export function HistoryPage() {
         onClose={() => setOpenJob(null)}
         onAction={noop}
         onRetryWithData={noop}
+        onRerun={noop}
       />
     </div>
   );

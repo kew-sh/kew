@@ -48,6 +48,14 @@ const columns = [
           <div className="flex items-center gap-2">
             <span className="font-mono text-xs text-muted">#{j.id}</span>
             <span className="truncate font-medium">{j.name}</span>
+            {j.retained && (
+              <span
+                title="Out of Redis — recorded by Kew. Live actions unavailable; re-run instead."
+                className="shrink-0 rounded bg-overlay px-1.5 py-0.5 text-[10px] font-normal uppercase tracking-wider text-muted"
+              >
+                retained
+              </span>
+            )}
           </div>
           {j.failedReason && (
             <div className="truncate font-mono text-xs text-failed/90">{j.failedReason}</div>
@@ -102,7 +110,7 @@ export function JobTable({
     data: jobs,
     columns,
     state: { rowSelection: selection },
-    enableRowSelection: !readOnly,
+    enableRowSelection: readOnly ? false : (row) => !row.original.retained,
     onRowSelectionChange: onSelectionChange,
     getRowId: rowId ?? ((j) => j.id),
     getCoreRowModel: getCoreRowModel(),

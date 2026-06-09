@@ -32,6 +32,7 @@ export function JobDrawer({
   onClose,
   onAction,
   onRetryWithData,
+  onRerun,
 }: {
   job: Job | null;
   readOnly: boolean;
@@ -39,6 +40,7 @@ export function JobDrawer({
   onClose: () => void;
   onAction: (action: "retry" | "promote" | "remove", id: string) => void;
   onRetryWithData: (id: string, data: unknown) => void;
+  onRerun: (id: string) => void;
 }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
@@ -116,7 +118,7 @@ export function JobDrawer({
               <Section
                 title="Payload"
                 action={
-                  !readOnly && !editing ? (
+                  !readOnly && !editing && !j.retained ? (
                     <Button variant="ghost" size="sm" onClick={() => setEditing(true)}>
                       <Pencil className="size-3" />
                       Edit
@@ -163,7 +165,19 @@ export function JobDrawer({
             </div>
             <Slot name="job-drawer.footer" ctx={{ job: j, readOnly }} />
 
-            {!readOnly && (
+            {!readOnly && j.retained && (
+              <div className="flex items-center gap-2 border-t border-line p-3">
+                <Button variant="subtle" disabled={pending} onClick={() => onRerun(j.id)}>
+                  <RotateCw className="size-3.5" />
+                  Re-run
+                </Button>
+                <span className="text-xs text-muted">
+                  Creates a new job from the saved payload.
+                </span>
+              </div>
+            )}
+
+            {!readOnly && !j.retained && (
               <div className="flex items-center gap-2 border-t border-line p-3">
                 {editing ? (
                   <>

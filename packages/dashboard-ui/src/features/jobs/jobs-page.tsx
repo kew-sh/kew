@@ -22,7 +22,7 @@ import { cn, compact } from "../../lib/utils";
 import { BulkBar } from "./bulk-bar";
 import { JobDrawer } from "./job-drawer";
 import { JobTable } from "./job-table";
-import { useBulkAction, useJobAction, useJobs, useRetryWithData } from "./use-jobs";
+import { useBulkAction, useJobAction, useJobs, useRerun, useRetryWithData } from "./use-jobs";
 
 const TIME_WINDOWS = [
   { id: "all", label: "Any time", ms: Number.POSITIVE_INFINITY },
@@ -70,6 +70,7 @@ export function JobsPage() {
   const bulk = useBulkAction(queueName);
   const jobAction = useJobAction(queueName);
   const retryWithData = useRetryWithData(queueName);
+  const rerun = useRerun(queueName);
   const pauseQueue = useSetQueuePaused();
 
   const pickState = (s: JobState) => {
@@ -213,7 +214,7 @@ export function JobsPage() {
       <JobDrawer
         job={openJob}
         readOnly={readOnly}
-        pending={jobAction.isPending || retryWithData.isPending}
+        pending={jobAction.isPending || retryWithData.isPending || rerun.isPending}
         onClose={() => setOpenJob(null)}
         onAction={(action, id) =>
           jobAction.mutate(
@@ -236,6 +237,14 @@ export function JobsPage() {
               },
             },
           )
+        }
+        onRerun={(id) =>
+          rerun.mutate(id, {
+            onSuccess: (res) => {
+              toast.success(`Re-queued as job #${res.id}`);
+              setOpenJob(null);
+            },
+          })
         }
       />
     </div>

@@ -55,6 +55,7 @@ export interface Job {
   logs?: string[];
   /** Number of children, when this is a flow parent. */
   childCount?: number;
+  retained?: boolean;
 }
 
 export interface JobPage {

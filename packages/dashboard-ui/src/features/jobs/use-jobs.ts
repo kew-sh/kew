@@ -45,3 +45,11 @@ export function useRetryWithData(queue: string) {
     onSuccess: invalidate,
   });
 }
+
+export function useRerun(queue: string) {
+  const invalidate = useInvalidateQueue(queue);
+  return useMutation({
+    mutationFn: (id: string) => api.rerun({ queue, id }),
+    onSuccess: invalidate,
+  });
+}

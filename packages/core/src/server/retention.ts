@@ -156,6 +156,7 @@ export function startRetention(
       pending.set(jobId, { promise, at: Date.now() });
     };
 
+    events.on("waiting", ({ jobId }) => capture(jobId));
     events.on("active", ({ jobId }) => capture(jobId));
     events.on(
       "completed",

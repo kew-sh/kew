@@ -5,6 +5,7 @@ import {
   createRedis,
   discoverQueues,
   getJobsPage,
+  getQueue,
   getQueueSummary,
   listFlows,
   listSchedulers,
@@ -28,6 +29,7 @@ import { cors } from "hono/cors";
 import { z } from "zod";
 import { AUTH_MODE, handleLogin, handleLogout, handleMe, requireAuth } from "./auth";
 import { env } from "./env";
+import { mergeCounts, mergeJobPages } from "./merge-jobs";
 import { createSqliteRetention, type RetentionStore } from "./retention-store";
 import { getVersionInfo } from "./version";
 
@@ -105,6 +107,49 @@ const requireRedis: MiddlewareHandler = async (c, next) => {
 startSampler(redis, () => discoverQueues(redis));
 void getVersionInfo();
 
+const MERGE_FETCH_CAP = 200;
+const COUNT_ID_CAP = 500;
+const RERUN_STRIP_OPTS = new Set([
+  "jobId",
+  "repeat",
+  "delay",
+  "parent",
+  "deduplication",
+  "fpof",
+  "rdof",
+  "idof",
+  "ovrd",
+]);
+
+async function liveStateIds(name: string, state: "completed" | "failed"): Promise<string[]> {
+  const jobs = await getQueue(name, redis).getJobs([state], 0, COUNT_ID_CAP - 1, false);
+  return jobs.map((j) => String(j.id));
+}
+
+async function summaryWithRetention(name: string) {
+  const summary = await getQueueSummary(name, redis);
+  if (!retentionStore) return summary;
+  const store = retentionStore;
+  const retained = store.counts(name);
+  const [completedIds, failedIds] = await Promise.all([
+    liveStateIds(name, "completed"),
+    liveStateIds(name, "failed"),
+  ]);
+  const overlap = {
+    completed: store.countOverlap(name, "completed", completedIds),
+    failed: store.countOverlap(name, "failed", failedIds),
+  };
+  return { ...summary, counts: mergeCounts(summary.counts, retained, overlap) };
+}
+
+function sanitizeRerunOpts(opts: Record<string, unknown>): Record<string, unknown> {
+  const clean: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(opts)) {
+    if (!RERUN_STRIP_OPTS.has(key)) clean[key] = value;
+  }
+  return clean;
+}
+
 const app = new Hono();
 app.use("/api/*", cors());
 app.use("/api/*", requireAuth);
@@ -153,12 +198,12 @@ app.use("/api/flows", requireRedis);
 
 app.get("/api/queues", async (c) => {
   const names = await discoverQueues(redis);
-  const summaries = await Promise.all(names.map((n) => getQueueSummary(n, redis)));
+  const summaries = await Promise.all(names.map((n) => summaryWithRetention(n)));
   return c.json(summaries);
 });
 
 app.get("/api/queues/:name", async (c) => {
-  return c.json(await getQueueSummary(c.req.param("name"), redis));
+  return c.json(await summaryWithRetention(c.req.param("name")));
 });
 
 app.post("/api/queues/:name/pause", async (c) => {
@@ -180,7 +225,19 @@ app.get("/api/queues/:name/jobs", async (c) => {
   const page = Math.max(0, Number(c.req.query("page") ?? 0));
   const pageSize = Math.min(200, Math.max(1, Number(c.req.query("pageSize") ?? 50)));
   const search = c.req.query("search") || undefined;
-  return c.json(await getJobsPage(name, state, page, pageSize, search, redis));
+
+  if (!retentionStore || (state !== "completed" && state !== "failed")) {
+    return c.json(await getJobsPage(name, state, page, pageSize, search, redis));
+  }
+
+  const fetchSize = Math.min(MERGE_FETCH_CAP, (page + 1) * pageSize);
+  const [live, retained] = await Promise.all([
+    getJobsPage(name, state, 0, fetchSize, search, redis),
+    Promise.resolve(
+      retentionStore.query({ queue: name, state, search, page: 0, pageSize: fetchSize }),
+    ),
+  ]);
+  return c.json(mergeJobPages(live, retained, page, pageSize));
 });
 
 app.post("/api/queues/:name/jobs/bulk", async (c) => {
@@ -196,6 +253,16 @@ app.post("/api/queues/:name/jobs/:id/retry-with-data", async (c) => {
   if (!parsed.success) return c.json({ error: "invalid request" }, 400);
   await retryWithData(c.req.param("name"), c.req.param("id"), parsed.data.data, redis);
   return c.body(null, 204);
+});
+
+app.post("/api/queues/:name/jobs/:id/rerun", async (c) => {
+  if (READ_ONLY) return c.json({ error: "read-only" }, 403);
+  if (!retentionStore) return c.json({ error: "retention disabled" }, 404);
+  const name = c.req.param("name");
+  const job = retentionStore.get(name, c.req.param("id"));
+  if (!job) return c.json({ error: "not found" }, 404);
+  const added = await getQueue(name, redis).add(job.name, job.data, sanitizeRerunOpts(job.opts));
+  return c.json({ id: String(added.id) });
 });
 
 app.get("/api/queues/:name/schedulers", async (c) =>

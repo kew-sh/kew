@@ -30,6 +30,7 @@ export interface QueueApi {
     action: BulkAction;
   }): Promise<{ affected: number }>;
   retryWithData(input: { queue: string; id: string; data: unknown }): Promise<void>;
+  rerun(input: { queue: string; id: string }): Promise<{ id: string }>;
   listSchedulers(queue: string): Promise<Scheduler[]>;
   upsertScheduler(input: SchedulerInput): Promise<void>;
   removeScheduler(input: { queue: string; id: string }): Promise<void>;
