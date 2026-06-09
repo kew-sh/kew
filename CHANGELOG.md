@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Scheduler form**: the **Queue** and **Timezone** fields are now `Select` dropdowns instead of free-text/native inputs. The timezone picker lists every IANA zone grouped by region, with `UTC` and the browser's local timezone pinned at the top under "Common". The **Cron pattern** field gains quick-pick presets (every minute, hourly, daily, weekdays, weekly, monthly) that fill the expression, alongside the existing live human-readable preview.
+
 ## [1.2.2] - 2026-06-08
 
 ### Added

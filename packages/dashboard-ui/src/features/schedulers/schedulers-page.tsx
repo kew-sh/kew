@@ -6,10 +6,44 @@ import { useMemo, useState } from "react";
 import { Skeleton } from "../../components/skeleton";
 import { toast } from "../../components/toast";
 import { Button } from "../../components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "../../components/ui/select";
 import { useQueues } from "../../lib/use-queues";
 import { cn } from "../../lib/utils";
 import { SchedulerDrawer } from "./scheduler-drawer";
 import { useRemoveScheduler, useSchedulers, useUpsertScheduler } from "./use-schedulers";
+
+const supportedTimezones = (Intl as unknown as { supportedValuesOf?: (key: string) => string[] })
+  .supportedValuesOf;
+const ALL_TIMEZONES = supportedTimezones ? supportedTimezones("timeZone") : ["UTC"];
+const LOCAL_TIMEZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
+const COMMON_TIMEZONES = Array.from(new Set(["UTC", LOCAL_TIMEZONE]));
+const GROUPED_TIMEZONES = ALL_TIMEZONES.filter((zone) => !COMMON_TIMEZONES.includes(zone)).reduce<
+  Record<string, string[]>
+>((acc, zone) => {
+  const region = zone.includes("/") ? zone.split("/")[0] : "Other";
+  if (!acc[region]) {
+    acc[region] = [];
+  }
+  acc[region].push(zone);
+  return acc;
+}, {});
+
+const CRON_PRESETS: { label: string; value: string }[] = [
+  { label: "Every minute", value: "* * * * *" },
+  { label: "Hourly", value: "0 * * * *" },
+  { label: "Daily · 9am", value: "0 9 * * *" },
+  { label: "Weekdays · 9am", value: "0 9 * * 1-5" },
+  { label: "Weekly · Mon", value: "0 9 * * 1" },
+  { label: "Monthly · 1st", value: "0 9 1 * *" },
+];
 
 function humanSchedule(s: Scheduler): string {
   if (s.pattern) {
@@ -206,17 +240,18 @@ function CreateForm({ queues, onDone }: { queues: string[]; onDone: () => void }
     <div className="mt-4 rounded-lg border border-line bg-surface p-4">
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label="Queue">
-          <select
-            value={queue}
-            onChange={(e) => setQueue(e.target.value)}
-            className="h-8 w-full rounded-md border border-line bg-canvas px-2 text-sm outline-none focus:border-line-strong"
-          >
-            {queues.map((q) => (
-              <option key={q} value={q}>
-                {q}
-              </option>
-            ))}
-          </select>
+          <Select value={queue} onValueChange={setQueue}>
+            <SelectTrigger size="sm" className="w-full">
+              <SelectValue placeholder="Select queue" />
+            </SelectTrigger>
+            <SelectContent>
+              {queues.map((q) => (
+                <SelectItem key={q} value={q}>
+                  {q}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </Field>
         <Field label="Job name">
           <Input value={name} onChange={setName} placeholder="daily-digest" />
@@ -225,10 +260,51 @@ function CreateForm({ queues, onDone }: { queues: string[]; onDone: () => void }
           <Input value={id} onChange={setId} placeholder="defaults to job name" />
         </Field>
         <Field label="Timezone">
-          <Input value={tz} onChange={setTz} placeholder="UTC" />
+          <Select value={tz} onValueChange={setTz}>
+            <SelectTrigger size="sm" className="w-full">
+              <SelectValue placeholder="Select timezone" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Common</SelectLabel>
+                {COMMON_TIMEZONES.map((zone) => (
+                  <SelectItem key={zone} value={zone}>
+                    {zone}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+              {Object.entries(GROUPED_TIMEZONES).map(([region, zones]) => (
+                <SelectGroup key={region}>
+                  <SelectLabel>{region}</SelectLabel>
+                  {zones.map((zone) => (
+                    <SelectItem key={zone} value={zone}>
+                      {zone}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              ))}
+            </SelectContent>
+          </Select>
         </Field>
         <Field label="Cron pattern" full>
           <Input value={pattern} onChange={setPattern} mono placeholder="0 9 * * *" />
+          <div className="mt-1.5 flex flex-wrap gap-1">
+            {CRON_PRESETS.map((preset) => (
+              <button
+                key={preset.value}
+                type="button"
+                onClick={() => setPattern(preset.value)}
+                className={cn(
+                  "rounded border px-1.5 py-0.5 text-xs transition-colors",
+                  pattern === preset.value
+                    ? "border-accent/50 bg-accent/10 text-ink"
+                    : "border-line bg-canvas text-muted hover:border-line-strong hover:text-ink",
+                )}
+              >
+                {preset.label}
+              </button>
+            ))}
+          </div>
         </Field>
       </div>
 
