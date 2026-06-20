@@ -7,9 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-06-20
+
+### Added
+
+- **Pagination in the per-queue Jobs view**: page through every job in a state instead of only seeing the first 100, with a compact pager in the toolbar that shows the current range and the total.
+- **Indexed history search**: the History search is now backed by a SQLite FTS5 (trigram) index over each job's name, id, and payload, so substring search stays fast on large histories instead of scanning every row. Existing retention databases are backfilled into the index automatically on upgrade.
+
 ### Changed
 
 - **Scheduler form**: the **Queue** and **Timezone** fields are now `Select` dropdowns instead of free-text/native inputs. The timezone picker lists every IANA zone grouped by region, with `UTC` and the browser's local timezone pinned at the top under "Common". The **Cron pattern** field gains quick-pick presets (every minute, hourly, daily, weekdays, weekly, monthly) that fill the expression, alongside the existing live human-readable preview.
+- **Consistent tabs and pagination** across the Jobs and History pages: both now share the same components, alignment, and overflow behaviour.
+- **Schema migrations now run as a dedicated step before the server starts** — the container entrypoint applies pending migrations to the retention volume with the Drizzle CLI, instead of the server migrating inside its own process. Existing databases are adopted and migrated without data loss.
+
+### Fixed
+
+- The per-queue **Completed** and **Failed** tabs could only reach the first ~200 merged live + retained jobs; the fetch window was raised so pagination reaches the full set.
+- Removed a stray **"Live"** indicator from the header, and fixed the tab underline extending past the content on the Jobs and History pages.
 
 ## [1.2.2] - 2026-06-08
 
@@ -69,7 +83,8 @@ The first public release of Kew: a standalone, self-hosted dashboard for BullMQ.
 - **Single Docker image** that serves the dashboard and API on one port (`5399`), published multi-arch (linux/amd64 and linux/arm64) to GHCR.
 - A `⌘K` command palette, a dark-first UI, and colorblind-safe job states (color, icon, and label).
 
-[Unreleased]: https://github.com/kew-sh/kew/compare/v1.2.2...HEAD
+[Unreleased]: https://github.com/kew-sh/kew/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/kew-sh/kew/compare/v1.2.2...v1.3.0
 [1.2.2]: https://github.com/kew-sh/kew/compare/v1.2.1...v1.2.2
 [1.2.1]: https://github.com/kew-sh/kew/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/kew-sh/kew/compare/v1.1.0...v1.2.0
