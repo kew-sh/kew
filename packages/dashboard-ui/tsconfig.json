@@ -1,9 +1,0 @@
-{
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "paths": {
-      "@kew/core": ["../core/src/index.ts"]
-    }
-  },
-  "include": ["src"]
-}
