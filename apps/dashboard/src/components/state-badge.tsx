@@ -1,10 +1,11 @@
-import type { JobState } from "@kew/core";
+import type { JobState } from "@/lib/api";
 import { cn } from "../lib/utils";
 import { STATE_META } from "./state-meta";
 
 export function StateBadge({ state, className }: { state: JobState; className?: string }) {
   const m = STATE_META[state];
   const Icon = m.icon;
+
   return (
     <span
       className={cn(
@@ -30,6 +31,7 @@ export function StateDot({
   className?: string;
 }) {
   const m = STATE_META[state];
+
   return (
     <span
       className={cn(

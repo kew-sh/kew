@@ -1,6 +1,5 @@
 import { cn } from "../lib/utils";
 
-/** Read-only pretty JSON. Mono, scrollable, no dependency. */
 export function JsonView({ value, className }: { value: unknown; className?: string }) {
   let text: string;
   try {
@@ -8,6 +7,7 @@ export function JsonView({ value, className }: { value: unknown; className?: str
   } catch {
     text = String(value);
   }
+
   return (
     <pre
       className={cn(

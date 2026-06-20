@@ -1,5 +1,5 @@
-import { api, type HistoryQuery } from "@kew/core";
 import { useQuery } from "@tanstack/react-query";
+import { api, type HistoryQuery } from "@/lib/api";
 
 export function useHistory(query: HistoryQuery) {
   return useQuery({

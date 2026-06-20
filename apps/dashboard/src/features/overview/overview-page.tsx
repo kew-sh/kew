@@ -1,7 +1,7 @@
-import { backlog, type QueueSummary } from "@kew/core";
 import { Inbox, Unplug } from "lucide-react";
 import { useMemo, useState } from "react";
-import { Slot } from "../../extensions";
+import type { QueueSummary } from "@/lib/api";
+import { backlog } from "@/lib/queue-health";
 import { useConnection } from "../../lib/use-connection";
 import { useQueues } from "../../lib/use-queues";
 import { cn } from "../../lib/utils";
@@ -25,15 +25,18 @@ export function OverviewPage() {
   // biome-ignore lint/correctness/useExhaustiveDependencies: the order is intentionally frozen against live metric updates — it re-sorts only when the sort mode or the set of queues changes, so rows stay put while their numbers update underneath.
   const order = useMemo(() => {
     if (!queues) return [];
+
     const arr = [...queues];
     if (sort === "name") arr.sort((a, b) => a.name.localeCompare(b.name));
     else if (sort === "backlog") arr.sort((a, b) => backlog(b) - backlog(a));
     else arr.sort((a, b) => severity(b) - severity(a));
+
     return arr.map((q) => q.name);
   }, [sort, nameKey]);
 
   const sorted = useMemo(() => {
     const byName = new Map((queues ?? []).map((q) => [q.name, q] as const));
+
     return order.map((n) => byName.get(n)).filter((q): q is QueueSummary => Boolean(q));
   }, [order, queues]);
 
@@ -66,7 +69,6 @@ export function OverviewPage() {
             ))}
           </div>
         </div>
-        <Slot name="overview.header.actions" ctx={{ queues }} />
       </header>
 
       <div className="mt-5">
@@ -96,7 +98,6 @@ export function OverviewPage() {
           </>
         )}
       </div>
-      <Slot name="overview.below-list" ctx={{ queues }} />
     </div>
   );
 }

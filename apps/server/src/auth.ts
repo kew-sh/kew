@@ -1,12 +1,10 @@
 import { createHash, timingSafeEqual } from "node:crypto";
-
-import type { AuthInfo } from "@kew/core/types";
 import type { Context, MiddlewareHandler } from "hono";
 import { getConnInfo } from "hono/bun";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import { sign, verify } from "hono/jwt";
-
 import { env } from "./env";
+import type { AuthInfo } from "./types";
 
 const PASSWORD = env.KEW_AUTH_PASSWORD;
 const EMAIL = env.KEW_AUTH_EMAIL;

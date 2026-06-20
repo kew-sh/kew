@@ -1,6 +1,7 @@
-import { type QueueSummary, queueHealth } from "@kew/core";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { ArrowUp, BarChart3, CalendarClock, GitFork, History, ListChecks } from "lucide-react";
+import type { QueueSummary } from "@/lib/api";
+import { queueHealth } from "@/lib/queue-health";
 import { KewMark } from "../components/brand";
 import { StateDot } from "../components/state-badge";
 import {
@@ -18,7 +19,6 @@ import {
   Sidebar as SidebarRoot,
   useSidebar,
 } from "../components/ui/sidebar";
-import { Slot } from "../extensions";
 import { useConnection } from "../lib/use-connection";
 import { useQueues } from "../lib/use-queues";
 import { useVersion } from "../lib/use-version";
@@ -63,7 +63,6 @@ export function Sidebar() {
                 </SidebarMenuButton>
               </SidebarMenuItem>
             ))}
-            <Slot name="sidebar.nav.extra" />
           </SidebarMenu>
         </SidebarGroup>
 
@@ -85,7 +84,6 @@ export function Sidebar() {
       </SidebarContent>
 
       <SidebarFooter className="group-data-[collapsible=icon]:hidden">
-        <Slot name="sidebar.footer" />
         <div className="space-y-2 px-1">
           <div className="flex items-center gap-2 text-xs">
             <StateDot
@@ -116,6 +114,7 @@ function QueueLink({
   onNavigate: () => void;
 }) {
   const health = queueHealth(q);
+
   return (
     <SidebarMenuItem>
       <SidebarMenuButton asChild isActive={active} tooltip={q.name}>
@@ -133,7 +132,9 @@ function QueueLink({
 
 function KewVersion() {
   const { data } = useVersion();
+
   if (!data) return null;
+
   return (
     <div className="flex items-center justify-between gap-2 text-[10px] text-muted">
       <span className="font-mono">Kew</span>

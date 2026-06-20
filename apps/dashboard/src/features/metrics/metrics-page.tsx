@@ -13,6 +13,7 @@ export function MetricsPage() {
     const completed = qs.reduce((a, q) => a + q.throughput.reduce((x, y) => x + y, 0), 0);
     const failed = qs.reduce((a, q) => a + q.failures.reduce((x, y) => x + y, 0), 0);
     const failRate = completed + failed === 0 ? 0 : failed / (completed + failed);
+
     return { rate, completed, failed, failRate };
   }, [queues]);
 

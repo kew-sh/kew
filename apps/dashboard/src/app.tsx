@@ -1,27 +1,12 @@
 import "@fontsource-variable/geist";
 import "@fontsource-variable/geist-mono";
 
-import type { AuthInfo } from "@kew/core";
 import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider } from "@tanstack/react-router";
-import type { ComponentType } from "react";
 import { ThemeProvider } from "./components/theme";
 import { Toaster, toast } from "./components/toast";
-import { ConfigProvider, type DashboardConfig } from "./extensions";
-import { buildRouter } from "./router";
-
-export { KewMark } from "./components/brand";
-export type {
-  AuthScreens,
-  DashboardConfig,
-  ExtraRoute,
-  JobDrawerContext,
-  OverviewContext,
-  QueueContext,
-  SlotComponents,
-  SlotMap,
-  SlotName,
-} from "./extensions";
+import type { AuthInfo } from "./lib/api";
+import { router } from "./router";
 
 function statusOf(error: unknown) {
   return (error as { response?: { status?: number } } | null)?.response?.status;
@@ -37,9 +22,12 @@ function reflectUnauthorized(error: unknown) {
 
 function notifyMutationError(error: unknown) {
   const status = statusOf(error);
+
   if (status === 401) return;
+
   const serverMessage = (error as { response?: { data?: { error?: string } } } | null)?.response
     ?.data?.error;
+
   toast.error(
     status === 403
       ? "This Kew instance is read-only — the action was blocked."
@@ -62,19 +50,13 @@ const queryClient = new QueryClient({
   }),
 });
 
-export function createKewDashboard(config: DashboardConfig = {}): { Dashboard: ComponentType } {
-  const router = buildRouter(config.extraRoutes);
-  function Dashboard() {
-    return (
-      <ConfigProvider value={config}>
-        <ThemeProvider>
-          <QueryClientProvider client={queryClient}>
-            <RouterProvider router={router} />
-            <Toaster />
-          </QueryClientProvider>
-        </ThemeProvider>
-      </ConfigProvider>
-    );
-  }
-  return { Dashboard };
+export function App() {
+  return (
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+        <Toaster />
+      </QueryClientProvider>
+    </ThemeProvider>
+  );
 }

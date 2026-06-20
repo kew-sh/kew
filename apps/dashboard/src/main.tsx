@@ -1,12 +1,10 @@
-import { createKewDashboard } from "@kew/dashboard-ui";
-import "@kew/dashboard-ui/styles.css";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-
-const { Dashboard } = createKewDashboard();
+import { App } from "./app";
+import "./index.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <Dashboard />
+    <App />
   </StrictMode>,
 );

@@ -1,11 +1,14 @@
-import { type BulkAction, JOB_STATES, type Job, type JobState, queueHealth } from "@kew/core";
 import { Link, useParams } from "@tanstack/react-router";
 import type { RowSelectionState } from "@tanstack/react-table";
 import { ArrowLeft, CheckCircle2, Pause, Play, SlidersHorizontal } from "lucide-react";
 import { useMemo, useState } from "react";
+import { type BulkAction, JOB_STATES, type Job, type JobState } from "@/lib/api";
+import { queueHealth } from "@/lib/queue-health";
+import { Pagination } from "../../components/pagination";
 import { Skeleton } from "../../components/skeleton";
 import { StateDot } from "../../components/state-badge";
 import { STATE_META } from "../../components/state-meta";
+import { Tabs } from "../../components/tabs";
 import { toast } from "../../components/toast";
 import { Button } from "../../components/ui/button";
 import {
@@ -15,10 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../components/ui/select";
-import { Slot } from "../../extensions";
 import { useConnection } from "../../lib/use-connection";
 import { useQueue, useSetQueuePaused } from "../../lib/use-queues";
-import { cn, compact } from "../../lib/utils";
 import { BulkBar } from "./bulk-bar";
 import { JobDrawer } from "./job-drawer";
 import { JobTable } from "./job-table";
@@ -39,6 +40,8 @@ const ACTION_PAST: Record<BulkAction, string> = {
   remove: "removed",
 };
 
+const PAGE_SIZE = 100;
+
 export function JobsPage() {
   const { queueName } = useParams({ from: "/queues/$queueName" });
   const { data: queue } = useQueue(queueName);
@@ -48,24 +51,43 @@ export function JobsPage() {
   const [state, setState] = useState<JobState>("completed");
   const [search, setSearch] = useState("");
   const [win, setWin] = useState<WindowId>("all");
+  const [pageIndex, setPageIndex] = useState(0);
   const [selection, setSelection] = useState<RowSelectionState>({});
   const [openJob, setOpenJob] = useState<Job | null>(null);
+
+  const filterKey = `${queueName}|${state}|${search}|${win}`;
+  const [trackedKey, setTrackedKey] = useState(filterKey);
+  if (trackedKey !== filterKey) {
+    setTrackedKey(filterKey);
+    setPageIndex(0);
+  }
 
   const { data: page } = useJobs({
     queue: queueName,
     state,
-    page: 0,
-    pageSize: 100,
+    page: pageIndex,
+    pageSize: PAGE_SIZE,
     search: search || undefined,
   });
 
   const jobs = useMemo(() => {
     if (!page) return [];
+
     const ms = TIME_WINDOWS.find((t) => t.id === win)!.ms;
     if (!Number.isFinite(ms)) return page.jobs;
+
     const cutoff = Date.now() - ms;
+
     return page.jobs.filter((j) => j.timestamp >= cutoff);
   }, [page, win]);
+
+  const total = page?.total ?? 0;
+  const exact = page?.exact ?? true;
+
+  const goToPage = (p: number) => {
+    setPageIndex(Math.max(0, p));
+    setSelection({});
+  };
 
   const bulk = useBulkAction(queueName);
   const jobAction = useJobAction(queueName);
@@ -117,33 +139,16 @@ export function JobsPage() {
         </div>
       </div>
 
-      <div
-        role="tablist"
-        className="mt-3 flex gap-1 overflow-x-auto border-b border-line px-4 md:px-8"
-      >
-        {JOB_STATES.map((s) => {
-          const active = s === state;
-          return (
-            <button
-              type="button"
-              key={s}
-              role="tab"
-              aria-selected={active}
-              onClick={() => pickState(s)}
-              className={cn(
-                "-mb-px flex items-center gap-2 whitespace-nowrap border-b-2 px-2.5 py-2.5 text-sm transition-colors",
-                active ? "border-accent text-ink" : "border-transparent text-muted hover:text-ink",
-              )}
-            >
-              <StateDot state={s} />
-              {STATE_META[s].label}
-              <span className={cn("text-xs tnum", active ? "text-ink-2" : "text-muted")}>
-                {compact(queue?.counts[s] ?? 0)}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+      <Tabs
+        value={state}
+        onValueChange={pickState}
+        items={JOB_STATES.map((s) => ({
+          id: s,
+          label: STATE_META[s].label,
+          icon: <StateDot state={s} />,
+          count: queue?.counts[s] ?? 0,
+        }))}
+      />
 
       <div className="flex flex-wrap items-center gap-2 px-4 py-3 md:px-8">
         <input
@@ -166,12 +171,19 @@ export function JobsPage() {
             ))}
           </SelectContent>
         </Select>
-        <Slot name="queue.toolbar" ctx={{ queueName, queue, readOnly }} />
-        <span className="ml-auto text-xs tnum text-muted">{jobs.length} shown</span>
+        <div className="ml-auto">
+          <Pagination
+            page={pageIndex}
+            pageSize={PAGE_SIZE}
+            total={total}
+            count={page?.jobs.length ?? 0}
+            exact={exact}
+            onPageChange={goToPage}
+          />
+        </div>
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col px-4 pb-4 md:px-8">
-        <Slot name="queue.above-table" ctx={{ queueName, queue, readOnly }} />
         {!page ? (
           <JobTableSkeleton />
         ) : jobs.length === 0 ? (
@@ -287,6 +299,7 @@ function EmptyJobs({ state, filtered }: { state: JobState; filtered: boolean }) 
     );
   }
   const good = state === "failed";
+
   return (
     <div className="flex flex-1 flex-col items-center justify-center rounded-lg border border-dashed border-line bg-surface/40 px-6 py-16 text-center">
       {good ? (

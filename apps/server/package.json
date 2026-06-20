@@ -6,21 +6,27 @@
   "description": "Standalone backend: reads a real Redis via BullMQ and serves the QueueApi contract + the built dashboard.",
   "license": "FSL-1.1-ALv2",
   "scripts": {
-    "dev": "bun --watch src/index.ts",
-    "start": "bun src/index.ts",
-    "seed": "bun src/seed.ts",
-    "demo": "bun src/demo.ts",
-    "feed": "bun src/test-feeder.ts",
+    "dev": "drizzle-kit migrate && bun --watch src/index.ts",
+    "start": "drizzle-kit migrate && bun src/index.ts",
+    "migrate": "drizzle-kit migrate",
+    "seed": "bun src/dev/seed.ts",
+    "demo": "bun src/dev/demo.ts",
+    "feed": "bun src/dev/test-feeder.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:studio": "drizzle-kit studio",
+    "test": "bun test",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kew/core": "workspace:*",
     "bullmq": "^5.34.0",
+    "drizzle-orm": "^0.45.2",
     "hono": "^4.6.14",
     "ioredis": "5.10.1",
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@types/bun": "^1.1.14"
+    "@libsql/client": "^0.17.4",
+    "@types/bun": "^1.1.14",
+    "drizzle-kit": "^0.31.10"
   }
 }

@@ -1,10 +1,11 @@
-import type { HistoryQuery, Job } from "@kew/core";
 import type { RowSelectionState } from "@tanstack/react-table";
-import { ChevronLeft, ChevronRight, Clock, History, SlidersHorizontal } from "lucide-react";
+import { Clock, History, SlidersHorizontal } from "lucide-react";
 import { useState } from "react";
+import type { HistoryQuery, Job } from "@/lib/api";
+import { Pagination } from "../../components/pagination";
 import { Skeleton } from "../../components/skeleton";
 import { StateDot } from "../../components/state-badge";
-import { Button } from "../../components/ui/button";
+import { Tabs } from "../../components/tabs";
 import {
   Select,
   SelectContent,
@@ -13,7 +14,6 @@ import {
   SelectValue,
 } from "../../components/ui/select";
 import { useQueues } from "../../lib/use-queues";
-import { cn, compact } from "../../lib/utils";
 import { JobDrawer } from "../jobs/job-drawer";
 import { JobTable } from "../jobs/job-table";
 import { useHistory } from "./use-history";
@@ -51,6 +51,7 @@ export function HistoryPage() {
   const [openJob, setOpenJob] = useState<Job | null>(null);
 
   const winMs = TIME_WINDOWS.find((t) => t.id === win)!.ms;
+
   const from = Number.isFinite(winMs)
     ? Math.floor((Date.now() - winMs) / 60_000) * 60_000
     : undefined;
@@ -63,11 +64,11 @@ export function HistoryPage() {
     page,
     pageSize: PAGE_SIZE,
   };
+
   const { data } = useHistory(query);
 
   const jobs = data?.jobs ?? [];
   const total = data?.total ?? 0;
-  const hasNext = (page + 1) * PAGE_SIZE < total;
   const filtered = Boolean(queue || search || stateTab !== "all" || win !== "all");
 
   const reset =
@@ -90,30 +91,15 @@ export function HistoryPage() {
         </p>
       </div>
 
-      <div
-        role="tablist"
-        className="mt-3 flex gap-1 overflow-x-auto border-b border-line px-4 md:px-8"
-      >
-        {STATE_TABS.map((t) => {
-          const active = t.id === stateTab;
-          return (
-            <button
-              type="button"
-              key={t.id}
-              role="tab"
-              aria-selected={active}
-              onClick={() => reset(setStateTab)(t.id)}
-              className={cn(
-                "-mb-px flex items-center gap-2 whitespace-nowrap border-b-2 px-2.5 py-2.5 text-sm transition-colors",
-                active ? "border-accent text-ink" : "border-transparent text-muted hover:text-ink",
-              )}
-            >
-              {t.id !== "all" && <StateDot state={t.id} />}
-              {t.label}
-            </button>
-          );
-        })}
-      </div>
+      <Tabs
+        value={stateTab}
+        onValueChange={reset(setStateTab)}
+        items={STATE_TABS.map((t) => ({
+          id: t.id,
+          label: t.label,
+          icon: t.id === "all" ? undefined : <StateDot state={t.id} />,
+        }))}
+      />
 
       <div className="flex flex-wrap items-center gap-2 px-4 py-3 md:px-8">
         <input
@@ -152,7 +138,15 @@ export function HistoryPage() {
             ))}
           </SelectContent>
         </Select>
-        <span className="ml-auto text-xs tnum text-muted">{compact(total)} total</span>
+        <div className="ml-auto">
+          <Pagination
+            page={page}
+            pageSize={PAGE_SIZE}
+            total={total}
+            count={jobs.length}
+            onPageChange={setPage}
+          />
+        </div>
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col px-4 pb-4 md:px-8">
@@ -169,34 +163,6 @@ export function HistoryPage() {
             readOnly
             rowId={(j) => `${j.queue}:${j.id}`}
           />
-        )}
-
-        {(page > 0 || hasNext) && (
-          <div className="mt-3 flex items-center justify-between text-xs text-muted">
-            <span className="tnum">
-              {page * PAGE_SIZE + 1}–{page * PAGE_SIZE + jobs.length} of {compact(total)}
-            </span>
-            <div className="flex items-center gap-1.5">
-              <Button
-                variant="subtle"
-                size="sm"
-                disabled={page === 0}
-                onClick={() => setPage((p) => Math.max(0, p - 1))}
-              >
-                <ChevronLeft className="size-3.5" />
-                Prev
-              </Button>
-              <Button
-                variant="subtle"
-                size="sm"
-                disabled={!hasNext}
-                onClick={() => setPage((p) => p + 1)}
-              >
-                Next
-                <ChevronRight className="size-3.5" />
-              </Button>
-            </div>
-          </div>
         )}
       </div>
 

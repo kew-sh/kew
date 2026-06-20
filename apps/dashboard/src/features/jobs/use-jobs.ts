@@ -1,5 +1,5 @@
-import { api, type BulkAction, type JobQuery } from "@kew/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { api, type BulkAction, type JobQuery } from "@/lib/api";
 
 export function useJobs(query: JobQuery) {
   return useQuery({
@@ -12,6 +12,7 @@ export function useJobs(query: JobQuery) {
 
 function useInvalidateQueue(queue: string) {
   const qc = useQueryClient();
+
   return () =>
     Promise.all([
       qc.invalidateQueries({ queryKey: ["jobs", queue] }),
@@ -22,6 +23,7 @@ function useInvalidateQueue(queue: string) {
 
 export function useBulkAction(queue: string) {
   const invalidate = useInvalidateQueue(queue);
+
   return useMutation({
     mutationFn: (input: { ids: string[]; action: BulkAction }) =>
       api.bulkAction({ queue, ...input }),
@@ -31,6 +33,7 @@ export function useBulkAction(queue: string) {
 
 export function useJobAction(queue: string) {
   const invalidate = useInvalidateQueue(queue);
+
   return useMutation({
     mutationFn: (input: { id: string; action: BulkAction }) =>
       api.bulkAction({ queue, ids: [input.id], action: input.action }),
@@ -40,6 +43,7 @@ export function useJobAction(queue: string) {
 
 export function useRetryWithData(queue: string) {
   const invalidate = useInvalidateQueue(queue);
+
   return useMutation({
     mutationFn: (input: { id: string; data: unknown }) => api.retryWithData({ queue, ...input }),
     onSuccess: invalidate,
@@ -48,6 +52,7 @@ export function useRetryWithData(queue: string) {
 
 export function useRerun(queue: string) {
   const invalidate = useInvalidateQueue(queue);
+
   return useMutation({
     mutationFn: (input: { id: string; data?: unknown }) => api.rerun({ queue, ...input }),
     onSuccess: invalidate,

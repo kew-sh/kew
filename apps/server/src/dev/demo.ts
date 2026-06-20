@@ -1,12 +1,7 @@
-import { createRedis } from "@kew/core/server";
 import { Queue, Worker } from "bullmq";
+import { createRedis } from "../queue";
 
-/**
- * Live load generator: trickles jobs into a few queues and processes them, so
- * counts and throughput sparklines actually move while you watch the dashboard.
- * Dev-only. Run: `bun run demo` (ctrl-c to stop).
- */
-
+// Dev: live load generator so counts and sparklines move. Run: bun run demo
 const QUEUES = ["emails", "webhooks", "notifications", "ai-inference"];
 const producers = Object.fromEntries(
   QUEUES.map((n) => [n, new Queue(n, { connection: createRedis() })]),

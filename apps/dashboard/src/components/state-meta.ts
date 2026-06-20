@@ -1,4 +1,3 @@
-import type { JobState } from "@kew/core";
 import {
   Activity,
   ArrowUp,
@@ -10,21 +9,16 @@ import {
   Timer,
   X,
 } from "lucide-react";
+import type { JobState } from "@/lib/api";
 
 export interface StateMeta {
   label: string;
   icon: LucideIcon;
-  /** static Tailwind classes (kept literal so JIT picks them up) */
   text: string;
   bg: string;
   dot: string;
 }
 
-/**
- * One source of truth for state color + icon + label. Color NEVER travels
- * alone: every surface that uses a state color also shows the icon and/or the
- * label, so red/green carry meaning for colorblind users too.
- */
 export const STATE_META: Record<JobState, StateMeta> = {
   active: {
     label: "Active",

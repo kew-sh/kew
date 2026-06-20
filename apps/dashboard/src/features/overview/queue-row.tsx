@@ -1,6 +1,7 @@
-import { type JobState, type QueueSummary, queueHealth } from "@kew/core";
 import { Link } from "@tanstack/react-router";
 import { ChevronRight, Pause } from "lucide-react";
+import type { JobState, QueueSummary } from "@/lib/api";
+import { queueHealth } from "@/lib/queue-health";
 import { Sparkline } from "../../components/sparkline";
 import { StateDot } from "../../components/state-badge";
 import { cn, compact } from "../../lib/utils";
@@ -10,6 +11,7 @@ const EXTRA: JobState[] = ["prioritized", "waiting-children", "paused"];
 
 export function QueueRow({ q }: { q: QueueSummary }) {
   const health = queueHealth(q);
+
   return (
     <Link
       to="/queues/$queueName"
@@ -54,6 +56,7 @@ export function QueueRow({ q }: { q: QueueSummary }) {
 
 function Count({ state, n }: { state: JobState; n: number }) {
   const zero = n === 0;
+
   return (
     <span
       className={cn(

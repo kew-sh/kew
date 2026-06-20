@@ -1,7 +1,7 @@
 import { Database } from "bun:sqlite";
 import { describe, expect, test } from "bun:test";
 import { unlinkSync } from "node:fs";
-import type { RetainedJob } from "@kew/core/server";
+import type { RetainedJob } from "../src/queue";
 import { createSqliteRetention } from "../src/retention-store";
 
 function tempPath(): string {
@@ -83,6 +83,48 @@ describe("sqlite retention store", () => {
 
       const completed = store.query({ state: "completed", page: 0, pageSize: 50 });
       expect(completed.jobs[0].maxAttempts).toBe(3);
+    } finally {
+      store.close();
+    }
+  });
+
+  test("search matches a substring of the name and of the payload (FTS index)", () => {
+    const store = createSqliteRetention({ path: ":memory:" });
+    try {
+      store.sink.write([
+        rec({
+          jobId: "1",
+          queue: "q",
+          name: "send-email",
+          data: { to: "alice@acme.io" },
+          capturedAt: 1000,
+        }),
+        rec({
+          jobId: "2",
+          queue: "q",
+          name: "charge-card",
+          data: { customer: "cus_42" },
+          capturedAt: 2000,
+        }),
+      ]);
+
+      const ids = (term: string) =>
+        store.query({ search: term, page: 0, pageSize: 50 }).jobs.map((j) => j.id);
+
+      expect(ids("mail")).toEqual(["1"]);
+      expect(ids("acme")).toEqual(["1"]);
+      expect(ids("card")).toEqual(["2"]);
+      expect(ids("cus_4")).toEqual(["2"]);
+    } finally {
+      store.close();
+    }
+  });
+
+  test("short search terms fall back to a LIKE scan", () => {
+    const store = createSqliteRetention({ path: ":memory:" });
+    try {
+      store.sink.write([rec({ jobId: "1", queue: "q", name: "ab", capturedAt: 1000 })]);
+      expect(store.query({ search: "ab", page: 0, pageSize: 50 }).total).toBe(1);
     } finally {
       store.close();
     }
@@ -175,7 +217,16 @@ describe("sqlite retention store", () => {
 });
 
 describe("sqlite retention migrations", () => {
-  test("data survives reopening the same file and the schema is versioned", () => {
+  function migrationCount(path: string): number {
+    const raw = new Database(path);
+    try {
+      return (raw.query("SELECT COUNT(*) AS c FROM __drizzle_migrations").get() as { c: number }).c;
+    } finally {
+      raw.close();
+    }
+  }
+
+  test("data survives reopening the same file; the baseline runs once and is idempotent", () => {
     const path = tempPath();
     try {
       const first = createSqliteRetention({ path });
@@ -186,16 +237,13 @@ describe("sqlite retention migrations", () => {
       expect(second.query({ page: 0, pageSize: 10 }).total).toBe(1);
       second.close();
 
-      const raw = new Database(path);
-      const { user_version } = raw.query("PRAGMA user_version").get() as { user_version: number };
-      expect(user_version).toBe(1);
-      raw.close();
+      expect(migrationCount(path)).toBe(2);
     } finally {
       cleanup(path);
     }
   });
 
-  test("adopts a pre-existing db that has no version, without losing rows", () => {
+  test("adopts a legacy pre-Drizzle db (existing table + indexes + user_version, no journal)", () => {
     const path = tempPath();
     try {
       const legacy = new Database(path, { create: true });
@@ -203,20 +251,23 @@ describe("sqlite retention migrations", () => {
         "CREATE TABLE retained_jobs (id INTEGER PRIMARY KEY AUTOINCREMENT, queue TEXT NOT NULL, job_id TEXT NOT NULL, name TEXT NOT NULL, state TEXT NOT NULL, data TEXT, opts TEXT, return_value TEXT, failed_reason TEXT, attempts_made INTEGER, timestamp INTEGER, processed_on INTEGER, finished_on INTEGER, duration_ms INTEGER, captured_at INTEGER NOT NULL, payload_captured INTEGER NOT NULL);",
       );
       legacy.run(
+        "CREATE INDEX idx_retained_queue_captured ON retained_jobs (queue, captured_at DESC);",
+      );
+      legacy.run("CREATE INDEX idx_retained_captured ON retained_jobs (captured_at DESC);");
+      legacy.run(
         "INSERT INTO retained_jobs (queue, job_id, name, state, captured_at, payload_captured) VALUES ('emails', '99', 'old-job', 'completed', 1000, 1);",
       );
+      legacy.run("PRAGMA user_version = 1;");
       legacy.close();
 
       const store = createSqliteRetention({ path });
-      const page = store.query({ page: 0, pageSize: 10 });
-      expect(page.total).toBe(1);
-      expect(page.jobs[0].id).toBe("99");
+      expect(store.query({ page: 0, pageSize: 10 }).jobs[0].id).toBe("99");
+
+      store.sink.write([rec({ jobId: "100", queue: "emails", capturedAt: 2000 })]);
+      expect(store.query({ page: 0, pageSize: 10 }).total).toBe(2);
       store.close();
 
-      const raw = new Database(path);
-      const { user_version } = raw.query("PRAGMA user_version").get() as { user_version: number };
-      expect(user_version).toBe(1);
-      raw.close();
+      expect(migrationCount(path)).toBe(2);
     } finally {
       cleanup(path);
     }

@@ -7,7 +7,7 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "includes": ["**", "!**/node_modules", "!**/dist", "!bun.lock", "!**/*.css"]
+    "includes": ["**", "!**/node_modules", "!**/dist", "!**/drizzle", "!bun.lock", "!**/*.css"]
   },
   "formatter": {
     "enabled": true,

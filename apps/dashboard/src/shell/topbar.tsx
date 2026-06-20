@@ -1,15 +1,14 @@
 import { LogOut, Search } from "lucide-react";
-import { StateDot } from "../components/state-badge";
 import { ThemeToggle } from "../components/theme";
 import { Button } from "../components/ui/button";
 import { SidebarTrigger } from "../components/ui/sidebar";
-import { Slot } from "../extensions";
 import { useAuth, useLogout } from "../lib/use-auth";
 
 export function Topbar() {
   const { data: auth } = useAuth();
   const logout = useLogout();
   const canLogout = Boolean(auth?.authRequired && auth.authenticated && auth.mode === "password");
+
   return (
     <header className="flex h-14 shrink-0 items-center gap-3 border-b border-line bg-surface/70 px-3 backdrop-blur">
       <SidebarTrigger className="size-7 text-muted hover:text-ink [&_svg]:size-4" />
@@ -27,11 +26,6 @@ export function Topbar() {
       </button>
 
       <div className="ml-auto flex items-center gap-2.5">
-        <Slot name="topbar.actions" />
-        <span className="hidden items-center gap-1.5 text-xs text-muted sm:flex">
-          <StateDot state="completed" pulse />
-          Live
-        </span>
         <ThemeToggle />
         {canLogout && (
           <Button

@@ -1,5 +1,5 @@
-import type { FlowNode } from "@kew/core";
 import { GitFork, Workflow } from "lucide-react";
+import type { FlowNode } from "@/lib/api";
 import { Skeleton } from "../../components/skeleton";
 import { StateBadge, StateDot } from "../../components/state-badge";
 import { useFlows } from "./use-flows";
@@ -57,6 +57,7 @@ function FlowTree({ node }: { node: FlowNode }) {
 
 function NodeRow({ node }: { node: FlowNode }) {
   const isParent = node.children.length > 0;
+
   return (
     <div className="flex items-center gap-2.5 rounded-md px-2 py-1.5 transition-colors hover:bg-overlay">
       <StateDot state={node.state} pulse={node.state === "active"} />

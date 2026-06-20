@@ -24,6 +24,7 @@ function dismiss(id: number) {
 
 function push(type: ToastType, message: string) {
   const id = ++seq;
+
   items = [...items, { id, type, message }];
   emit();
   setTimeout(() => dismiss(id), 4500);
@@ -59,6 +60,7 @@ export function Toaster() {
     >
       {current.map((t) => {
         const Icon = ICON[t.type];
+
         return (
           <div
             key={t.id}

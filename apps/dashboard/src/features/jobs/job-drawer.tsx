@@ -1,6 +1,6 @@
-import type { Job } from "@kew/core";
 import { ArrowUp, Pencil, RotateCw, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import type { Job } from "@/lib/api";
 import { JsonView } from "../../components/json-view";
 import { StateBadge } from "../../components/state-badge";
 import {
@@ -22,7 +22,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from "../../components/ui/sheet";
-import { Slot } from "../../extensions";
 import { duration, relativeTime } from "../../lib/utils";
 
 export function JobDrawer({
@@ -49,6 +48,7 @@ export function JobDrawer({
 
   useEffect(() => {
     if (!job) return;
+
     setShown(job);
     setEditing(false);
     setError(null);
@@ -62,6 +62,7 @@ export function JobDrawer({
     try {
       const parsed = JSON.parse(draft);
       setError(null);
+
       if (j.retained) onRerun(j.id, parsed);
       else onRetryWithData(j.id, parsed);
     } catch {
@@ -166,7 +167,6 @@ export function JobDrawer({
                 </Section>
               )}
             </div>
-            <Slot name="job-drawer.footer" ctx={{ job: j, readOnly }} />
 
             {!readOnly && j.retained && (
               <div className="flex items-center gap-2 border-t border-line p-3">

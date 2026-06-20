@@ -32,6 +32,7 @@ export const useTheme = () => useContext(ThemeCtx);
 
 export function ThemeToggle() {
   const { theme, toggle } = useTheme();
+
   return (
     <Button variant="ghost" size="icon-sm" onClick={toggle} aria-label="Toggle color theme">
       {theme === "dark" ? <Moon className="size-4" /> : <Sun className="size-4" />}

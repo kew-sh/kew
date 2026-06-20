@@ -1,5 +1,5 @@
-import type { BulkAction } from "@kew/core";
 import { ArrowUp, RotateCw, Trash2, X } from "lucide-react";
+import type { BulkAction } from "@/lib/api";
 import {
   AlertDialog,
   AlertDialogAction,

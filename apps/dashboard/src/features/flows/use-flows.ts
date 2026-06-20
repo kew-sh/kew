@@ -1,5 +1,5 @@
-import { api } from "@kew/core";
 import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api";
 
 export function useFlows() {
   return useQuery({

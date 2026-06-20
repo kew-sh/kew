@@ -1,12 +1,5 @@
-import {
-  createRootRoute,
-  createRoute,
-  createRouter,
-  Outlet,
-  type RouteComponent,
-} from "@tanstack/react-router";
+import { createRootRoute, createRoute, createRouter, Outlet } from "@tanstack/react-router";
 import { lazy } from "react";
-import type { ExtraRoute } from "./extensions";
 import { AuthGate } from "./features/auth/auth-gate";
 import { OverviewPage } from "./features/overview/overview-page";
 import { AppShell } from "./shell/app-shell";
@@ -74,34 +67,23 @@ const historyRoute = createRoute({
   component: HistoryPage,
 });
 
-export function buildRouter(extraRoutes: ExtraRoute[] = []) {
-  const extra = extraRoutes.map((r) =>
-    createRoute({
-      getParentRoute: () => rootRoute,
-      path: r.path,
-      component: r.component as RouteComponent,
-    }),
-  );
-  const routeTree = rootRoute.addChildren([
-    indexRoute,
-    queueRoute,
-    schedulersRoute,
-    flowsRoute,
-    metricsRoute,
-    historyRoute,
-    ...extra,
-  ]);
-  return createRouter({
-    routeTree,
-    defaultPreload: "intent",
-    defaultErrorComponent: ErrorScreen,
-  });
-}
+const routeTree = rootRoute.addChildren([
+  indexRoute,
+  queueRoute,
+  schedulersRoute,
+  flowsRoute,
+  metricsRoute,
+  historyRoute,
+]);
 
-export type KewRouter = ReturnType<typeof buildRouter>;
+export const router = createRouter({
+  routeTree,
+  defaultPreload: "intent",
+  defaultErrorComponent: ErrorScreen,
+});
 
 declare module "@tanstack/react-router" {
   interface Register {
-    router: KewRouter;
+    router: typeof router;
   }
 }

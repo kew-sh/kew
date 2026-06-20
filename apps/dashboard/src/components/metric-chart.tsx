@@ -1,6 +1,5 @@
 import { cn } from "../lib/utils";
 
-/** Lightweight full-width area + failures-line chart. SVG, no dependency. */
 export function MetricChart({
   data,
   failures,

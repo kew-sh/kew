@@ -1,8 +1,8 @@
-import type { Scheduler } from "@kew/core";
 import { CronExpressionParser } from "cron-parser";
 import cronstrue from "cronstrue";
 import { CalendarClock, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import type { Scheduler } from "@/lib/api";
 import { JsonView } from "../../components/json-view";
 import { toast } from "../../components/toast";
 import {
@@ -36,18 +36,22 @@ function human(s: Scheduler): string {
   }
   if (s.every) {
     const sec = Math.round(s.every / 1000);
+
     if (sec % 3600 === 0) return `Every ${sec / 3600} hour(s)`;
     if (sec % 60 === 0) return `Every ${sec / 60} minute(s)`;
     return `Every ${sec} seconds`;
   }
+
   return "—";
 }
 
 function nextRuns(s: Scheduler, count = 6): Date[] {
   if (s.every) {
     const base = s.next ?? Date.now() + s.every;
+
     return Array.from({ length: count }, (_, i) => new Date(base + i * s.every!));
   }
+
   if (s.pattern) {
     try {
       const it = CronExpressionParser.parse(s.pattern, {

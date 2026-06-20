@@ -1,12 +1,12 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import { Queue, Worker } from "bullmq";
+import { Redis } from "ioredis";
 import {
   type RetainedJob,
   type RetentionHandle,
   type RetentionSink,
   startRetention,
-} from "@kew/core/server";
-import { Queue, Worker } from "bullmq";
-import { Redis } from "ioredis";
+} from "../src/queue";
 
 const TEST_REDIS_URL = process.env.TEST_REDIS_URL ?? "redis://localhost:6379";
 const PREFIX = process.env.BULLMQ_PREFIX ?? "bull";

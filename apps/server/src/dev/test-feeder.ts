@@ -1,21 +1,5 @@
-/**
- * TEST FEEDER — simulated production traffic for local development.
- *
- * This is NOT part of the Kew product and is never shipped. It is a standalone
- * load generator: it publishes realistic BullMQ jobs into your local Redis and
- * runs workers that process them, deliberately failing a fraction so the
- * dashboard shows real success AND error states (with real stack traces).
- *
- * One queue ("magic-number") is a deterministic gate: a job only succeeds when
- * its payload is { value: 1 }, otherwise it fails. Use it to exercise the
- * edit-payload-and-reprocess flow — open a failed job, set value to 1, retry.
- *
- * Each queue feeds at its own slow cadence so the flow is easy to follow.
- *
- *   bun run --filter '@kew/server' feed
- *
- * Stop with Ctrl-C. It only ever writes to the queues listed in SCENARIOS.
- */
+// Dev-only simulated traffic. The "magic-number" queue only passes payload { value: 1 },
+// so you can exercise the edit-payload-and-retry flow. Run: bun run feed
 import { Queue, Worker } from "bullmq";
 import { Redis } from "ioredis";
 

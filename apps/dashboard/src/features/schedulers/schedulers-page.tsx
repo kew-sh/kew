@@ -1,8 +1,8 @@
-import { api, type Scheduler } from "@kew/core";
 import { useQueries } from "@tanstack/react-query";
 import cronstrue from "cronstrue";
 import { CalendarClock, ChevronRight, Plus, Trash2, X } from "lucide-react";
 import { useMemo, useState } from "react";
+import { api, type Scheduler } from "@/lib/api";
 import { Skeleton } from "../../components/skeleton";
 import { toast } from "../../components/toast";
 import { Button } from "../../components/ui/button";
@@ -55,18 +55,22 @@ function humanSchedule(s: Scheduler): string {
   }
   if (s.every) {
     const sec = Math.round(s.every / 1000);
+
     if (sec % 3600 === 0) return `Every ${sec / 3600}h`;
     if (sec % 60 === 0) return `Every ${sec / 60}m`;
     return `Every ${sec}s`;
   }
+
   return "—";
 }
 
 function until(ts: number): string {
   const s = Math.max(0, Math.round((ts - Date.now()) / 1000));
   if (s < 60) return `${s}s`;
+
   const m = Math.round(s / 60);
   if (m < 60) return `${m}m`;
+
   const h = Math.round(m / 60);
   if (h < 24) return `${h}h`;
   return `${Math.round(h / 24)}d`;
@@ -84,6 +88,7 @@ export function SchedulersPage() {
       refetchInterval: 5000,
     })),
   });
+
   const loadingSchedulers = schedulerQueries.some((r) => r.isLoading);
   const totalSchedulers = schedulerQueries.reduce((a, r) => a + (r.data?.length ?? 0), 0);
   const isEmpty = Boolean(queues) && !loadingSchedulers && totalSchedulers === 0;

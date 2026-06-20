@@ -1,5 +1,5 @@
-import { api } from "@kew/core";
 import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api";
 
 const ONE_HOUR = 60 * 60 * 1000;
 

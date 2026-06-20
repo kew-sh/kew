@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import type { VersionInfo } from "@kew/core/types";
 import { env } from "./env";
+import type { VersionInfo } from "./types";
 
 const CURRENT = readCurrentVersion();
 const CHECK = env.KEW_UPDATE_CHECK;

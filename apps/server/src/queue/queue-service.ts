@@ -1,29 +1,21 @@
 import { FlowProducer, type JobNode, Queue } from "bullmq";
 import type { Redis } from "ioredis";
-import type {
-  BulkAction,
-  FlowNode,
-  Job,
-  JobCounts,
-  JobPage,
-  JobState,
-  QueueSummary,
-  Scheduler,
-  SchedulerInput,
+import {
+  type BulkAction,
+  type FlowNode,
+  JOB_STATES,
+  type Job,
+  type JobCounts,
+  type JobPage,
+  type JobState,
+  type QueueSummary,
+  type Scheduler,
+  type SchedulerInput,
 } from "../types";
 import { BULLMQ_PREFIX } from "./redis";
 import { getWindow } from "./sampler";
 
-export const STATES: JobState[] = [
-  "active",
-  "waiting",
-  "prioritized",
-  "delayed",
-  "waiting-children",
-  "completed",
-  "failed",
-  "paused",
-];
+export const STATES = JOB_STATES;
 
 const SEARCH_SCAN_LIMIT = 500;
 

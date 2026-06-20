@@ -1,6 +1,5 @@
 import { cn } from "../lib/utils";
 
-/** Tiny throughput sparkline with an optional failures overlay. SVG, no deps. */
 export function Sparkline({
   data,
   failures,

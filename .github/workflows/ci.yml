@@ -30,7 +30,7 @@ jobs:
       - run: bun run build
       - name: Assert no premium code leaks into the OSS build
         run: |
-          if grep -rE "@kew/premium-ui" packages/dashboard-ui/src apps/dashboard/src apps/dashboard/dist; then
+          if grep -rE "@kew/premium-ui" apps/dashboard/src apps/dashboard/dist; then
             echo "::error::premium reference found in the OSS source or build output"
             exit 1
           fi

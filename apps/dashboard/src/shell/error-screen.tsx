@@ -3,6 +3,7 @@ import { Button } from "../components/ui/button";
 
 export function ErrorScreen({ error, reset }: { error: Error; reset?: () => void }) {
   const message = error?.message || "An unexpected error occurred.";
+
   return (
     <div className="grid min-h-dvh place-items-center bg-canvas px-6 py-10 text-ink">
       <div className="w-full max-w-lg">

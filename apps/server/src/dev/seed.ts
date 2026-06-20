@@ -1,12 +1,7 @@
-import { createRedis } from "@kew/core/server";
 import { FlowProducer, Queue, Worker } from "bullmq";
+import { createRedis } from "../queue";
 
-/**
- * Populates Redis with a realistic, varied snapshot of BullMQ data so the
- * dashboard has something true to render. Run once: `bun run seed`.
- * (`active` is transient, so it stays ~0 here; run `bun run demo` for live load.)
- */
-
+// Dev: seed Redis with a realistic BullMQ snapshot. Run: bun run seed
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const ALL = ["emails", "ai-inference", "media-processing", "webhooks", "exports", "notifications"];
 
@@ -33,7 +28,6 @@ async function main() {
       .catch(() => {});
   }
 
-  // emails — healthy: lots completed, a few failed, one delayed, a cron scheduler
   const emails = q("emails");
   for (let i = 0; i < 300; i++) await emails.add("welcome-email", { to: `user${i}@example.com` });
   for (let i = 0; i < 6; i++) await emails.add("digest", { _fail: true });
@@ -44,31 +38,25 @@ async function main() {
     { name: "digest", data: { scheduled: true } },
   );
 
-  // ai-inference — failing: token-heavy jobs, ~2/3 hit a provider error
   const ai = q("ai-inference");
   for (let i = 0; i < 220; i++)
     await ai.add("embed-document", { model: "claude-sonnet", tokens: 1200, _fail: i % 3 !== 0 });
 
-  // media-processing — backed up: huge waiting backlog, some delayed + prioritized, no worker
   const media = q("media-processing");
   for (let i = 0; i < 1500; i++) await media.add("transcode-video", { assetId: `ast_${i}` });
   for (let i = 0; i < 20; i++) await media.add("optimize-image", {}, { delay: (i + 1) * 30_000 });
   for (let i = 0; i < 5; i++) await media.add("urgent-reencode", {}, { priority: 1 });
 
-  // webhooks — healthy
   const webhooks = q("webhooks");
   for (let i = 0; i < 120; i++) await webhooks.add("stripe-event", { type: "invoice.paid" });
 
-  // exports — paused with a backlog
   const exportsQ = q("exports");
   for (let i = 0; i < 80; i++) await exportsQ.add("csv-export", { rows: 1000 });
   await exportsQ.pause();
 
-  // notifications — idle (small, fully drained)
   const notifications = q("notifications");
   for (let i = 0; i < 20; i++) await notifications.add("push", { device: "ios" });
 
-  // a flow → parent sits in waiting-children until its children finish
   const flow = new FlowProducer({ connection });
   await flow.add({
     name: "assemble-report",
@@ -80,7 +68,6 @@ async function main() {
     ],
   });
 
-  // process a few queues to create completed/failed states
   await Promise.all([
     drain(
       "emails",

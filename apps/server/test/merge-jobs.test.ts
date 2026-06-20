@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import type { Job, JobCounts, JobPage, JobState } from "@kew/core/types";
 import { mergeCounts, mergeJobPages, sortKey } from "../src/merge-jobs";
+import type { Job, JobCounts, JobPage, JobState } from "../src/types";
 
 function job(id: string, over: Partial<Job> = {}): Job {
   return {

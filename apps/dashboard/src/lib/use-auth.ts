@@ -1,5 +1,5 @@
-import { type AuthInfo, api } from "@kew/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { type AuthInfo, api } from "@/lib/api";
 
 export function useAuth() {
   return useQuery({
@@ -12,6 +12,7 @@ export function useAuth() {
 
 export function useLogin() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: (input: { email?: string; password: string }) => api.login(input),
     onSuccess: () => qc.invalidateQueries(),
@@ -20,6 +21,7 @@ export function useLogin() {
 
 export function useLogout() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: () => api.logout(),
     onSuccess: () => {

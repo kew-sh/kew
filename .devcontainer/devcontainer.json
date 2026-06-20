@@ -1,0 +1,27 @@
+{
+  "name": "kew",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspace",
+  "forwardPorts": [5173, 5399, 6379],
+  "portsAttributes": {
+    "5173": { "label": "dashboard (vite)" },
+    "5399": { "label": "kew server" },
+    "6379": { "label": "redis" }
+  },
+  "postCreateCommand": "bun install",
+  "remoteEnv": {
+    "REDIS_URL": "redis://redis:6379",
+    "TEST_REDIS_URL": "redis://redis:6379"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": ["biomejs.biome", "oven.bun-vscode"],
+      "settings": {
+        "editor.defaultFormatter": "biomejs.biome",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": { "source.organizeImports.biome": "explicit" }
+      }
+    }
+  }
+}

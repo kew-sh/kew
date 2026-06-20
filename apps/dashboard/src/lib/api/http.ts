@@ -1,5 +1,5 @@
-import type { QueueApi } from "./api";
 import { client } from "./client";
+import type { QueueApi } from "./contract";
 import type {
   AuthInfo,
   ConnectionInfo,

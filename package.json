@@ -6,8 +6,7 @@
   "license": "FSL-1.1-ALv2",
   "author": "Pedro Henrique Gomes Rodrigues Marques",
   "workspaces": [
-    "apps/*",
-    "packages/*"
+    "apps/*"
   ],
   "scripts": {
     "dev": "bun --filter '@kew/dashboard' dev",
@@ -15,7 +14,7 @@
     "seed": "bun --filter '@kew/server' seed",
     "build": "bun --filter '@kew/dashboard' build",
     "typecheck": "bun --filter '*' typecheck",
-    "test": "bun test",
+    "test": "bun --filter '*' test",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",

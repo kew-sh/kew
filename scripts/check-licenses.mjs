@@ -36,7 +36,7 @@ function walk(dir, offenders) {
     if (existsSync(manifest)) {
       try {
         const pkg = JSON.parse(readFileSync(manifest, "utf8"));
-        const license = normalize(pkg.license || (pkg.licenses && pkg.licenses[0]));
+        const license = normalize(pkg.license || pkg.licenses?.[0]);
         if (FORBIDDEN.test(license)) {
           offenders.push(`${pkg.name}@${pkg.version}: ${license}`);
         }

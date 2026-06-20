@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, test } from "bun:test";
-import { redactRedisUrl } from "@kew/core/server";
 import { Hono } from "hono";
+import { redactRedisUrl } from "../src/queue";
 
 process.env.KEW_AUTH_PASSWORD = "test-secret-xyz";
 process.env.KEW_AUTH_EMAIL = "";

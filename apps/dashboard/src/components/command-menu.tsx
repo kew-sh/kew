@@ -1,7 +1,7 @@
-import { queueHealth } from "@kew/core";
 import { useNavigate } from "@tanstack/react-router";
 import { LayoutGrid, MoonStar } from "lucide-react";
 import { useEffect, useState } from "react";
+import { queueHealth } from "@/lib/queue-health";
 import { useQueues } from "../lib/use-queues";
 import { StateDot } from "./state-badge";
 import { useTheme } from "./theme";
@@ -28,8 +28,10 @@ export function CommandMenu() {
       }
     };
     const onOpen = () => setOpen(true);
+
     document.addEventListener("keydown", onKey);
     window.addEventListener("command-menu:open", onOpen);
+
     return () => {
       document.removeEventListener("keydown", onKey);
       window.removeEventListener("command-menu:open", onOpen);

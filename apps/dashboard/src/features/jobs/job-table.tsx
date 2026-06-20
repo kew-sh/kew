@@ -1,4 +1,3 @@
-import type { Job } from "@kew/core";
 import {
   createColumnHelper,
   flexRender,
@@ -9,6 +8,7 @@ import {
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useRef } from "react";
+import type { Job } from "@/lib/api";
 import { StateBadge } from "../../components/state-badge";
 import { cn, duration, relativeTime } from "../../lib/utils";
 
@@ -43,6 +43,7 @@ const columns = [
     header: "Job",
     cell: ({ row }) => {
       const j = row.original;
+
       return (
         <div className="min-w-0">
           <div className="flex items-center gap-2">
@@ -85,6 +86,7 @@ const columns = [
     header: "Duration",
     cell: ({ getValue }) => {
       const d = getValue();
+
       return <span className="tnum text-ink-2">{d != null ? duration(d) : "—"}</span>;
     },
   }),
@@ -117,6 +119,7 @@ export function JobTable({
   });
 
   const rows = table.getRowModel().rows;
+
   const virtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => parentRef.current,
@@ -149,6 +152,7 @@ export function JobTable({
         <div style={{ height: virtualizer.getTotalSize() }} className="relative w-full">
           {virtualizer.getVirtualItems().map((vi) => {
             const row = rows[vi.index];
+
             return (
               // biome-ignore lint/a11y/useSemanticElements: row wraps a checkbox input, which a <button> can't legally contain
               <div

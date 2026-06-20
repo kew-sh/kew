@@ -1,5 +1,5 @@
-import { api } from "@kew/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { api } from "@/lib/api";
 
 export function useQueues() {
   return useQuery({
@@ -19,6 +19,7 @@ export function useQueue(name: string) {
 
 export function useSetQueuePaused() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: (input: { queue: string; paused: boolean }) => api.setQueuePaused(input),
     onSuccess: (_data, vars) =>

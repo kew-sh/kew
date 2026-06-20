@@ -1,4 +1,4 @@
-import type { Job, JobCounts, JobPage } from "@kew/core/types";
+import type { Job, JobCounts, JobPage } from "./types";
 
 export function sortKey(j: Job): number {
   return j.finishedOn ?? j.timestamp ?? 0;

@@ -1,4 +1,3 @@
-import { httpApi } from "./http";
 import type {
   AuthInfo,
   BulkAction,
@@ -36,5 +35,3 @@ export interface QueueApi {
   removeScheduler(input: { queue: string; id: string }): Promise<void>;
   listFlows(): Promise<FlowNode[]>;
 }
-
-export const api: QueueApi = httpApi;
